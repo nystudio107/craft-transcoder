@@ -174,10 +174,40 @@ class Transcoder extends Component
             if (file_exists($destThumbnailPath)) {
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
             } else {
-                $pid = shell_exec($ffmpegCmd);
+                $shellOutput = shell_exec($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
             }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract information from a video
+     *
+     * @param $filePath
+     *
+     * @return array
+     */
+    public function getFileInfo($filePath): array
+    {
+
+        $result = null;
+        $filePath = $this->getAssetPath($filePath);
+
+        if (file_exists($filePath)) {
+            // Build the basic command for ffprobe
+            $ffprobeOptions = Craft::$app->config->get("ffprobeOptions", "transcoder");
+            $ffprobeCmd = Craft::$app->config->get("ffprobePath", "transcoder")
+                .' '.$ffprobeOptions
+                .' '.escapeshellarg($filePath);
+
+            $shellOutput = shell_exec($ffprobeCmd);
+            Craft::info($ffprobeCmd, __METHOD__);
+            $result = json_decode($shellOutput, true);
+            Craft::info(print_r($result, true), __METHOD__);
+            Craft::dd($result);
         }
 
         return $result;

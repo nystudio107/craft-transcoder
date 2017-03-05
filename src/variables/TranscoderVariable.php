@@ -58,6 +58,20 @@ class TranscoderVariable
     }
 
     /**
+     * Extract information from a video/audio file
+     *
+     * @param $filePath
+     *
+     * @return array
+     */
+    public function getFileInfo($filePath): array
+    {
+        $result = Transcoder::$plugin->transcoder->getFileInfo($filePath);
+
+        return $result;
+    }
+
+    /**
      * Get a download URL
      *
      * @param $url

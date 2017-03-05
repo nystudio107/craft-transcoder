@@ -28,6 +28,12 @@ return [
     // The path to the ffmpeg binary
     "ffmpegPath" => "/usr/bin/ffmpeg",
 
+    // The path to the ffprobe binary
+    "ffprobePath" => "/usr/bin/ffprobe",
+
+    // The options to use for ffprobe
+    "ffprobeOptions" => "-v quiet -print_format json -show_format -show_streams",
+
     // The path where the transcoded videos are stored
     "transcoderPath" => $_SERVER['DOCUMENT_ROOT'] . "/transcoder/",
 
