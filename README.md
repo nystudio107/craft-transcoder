@@ -150,10 +150,4 @@ Some things to do, and ideas for potential features:
 * The videos could potentially be resized, either to an aspect ratio or an absolute size or what have you
 * Accessors could be written to get information about a video (height, width, duration, and so on)
 
-## Transcoder Changelog
-
-### 1.0.0 -- 2017.03.05
-
-* Initial release
-
 Brought to you by [nystudio107](https://nystudio107.com)
