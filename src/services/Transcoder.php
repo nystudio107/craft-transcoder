@@ -203,7 +203,7 @@ class Transcoder extends Component
     {
         // If we're passed an Asset, extract the path from it
         if (is_object($filePath) && ($filePath instanceof Asset)) {
-            $asset = (Asset)$filePath;
+            $asset = $filePath;
             $assetVolume = $asset->getVolume();
 
             if (!(($assetVolume instanceof Local) || is_subclass_of($assetVolume, Local::class))) {
@@ -212,8 +212,10 @@ class Transcoder extends Component
                 );
             }
 
-            $sourcePath = $assetVolume->path;
-            $folderPath = $asset->getFolder()->path;
+            $sourcePath = rtrim($assetVolume->path, DIRECTORY_SEPARATOR);
+            $sourcePath .= strlen($sourcePath) ? DIRECTORY_SEPARATOR : '';
+            $folderPath = rtrim($asset->getFolder()->path, DIRECTORY_SEPARATOR);
+            $folderPath .= strlen($folderPath) ? DIRECTORY_SEPARATOR : '';
 
             $filePath = $sourcePath.$folderPath.$asset->filename;
         }

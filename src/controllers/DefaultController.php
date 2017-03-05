@@ -20,7 +20,7 @@ use craft\web\Controller;
  * @package   Transcoder
  * @since     1.0.0
  */
-class TranscoderController extends Controller
+class DefaultController extends Controller
 {
 
     // Protected Properties
@@ -50,5 +50,6 @@ class TranscoderController extends Controller
             null,
             ['inline' => false]
         );
+        Craft::$app->end();
     }
 }

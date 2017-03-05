@@ -73,7 +73,7 @@ class TranscoderVariable
             $urlParams = [
                 'url' => urlencode($url),
             ];
-            $result = UrlHelper::actionUrl('transcoder/downloadFile', $urlParams);
+            $result = UrlHelper::actionUrl('transcoder/default/download-file', $urlParams);
         }
 
         return $result;
