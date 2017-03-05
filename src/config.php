@@ -34,4 +34,17 @@ return [
     // The URL where the transcoded videos are stored
     "transcoderUrl" => "/transcoder/",
 
+    // Default options for encoded videos
+    "defaultVideoOptions" => [
+        "bitRate" => "800k",
+        "frameRate" => 15,
+    ],
+
+    // Default options for video thumbnails
+    "defaultThumbnailOptions" => [
+        "width" => "",
+        "height" => "",
+        "timeInSecs" => 10,
+    ],
+
 ];

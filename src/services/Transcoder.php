@@ -49,10 +49,7 @@ class Transcoder extends Component
             $destVideoPath = Craft::$app->config->get("transcoderPath", "transcoder");
 
             // Default options for transcoded videos
-            $defaultOptions = [
-                "bitRate" => "800k",
-                "frameRate" => 15,
-            ];
+            $defaultOptions = Craft::$app->config->get("defaultVideoOptions", "transcoder");
 
             // Coalesce the passed in $videoOptions with the $defaultOptions
             $videoOptions = array_merge($defaultOptions, $videoOptions);
@@ -69,13 +66,13 @@ class Transcoder extends Component
                 .' -threads 0';
 
             // Set the framerate if desired
-            if ($videoOptions['frameRate']) {
+            if (!empty($videoOptions['frameRate'])) {
                 $ffmpegCmd .= ' -r '.$videoOptions['frameRate'];
                 $destVideoFile .= '_'.$videoOptions['frameRate'].'fps';
             }
 
             // Set the bitrate if desired
-            if ($videoOptions['bitRate']) {
+            if (!empty($videoOptions['bitRate'])) {
                 $ffmpegCmd .= ' -b:v '.$videoOptions['bitRate'].' -maxrate '.$videoOptions['bitRate'];
                 $destVideoFile .= '_'.$videoOptions['bitRate'].'bps';
             }
@@ -105,7 +102,6 @@ class Transcoder extends Component
             if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destVideoFile;
             } else {
-
                 // Kick off the transcoding
                 $pid = shell_exec($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
@@ -138,11 +134,7 @@ class Transcoder extends Component
             $destThumbnailPath = Craft::$app->config->get("transcoderPath", "transcoder");
 
             // Default options for video thumbnails
-            $defaultOptions = [
-                "width" => 200,
-                "height" => 100,
-                "timeInSecs" => 10,
-            ];
+            $defaultOptions = Craft::$app->config->get("defaultThumbnailOptions", "transcoder");
 
             // Coalesce the passed in $thumbnailOptions with the $defaultOptions
             $thumbnailOptions = array_merge($defaultOptions, $thumbnailOptions);
@@ -154,7 +146,7 @@ class Transcoder extends Component
                 .' -vframes 1';
 
             // Set the width & height if desired
-            if ($thumbnailOptions['width'] && $thumbnailOptions['height']) {
+            if (!empty($thumbnailOptions['width']) && !empty($thumbnailOptions['height'])) {
                 $ffmpegCmd .= ' -vf "scale='
                     .$thumbnailOptions['width'].':'.$thumbnailOptions['height']
                     .', unsharp=5:5:1.0:5:5:0.0"';
@@ -162,7 +154,7 @@ class Transcoder extends Component
             }
 
             // Set the timecode to get the thumbnail from if desired
-            if ($thumbnailOptions['timeInSecs']) {
+            if (!empty($thumbnailOptions['timeInSecs'])) {
                 $timeCode = gmdate("H:i:s", $thumbnailOptions['timeInSecs']);
                 $ffmpegCmd .= ' -ss '.$timeCode.'.00';
                 $destThumbnailFile .= '_'.$thumbnailOptions['timeInSecs'].'s';
