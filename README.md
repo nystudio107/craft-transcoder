@@ -2,6 +2,8 @@
 
 Transcode videos to various formats, and provide thumbnails of the video
 
+Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
+
 ## Installation
 
 To install Transcoder, follow these steps:
