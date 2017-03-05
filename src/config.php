@@ -44,13 +44,23 @@ return [
     "defaultVideoOptions" => [
         "bitRate" => "800k",
         "frameRate" => 15,
+        "width" => "",
+        "height" => "",
+        "sharpen" => true,
+        // Can be "none", "crop", or "letterbox"
+        "aspectRatio" => "letterbox",
+        "letterboxColor" => "0x000000",
     ],
 
     // Default options for video thumbnails
     "defaultThumbnailOptions" => [
+        "timeInSecs" => 10,
         "width" => "",
         "height" => "",
-        "timeInSecs" => 10,
+        "sharpen" => true,
+        // Can be "none", "crop", or "letterbox"
+        "aspectRatio" => "letterbox",
+        "letterboxColor" => "0x000000",
     ],
 
 ];

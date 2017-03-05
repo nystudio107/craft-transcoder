@@ -12,6 +12,7 @@ namespace nystudio107\transcoder\services;
 
 use Craft;
 use craft\base\Component;
+use craft\console\Request;
 use craft\elements\Asset;
 use craft\volumes\Local;
 
@@ -32,7 +33,7 @@ class Transcoder extends Component
      * time it will create it). By default, the video is never resized, and the
      * format is always .mp4
      *
-     * @param $filePath     path to the original video -OR- an AssetFileModel
+     * @param $filePath     path to the original video -OR- an Asset
      * @param $videoOptions array of options for the video
      *
      * @return string       URL of the transcoded video or ""
@@ -77,21 +78,31 @@ class Transcoder extends Component
                 $destVideoFile .= '_'.$videoOptions['bitRate'].'bps';
             }
 
+            // Adjust the scaling if desired
+            list($destVideoFile, $ffmpegCmd) = $this->addScalingParams(
+                $videoOptions,
+                $destVideoFile,
+                $ffmpegCmd
+            );
+
             // Create the directory if it isn't there already
             if (!file_exists($destVideoPath)) {
                 mkdir($destVideoPath);
             }
 
+            // File to store the video encoding progress in
+            $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.".progress";
+
             // Assemble the destination path and final ffmpeg command
             $destVideoFile .= '.mp4';
             $destVideoPath = $destVideoPath.$destVideoFile;
-            $ffmpegCmd .= ' -f mp4 -y '.escapeshellarg($destVideoPath).' >/dev/null 2>/dev/null & echo $!';
+            $ffmpegCmd .= ' -f mp4 -y '.escapeshellarg($destVideoPath).' 1> '.$progressFile.' 2>&1 & echo $!';
 
             // Make sure there isn't a lockfile for this video already
-            $lockFile = sys_get_temp_dir().'/'.$destVideoFile."lock";
-            $oldpid = @file_get_contents($lockFile);
-            if ($oldpid !== false) {
-                exec("ps $oldpid", $ProcessState);
+            $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.".lock";
+            $oldPid = @file_get_contents($lockFile);
+            if ($oldPid !== false) {
+                exec("ps $oldPid", $ProcessState);
                 if (count($ProcessState) >= 2) {
                     return $result;
                 }
@@ -145,13 +156,12 @@ class Transcoder extends Component
                 .' -vcodec mjpeg'
                 .' -vframes 1';
 
-            // Set the width & height if desired
-            if (!empty($thumbnailOptions['width']) && !empty($thumbnailOptions['height'])) {
-                $ffmpegCmd .= ' -vf "scale='
-                    .$thumbnailOptions['width'].':'.$thumbnailOptions['height']
-                    .', unsharp=5:5:1.0:5:5:0.0"';
-                $destThumbnailFile .= '_'.$thumbnailOptions['width'].'x'.$thumbnailOptions['height'];
-            }
+            // Adjust the scaling if desired
+            list($destThumbnailFile, $ffmpegCmd) = $this->addScalingParams(
+                $thumbnailOptions,
+                $destThumbnailFile,
+                $ffmpegCmd
+            );
 
             // Set the timecode to get the thumbnail from if desired
             if (!empty($thumbnailOptions['timeInSecs'])) {
@@ -243,5 +253,60 @@ class Transcoder extends Component
         }
 
         return $filePath;
+    }
+
+    /**
+     * Set the width & height if desired
+     *
+     * @param $options
+     * @param $destFile
+     * @param $ffmpegCmd
+     *
+     * @return array
+     */
+    protected function addScalingParams($options, $destFile, $ffmpegCmd): array
+    {
+        if (!empty($options['width']) && !empty($options['height'])) {
+            // Handle "none", "crop", and "letterbox" aspectRatios
+            if (!empty($options['aspectRatio'])) {
+                switch ($options['aspectRatio']) {
+                    // Scale to the appropriate aspect ratio, padding
+                    case "letterbox":
+                        $letterboxColor = "";
+                        if (!empty($options['letterboxColor'])) {
+                            $letterboxColor = ":color=".$options['letterboxColor'];
+                        }
+                        $aspectRatio = ':force_original_aspect_ratio=decrease'
+                            .',pad='.$options['width'].':'.$options['height'].':(ow-iw)/2:(oh-ih)/2'
+                            .$letterboxColor;
+                        break;
+                    // Scale to the appropriate aspect ratio, cropping
+                    case "crop":
+                        $aspectRatio = ':force_original_aspect_ratio=increase'
+                            .',crop='.$options['width'].':'.$options['height'];
+                        break;
+                    // No aspect ratio scaling at all
+                    default:
+                        $aspectRatio = ':force_original_aspect_ratio=disable';
+                        $options['aspectRatio'] = "none";
+                        break;
+                }
+                $destFile .= '_'.$options['aspectRatio'];
+            }
+            $sharpen = "";
+            if (!empty($options['sharpen']) && ($options['sharpen'] !== false)) {
+                $sharpen = ',unsharp=5:5:1.0:5:5:0.0';
+            }
+            $ffmpegCmd .= ' -vf "scale='
+                .$options['width'].':'.$options['height']
+                .$aspectRatio
+                .$sharpen
+                .'"';
+            $destFile .= '_'.$options['width'].'x'.$options['height'];
+
+            return [$destFile, $ffmpegCmd];
+        }
+
+        return [$destFile, $ffmpegCmd];
     }
 }
