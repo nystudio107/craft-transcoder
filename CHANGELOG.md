@@ -10,6 +10,9 @@
 - The `ffmpeg` progress for video transcoding is now written out to a `.progress` file
 - Added a `progress` controller to return video transcoding progress
 - Moved all of the default settings out to the `config.php` file
+- Added support for multiple video encoding formats
+- Added the ability to transcode audio files
+- Transcoder caches can be cleared via the ClearCaches utility
 
 ### Fixed
 - Fixed some issues with the lockfile naming

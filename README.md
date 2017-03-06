@@ -24,7 +24,7 @@ If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
 
 ## Transcoder Overview
 
-The Transcoder video allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready `.mp4` file.
+The Transcoder video allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready `.mp4` video file.
 
 It also allows you to get a thumbnail of the video in any size and at any timecode.
 
@@ -89,6 +89,10 @@ The only configuration for Transcoder is in the `config.php` file, which is a mu
             // Can be "none", "crop", or "letterbox"
             "aspectRatio" => "letterbox",
             "letterboxColor" => "",
+            // File format settings
+            "fileSuffix" => ".mp4",
+            "videoFormat" => "mp4",
+            "videoCodec" => "libx264",
         ],
 
         // Default options for video thumbnails
@@ -137,6 +141,9 @@ In the array you pass in, the default values are used if the key/value pair does
         "frameRate" => 15,
         "aspectRatio" => "letterbox",
         "sharpen" => true,
+        "fileSuffix" => ".mp4",
+        "videoFormat" => "mp4",
+        "videoCodec" => "libx264",
     }
 
 These default values come from the `config.php` file.
@@ -167,6 +174,8 @@ The `aspectRatio` parameter lets you control how the video aspect ratio is maint
 You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
+
+The file format settings `fileSuffix`, `videoFormat`, and `videoCodec` are all preset to what you'll need to generate `.mp4` videos. Change these only if you know what you're doing.
 
 ### Getting Transcoding Progress
 

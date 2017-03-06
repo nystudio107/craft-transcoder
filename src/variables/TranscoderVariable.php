@@ -27,8 +27,7 @@ class TranscoderVariable
 
     /**
      * Returns a URL to the transcoded video or "" if it doesn't exist (at which
-     * time it will create it). By default, the video is never resized, and the
-     * format is always .mp4
+     * time it will create it).
      *
      * @param $filePath
      * @param $videoOptions
@@ -53,6 +52,22 @@ class TranscoderVariable
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
     {
         $result = Transcoder::$plugin->transcoder->getVideoThumbnailUrl($filePath, $thumbnailOptions);
+
+        return $result;
+    }
+
+    /**
+     * Returns a URL to the transcoded audio file or "" if it doesn't exist
+     * (at which time it will create it).
+     *
+     * @param $filePath
+     * @param $audioOptions
+     *
+     * @return string
+     */
+    public function getAudioUrl($filePath, $audioOptions): string
+    {
+        $result = Transcoder::$plugin->transcoder->getAudioUrl($filePath, $audioOptions);
 
         return $result;
     }
@@ -83,6 +98,28 @@ class TranscoderVariable
     {
         $result = "";
         $filename = Transcoder::$plugin->transcoder->getVideoFileName($filePath, $videoOptions);
+        if (!empty($filename)) {
+            $urlParams = [
+                'filename' => $filename,
+            ];
+            $result = UrlHelper::actionUrl('transcoder/default/progress', $urlParams);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get an audio progress URL
+     *
+     * @param $filePath
+     * @param $audioOptions
+     *
+     * @return string
+     */
+    public function getAudioProgressUrl($filePath, $audioOptions): string
+    {
+        $result = "";
+        $filename = Transcoder::$plugin->transcoder->getAudioFileName($filePath, $audioOptions);
         if (!empty($filename)) {
             $urlParams = [
                 'filename' => $filename,

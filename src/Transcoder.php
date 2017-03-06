@@ -14,10 +14,8 @@ use nystudio107\transcoder\variables\TranscoderVariable;
 
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
-use craft\web\UrlManager;
-use craft\events\RegisterUrlRulesEvent;
+use craft\events\RegisterCacheOptionsEvent;
+use craft\utilities\ClearCaches;
 use yii\base\Event;
 
 /**
@@ -45,6 +43,19 @@ class Transcoder extends Plugin
     {
         parent::init();
         self::$plugin = $this;
+
+        // Add the Transcoder path to the list of things the Clear Caches tool can delete.
+        Event::on(
+            ClearCaches::className(),
+            ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+            function (RegisterCacheOptionsEvent $event) {
+                $event->options[] = [
+                    'key' => 'transcoder',
+                    'label' => Craft::t('transcoder', 'Transcoder caches'),
+                    'action' => Craft::$app->config->get("transcoderPath", "transcoder")
+                ];
+            }
+        );
 
         Craft::info('Transcoder ' . Craft::t('transcoder', 'plugin loaded'), __METHOD__);
     }

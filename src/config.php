@@ -34,17 +34,64 @@ return [
     // The options to use for ffprobe
     "ffprobeOptions" => "-v quiet -print_format json -show_format -show_streams",
 
-    // The path where the transcoded videos are stored
+    // The path where the transcoded videos are stored; must have a trailing /
     "transcoderPath" => $_SERVER['DOCUMENT_ROOT'] . "/transcoder/",
 
-    // The URL where the transcoded videos are stored
+    // The URL where the transcoded videos are stored; must have a trailing /
     "transcoderUrl" => "/transcoder/",
+
+    // Use a md5 hash for the filenames instead of parameterized naming
+    "useHashedNames" => false,
+
+    // Preset video encoders
+    "videoEncoders" => [
+        "mp4" => [
+            "fileSuffix" => ".mp4",
+            "videoCodec" => "libx264",
+            "videoCodecOptions" => "-vprofile high -preset slow -crf 22",
+            "audioCodec" => "libfdk_aac",
+            "audioCodecOptions" => "-async 1000",
+        ],
+        "webm" => [
+            "fileSuffix" => ".webm",
+            "videoCodec" => "libvpx",
+            "videoCodecOptions" => "-quality good -cpu-used 0",
+            "audioCodec" => "libvorbis",
+            "audioCodecOptions" => "-async 1000",
+        ],
+    ],
+
+    // Preset audio encoders
+    "audioEncoders" => [
+        "mp3" => [
+            "fileSuffix" => ".mp3",
+            "audioCodec" => "libmp3lame",
+            "audioCodecOptions" => "",
+        ],
+        "m4a" => [
+            "fileSuffix" => ".m4a",
+            "audioCodec" => "libfdk_aac",
+            "audioCodecOptions" => "",
+
+        ],
+        "ogg" => [
+            "fileSuffix" => ".ogg",
+            "audioCodec" => "libvorbis",
+            "audioCodecOptions" => "",
+        ],
+    ],
 
     // Default options for encoded videos
     "defaultVideoOptions" => [
-        "fileSuffix" => ".mp4",
-        "bitRate" => "800k",
-        "frameRate" => 15,
+        // Video settings
+        "videoFormat" => "mp4",
+        "videoBitRate" => "800k",
+        "videoFrameRate" => 15,
+        // Audio settings
+        "audioBitRate" => "",
+        "audioSampleRate" => "",
+        "audioChannels" => "",
+        // Spatial settings
         "width" => "",
         "height" => "",
         "sharpen" => true,
@@ -63,6 +110,14 @@ return [
         // Can be "none", "crop", or "letterbox"
         "aspectRatio" => "letterbox",
         "letterboxColor" => "",
+    ],
+
+    // Default options for encoded videos
+    "defaultAudioOptions" => [
+        "audioFormat" => "mp3",
+        "audioBitRate" => "128k",
+        "audioSampleRate" => "44100",
+        "audioChannels" => "2",
     ],
 
 ];
