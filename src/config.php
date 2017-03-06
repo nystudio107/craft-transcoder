@@ -42,6 +42,7 @@ return [
 
     // Default options for encoded videos
     "defaultVideoOptions" => [
+        "fileSuffix" => ".mp4",
         "bitRate" => "800k",
         "frameRate" => 15,
         "width" => "",
@@ -49,18 +50,19 @@ return [
         "sharpen" => true,
         // Can be "none", "crop", or "letterbox"
         "aspectRatio" => "letterbox",
-        "letterboxColor" => "0x000000",
+        "letterboxColor" => "",
     ],
 
     // Default options for video thumbnails
     "defaultThumbnailOptions" => [
+        "fileSuffix" => ".jpg",
         "timeInSecs" => 10,
         "width" => "",
         "height" => "",
         "sharpen" => true,
         // Can be "none", "crop", or "letterbox"
         "aspectRatio" => "letterbox",
-        "letterboxColor" => "0x000000",
+        "letterboxColor" => "",
     ],
 
 ];

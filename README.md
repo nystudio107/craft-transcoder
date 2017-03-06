@@ -8,14 +8,23 @@ Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
 To install Transcoder, follow these steps:
 
-3. Install with Composer via `composer require nystudio107/craft3-transcoder`
-4. Install plugin in the Craft Control Panel under Settings > Plugins
+1. Install with Composer via `composer require nystudio107/craft3-transcoder`
+2. Install plugin in the Craft Control Panel under Settings > Plugins
 
 Transcoder works on Craft 3.x.
 
+You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to work. On Ubuntu 16.04, you can do just:
+
+    sudo apt-get update
+    sudo apt-get install ffmpeg
+
+To install `ffmpeg` on Centos 6/7, you can follow the guide [How to Install FFmpeg on CentOS](https://www.vultr.com/docs/how-to-install-ffmpeg-on-centos)
+
+If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
+
 ## Transcoder Overview
 
-The Transcoder video allows you to take any locally stored video, and transcode it into any bitrate/framerate, and save it out as a web-ready `.mp4` file.
+The Transcoder video allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready `.mp4` file.
 
 It also allows you to get a thumbnail of the video in any size and at any timecode.
 
@@ -57,11 +66,42 @@ The only configuration for Transcoder is in the `config.php` file, which is a mu
         // The path to the ffmpeg binary
         "ffmpegPath" => "/usr/bin/ffmpeg",
 
+        // The path to the ffprobe binary
+        "ffprobePath" => "/usr/bin/ffprobe",
+
+        // The options to use for ffprobe
+        "ffprobeOptions" => "-v quiet -print_format json -show_format -show_streams",
+
         // The path where the transcoded videos are stored
         "transcoderPath" => $_SERVER['DOCUMENT_ROOT'] . "/transcoder/",
 
         // The URL where the transcoded videos are stored
         "transcoderUrl" => "/transcoder/",
+
+        // Default options for encoded videos
+        "defaultVideoOptions" => [
+            "fileSuffix" => ".mp4",
+            "bitRate" => "800k",
+            "frameRate" => 15,
+            "width" => "",
+            "height" => "",
+            "sharpen" => true,
+            // Can be "none", "crop", or "letterbox"
+            "aspectRatio" => "letterbox",
+            "letterboxColor" => "",
+        ],
+
+        // Default options for video thumbnails
+        "defaultThumbnailOptions" => [
+            "fileSuffix" => ".jpg",
+            "timeInSecs" => 10,
+            "width" => "",
+            "height" => "",
+            "sharpen" => true,
+            // Can be "none", "crop", or "letterbox"
+            "aspectRatio" => "letterbox",
+            "letterboxColor" => "",
+        ],
 
     ];
 
@@ -71,17 +111,21 @@ The only configuration for Transcoder is in the `config.php` file, which is a mu
 
 To generate a transcoded video, do the following:
 
-    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
         "frameRate": 20,
-        "bitRate": "500k"
+        "bitRate": "500k",
+        "width": 720,
+        "height": 480
     }) %}
 
-You can also pass in an `AssetFileModel`:
+You can also pass in an `Asset`:
 
     {% set myAsset = entry.someAsset.first() %}
     {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
         "frameRate": 20,
-        "bitRate": "500k"
+        "bitRate": "500k",
+        "width": 720,
+        "height": 480
     }) %}
 
 It will return to you a URL to the transcoded video if it already exists, or if it doesn't exist, it will return `""` and kick off the transcoding process (which can be quite lengthy for long videos).
@@ -91,7 +135,11 @@ In the array you pass in, the default values are used if the key/value pair does
     {
         "bitRate" => "800k",
         "frameRate" => 15,
+        "aspectRatio" => "letterbox",
+        "sharpen" => true,
     }
+
+These default values come from the `config.php` file.
 
 If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
 
@@ -102,11 +150,69 @@ If you want to have the Transcoder not change a parameter, pass in an empty valu
 
 The above example would cause it to not change the frameRate or bitRate of the source movie (not recommended for client-proofing purposes).
 
+The `aspectRatio` parameter lets you control how the video aspect ratio is maintained when it is scaled:
+
+`none` results in the aspect ratio of the original video not being maintained, and the video scaled to the dimensions passed in:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_none.jpg)
+
+`crop` scales the video up to maintain the original aspect ratio, and then crops it so that it's full-frame:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_crop.jpg)
+
+`letterbox` scales the video to fit the new frame, putting a letterboxed or pillarboxed border to pad it:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_letterbox.jpg)
+
+You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
+
+The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
+
+### Getting Transcoding Progress
+
+Transcoding of videos can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()`. For example:
+
+    {% set myAsset = entry.someAsset.first() %}
+    {% set videoOptions = {
+        "frameRate": 60,
+        "bitRate": "1000k",
+        "width": 1000,
+        "height": 800,
+        "aspectRatio": "none",
+    } %}
+    {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, videoOptions) %}
+    {% set progressUrl = craft.transcoder.getVideoProgressUrl(myAsset, videoOptions) %}
+
+The variable `progressUrl` in the example above is set to a URL will return a JSON array of data indicating the current progress of the transcoding:
+ 
+     {
+       "filename": "oceans_1000kbps_60fps_1000w_800h_letterbox.mp4",
+       "duration": 46.61,
+       "time": 37.69,
+       "progress": 81
+     }
+
+* `filename` - the name of the file
+* `duration` - the duration of the video/audio stream
+* `time` - the time of the current encoding
+* `progress` - a percentage indicating how much of the encoding is done
+
+You can use this information to provide a progress bar via JavaScript or from a plugin.
+
 ### Generating a Video Thumbnail
 
 To generate a thumbnail from a video, do the following:
 
-    {% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
+    {% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
+        "width": 300,
+        "height": 200,
+        "timeInSecs": 20,
+    }) %}
+
+You can also pass in an `Asset`:
+
+    {% set myAsset = entry.someAsset.first() %}
+    {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
         "width": 300,
         "height": 200,
         "timeInSecs": 20,
@@ -120,17 +226,172 @@ In the array you pass in, the default values are used if the key/value pair does
         "width" => 200,
         "height" => 100,
         "timeInSecs" => 10,
+        "aspectRatio" => "letterbox",
+        "sharpen" => true,
     }
 
 If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
 
-    {% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
+    {% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
         "width": "",
         "height": "",
         "timeInSecs": 20,
     }) %}
 
 The above example would cause it to generate a thumbnail at whatever size the video is (not recommended for client-proofing purposes).
+
+The `aspectRatio` parameter lets you control how the video aspect ratio is maintained when it is scaled:
+
+`none` results in the aspect ratio of the original video not being maintained, and the thumbnail image is scaled to the dimensions passed in:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_none.jpg)
+
+`crop` scales the video up to maintain the original aspect ratio, and then crops it so that the thumbnail image is full-frame:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_crop.jpg)
+
+`letterbox` scales the video to fit the new frame, putting a letterboxed or pillarboxed border to pad the thumbnail image:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_letterbox.jpg)
+
+You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
+
+The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled thumbnail image.
+
+### Getting Information About a Video
+
+To get information about an existing video, you can use `craft.transcoder.getFileInfo()`:
+
+    {% set transVideoUrl = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4') %}
+
+You can also pass in an `Asset`:
+
+    {% set myAsset = entry.someAsset.first() %}
+    {% set transVideoUrl = craft.transcoder.getFileInfo(myAsset) %}
+
+This returns an array with two top-level keys:
+
+* `format` - information about the container file format
+* `streams` - information about each stream in the container; many videos have multiple streams, for instance, one for the video streams, and another for the audio stream. There can even be multiple video or audio streams in a container.
+
+Here's example output from `craft.transcoder.getFileInfo`:
+
+    [
+        'streams' => [
+            0 => [
+                'index' => 0
+                'codec_name' => 'h264'
+                'codec_long_name' => 'H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10'
+                'profile' => 'Constrained Baseline'
+                'codec_type' => 'video'
+                'codec_time_base' => '1001/48000'
+                'codec_tag_string' => 'avc1'
+                'codec_tag' => '0x31637661'
+                'width' => 960
+                'height' => 400
+                'coded_width' => 960
+                'coded_height' => 400
+                'has_b_frames' => 0
+                'sample_aspect_ratio' => '1:1'
+                'display_aspect_ratio' => '12:5'
+                'pix_fmt' => 'yuv420p'
+                'level' => 30
+                'chroma_location' => 'left'
+                'refs' => 3
+                'is_avc' => '1'
+                'nal_length_size' => '4'
+                'r_frame_rate' => '24000/1001'
+                'avg_frame_rate' => '24000/1001'
+                'time_base' => '1/24000'
+                'start_pts' => 0
+                'start_time' => '0.000000'
+                'duration_ts' => 1117116
+                'duration' => '46.546500'
+                'bit_rate' => '3859635'
+                'bits_per_raw_sample' => '8'
+                'nb_frames' => '1116'
+                'disposition' => [
+                    'default' => 1
+                    'dub' => 0
+                    'original' => 0
+                    'comment' => 0
+                    'lyrics' => 0
+                    'karaoke' => 0
+                    'forced' => 0
+                    'hearing_impaired' => 0
+                    'visual_impaired' => 0
+                    'clean_effects' => 0
+                    'attached_pic' => 0
+                ]
+                'tags' => [
+                    'creation_time' => '2013-05-03 22:50:47'
+                    'language' => 'und'
+                    'handler_name' => 'GPAC ISO Video Handler'
+                ]
+            ]
+            1 => [
+                'index' => 1
+                'codec_name' => 'aac'
+                'codec_long_name' => 'AAC (Advanced Audio Coding)'
+                'profile' => 'LC'
+                'codec_type' => 'audio'
+                'codec_time_base' => '1/48000'
+                'codec_tag_string' => 'mp4a'
+                'codec_tag' => '0x6134706d'
+                'sample_fmt' => 'fltp'
+                'sample_rate' => '48000'
+                'channels' => 2
+                'channel_layout' => 'stereo'
+                'bits_per_sample' => 0
+                'r_frame_rate' => '0/0'
+                'avg_frame_rate' => '0/0'
+                'time_base' => '1/48000'
+                'start_pts' => 0
+                'start_time' => '0.000000'
+                'duration_ts' => 2237440
+                'duration' => '46.613333'
+                'bit_rate' => '92926'
+                'max_bit_rate' => '104944'
+                'nb_frames' => '2185'
+                'disposition' => [
+                    'default' => 1
+                    'dub' => 0
+                    'original' => 0
+                    'comment' => 0
+                    'lyrics' => 0
+                    'karaoke' => 0
+                    'forced' => 0
+                    'hearing_impaired' => 0
+                    'visual_impaired' => 0
+                    'clean_effects' => 0
+                    'attached_pic' => 0
+                ]
+                'tags' => [
+                    'creation_time' => '2013-05-03 22:51:07'
+                    'language' => 'und'
+                    'handler_name' => 'GPAC ISO Audio Handler'
+                ]
+            ]
+        ]
+        'format' => [
+            'filename' => '/htdocs/craft3/public/assets/oceans.mp4'
+            'nb_streams' => 2
+            'nb_programs' => 0
+            'format_name' => 'mov,mp4,m4a,3gp,3g2,mj2'
+            'format_long_name' => 'QuickTime / MOV'
+            'start_time' => '0.000000'
+            'duration' => '46.613333'
+            'size' => '23014356'
+            'bit_rate' => '3949832'
+            'probe_score' => 100
+            'tags' => [
+                'major_brand' => 'isom'
+                'minor_version' => '1'
+                'compatible_brands' => 'isomavc1'
+                'creation_time' => '2013-05-03 22:51:07'
+            ]
+        ]
+    ]
 
 ### Generating a Download URL
 
@@ -147,7 +408,5 @@ The file must reside in the webroot (thus a URL or URI must be passed in as a pa
 Some things to do, and ideas for potential features:
 
 * The videos could potentially be saved in different formats (though `.mp4` really is "the" standard for video)
-* The videos could potentially be resized, either to an aspect ratio or an absolute size or what have you
-* Accessors could be written to get information about a video (height, width, duration, and so on)
 
 Brought to you by [nystudio107](https://nystudio107.com)

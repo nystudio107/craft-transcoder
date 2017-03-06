@@ -72,6 +72,28 @@ class TranscoderVariable
     }
 
     /**
+     * Get a video progress URL
+     *
+     * @param $filePath
+     * @param $videoOptions
+     *
+     * @return string
+     */
+    public function getVideoProgressUrl($filePath, $videoOptions): string
+    {
+        $result = "";
+        $filename = Transcoder::$plugin->transcoder->getVideoFileName($filePath, $videoOptions);
+        if (!empty($filename)) {
+            $urlParams = [
+                'filename' => $filename,
+            ];
+            $result = UrlHelper::actionUrl('transcoder/default/progress', $urlParams);
+        }
+
+        return $result;
+    }
+
+    /**
      * Get a download URL
      *
      * @param $url
@@ -85,7 +107,7 @@ class TranscoderVariable
         $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
         if (file_exists($filePath)) {
             $urlParams = [
-                'url' => urlencode($url),
+                'url' => $url,
             ];
             $result = UrlHelper::actionUrl('transcoder/default/download-file', $urlParams);
         }

@@ -25,13 +25,30 @@ use yii\base\Exception;
  */
 class Transcoder extends Component
 {
+    // Protected Properties
+    // =========================================================================
+
+    // Suffixes to add to the generated filename params
+    protected $suffixMap = [
+        'frameRate' => 'fps',
+        'bitRate' => 'bps',
+        'height' => 'h',
+        'width' => 'w',
+        'timeInSecs' => 's',
+    ];
+
+    // Params that should be excluded from being included in the generated filename
+    protected $excludeParams = [
+        'fileSuffix',
+        'sharpen'
+    ];
+
     // Public Methods
     // =========================================================================
 
     /**
      * Returns a URL to the transcoded video or "" if it doesn't exist (at which
-     * time it will create it). By default, the video is never resized, and the
-     * format is always .mp4
+     * time it will create it). By default, the video format is always .mp4
      *
      * @param $filePath     path to the original video -OR- an Asset
      * @param $videoOptions array of options for the video
@@ -45,15 +62,9 @@ class Transcoder extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (file_exists($filePath)) {
-            $path_parts = pathinfo($filePath);
-            $destVideoFile = $path_parts['filename'];
             $destVideoPath = Craft::$app->config->get("transcoderPath", "transcoder");
 
-            // Default options for transcoded videos
-            $defaultOptions = Craft::$app->config->get("defaultVideoOptions", "transcoder");
-
-            // Coalesce the passed in $videoOptions with the $defaultOptions
-            $videoOptions = array_merge($defaultOptions, $videoOptions);
+            $videoOptions = $this->coalesceOptions("defaultVideoOptions", $videoOptions);
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = Craft::$app->config->get("ffmpegPath", "transcoder")
@@ -69,19 +80,16 @@ class Transcoder extends Component
             // Set the framerate if desired
             if (!empty($videoOptions['frameRate'])) {
                 $ffmpegCmd .= ' -r '.$videoOptions['frameRate'];
-                $destVideoFile .= '_'.$videoOptions['frameRate'].'fps';
             }
 
             // Set the bitrate if desired
             if (!empty($videoOptions['bitRate'])) {
                 $ffmpegCmd .= ' -b:v '.$videoOptions['bitRate'].' -maxrate '.$videoOptions['bitRate'];
-                $destVideoFile .= '_'.$videoOptions['bitRate'].'bps';
             }
 
             // Adjust the scaling if desired
-            list($destVideoFile, $ffmpegCmd) = $this->addScalingParams(
+            $ffmpegCmd = $this->addScalingFfmpegArgs(
                 $videoOptions,
-                $destVideoFile,
                 $ffmpegCmd
             );
 
@@ -90,11 +98,12 @@ class Transcoder extends Component
                 mkdir($destVideoPath);
             }
 
+            $destVideoFile = $this->getFilename($filePath, $videoOptions);
+
             // File to store the video encoding progress in
             $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.".progress";
 
             // Assemble the destination path and final ffmpeg command
-            $destVideoFile .= '.mp4';
             $destVideoPath = $destVideoPath.$destVideoFile;
             $ffmpegCmd .= ' -f mp4 -y '.escapeshellarg($destVideoPath).' 1> '.$progressFile.' 2>&1 & echo $!';
 
@@ -106,7 +115,9 @@ class Transcoder extends Component
                 if (count($ProcessState) >= 2) {
                     return $result;
                 }
-                unlink($lockFile);
+                // It's finished transcoding, so delete the lockfile and progress file
+                @unlink($lockFile);
+                @unlink($progressFile);
             }
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
@@ -140,15 +151,9 @@ class Transcoder extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (file_exists($filePath)) {
-            $path_parts = pathinfo($filePath);
-            $destThumbnailFile = $path_parts['filename'];
             $destThumbnailPath = Craft::$app->config->get("transcoderPath", "transcoder");
 
-            // Default options for video thumbnails
-            $defaultOptions = Craft::$app->config->get("defaultThumbnailOptions", "transcoder");
-
-            // Coalesce the passed in $thumbnailOptions with the $defaultOptions
-            $thumbnailOptions = array_merge($defaultOptions, $thumbnailOptions);
+            $thumbnailOptions = $this->coalesceOptions("defaultThumbnailOptions", $thumbnailOptions);
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = Craft::$app->config->get("ffmpegPath", "transcoder")
@@ -157,9 +162,8 @@ class Transcoder extends Component
                 .' -vframes 1';
 
             // Adjust the scaling if desired
-            list($destThumbnailFile, $ffmpegCmd) = $this->addScalingParams(
+            $ffmpegCmd = $this->addScalingFfmpegArgs(
                 $thumbnailOptions,
-                $destThumbnailFile,
                 $ffmpegCmd
             );
 
@@ -167,7 +171,6 @@ class Transcoder extends Component
             if (!empty($thumbnailOptions['timeInSecs'])) {
                 $timeCode = gmdate("H:i:s", $thumbnailOptions['timeInSecs']);
                 $ffmpegCmd .= ' -ss '.$timeCode.'.00';
-                $destThumbnailFile .= '_'.$thumbnailOptions['timeInSecs'].'s';
             }
 
             // Create the directory if it isn't there already
@@ -175,19 +178,18 @@ class Transcoder extends Component
                 mkdir($destThumbnailPath);
             }
 
+            $destThumbnailFile = $this->getFilename($filePath, $thumbnailOptions);
+
             // Assemble the destination path and final ffmpeg command
-            $destThumbnailFile .= '.jpg';
             $destThumbnailPath = $destThumbnailPath.$destThumbnailFile;
             $ffmpegCmd .= ' -f image2 -y '.escapeshellarg($destThumbnailPath).' >/dev/null 2>/dev/null';
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
-            if (file_exists($destThumbnailPath)) {
-                $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
-            } else {
+            if (!file_exists($destThumbnailPath)) {
                 $shellOutput = shell_exec($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
-                $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
             }
+            $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
         }
 
         return $result;
@@ -217,10 +219,62 @@ class Transcoder extends Component
             Craft::info($ffprobeCmd, __METHOD__);
             $result = json_decode($shellOutput, true);
             Craft::info(print_r($result, true), __METHOD__);
-            Craft::dd($result);
         }
 
         return $result;
+    }
+
+    /**
+     * Get the name of a video from a path and options
+     *
+     * @param $filePath
+     * @param $videoOptions
+     *
+     * @return string
+     */
+    public function getVideoFilename($filePath, $videoOptions): string
+    {
+        $videoOptions = $this->coalesceOptions("defaultVideoOptions", $videoOptions);
+        $result = $this->getFilename($filePath, $videoOptions);
+
+        return $result;
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * Get the name of a file from a path and options
+     *
+     * @param $filePath
+     * @param $options
+     *
+     * @return string
+     */
+    protected function getFilename($filePath, $options)
+    {
+        $filePath = $this->getAssetPath($filePath);
+        $pathParts = pathinfo($filePath);
+        $fileName = $pathParts['filename'];
+
+        // Add our options to the file name
+        foreach ($options as $key => $value) {
+            if (!empty($value)) {
+                $suffix = "";
+                if (!empty($this->suffixMap[$key])) {
+                    $suffix = $this->suffixMap[$key];
+                }
+                if (is_bool($value)) {
+                    $value = $value ? $key : 'no'.$key;
+                }
+                if (!in_array($key, $this->excludeParams)) {
+                    $fileName .= '_'.$value.$suffix;
+                }
+            }
+        }
+        $fileName .= $options['fileSuffix'];
+
+        return $fileName;
     }
 
     /**
@@ -259,12 +313,11 @@ class Transcoder extends Component
      * Set the width & height if desired
      *
      * @param $options
-     * @param $destFile
      * @param $ffmpegCmd
      *
-     * @return array
+     * @return string
      */
-    protected function addScalingParams($options, $destFile, $ffmpegCmd): array
+    protected function addScalingFfmpegArgs($options, $ffmpegCmd): string
     {
         if (!empty($options['width']) && !empty($options['height'])) {
             // Handle "none", "crop", and "letterbox" aspectRatios
@@ -291,7 +344,6 @@ class Transcoder extends Component
                         $options['aspectRatio'] = "none";
                         break;
                 }
-                $destFile .= '_'.$options['aspectRatio'];
             }
             $sharpen = "";
             if (!empty($options['sharpen']) && ($options['sharpen'] !== false)) {
@@ -302,11 +354,27 @@ class Transcoder extends Component
                 .$aspectRatio
                 .$sharpen
                 .'"';
-            $destFile .= '_'.$options['width'].'x'.$options['height'];
-
-            return [$destFile, $ffmpegCmd];
         }
 
-        return [$destFile, $ffmpegCmd];
+        return $ffmpegCmd;
+    }
+
+    /**
+     * Combine the options arrays
+     *
+     * @param $defaultName
+     * @param $options
+     *
+     * @return array
+     */
+    protected function coalesceOptions($defaultName, $options): array
+    {
+        // Default options
+        $defaultOptions = Craft::$app->config->get($defaultName, "transcoder");
+
+        // Coalesce the passed in $options with the $defaultOptions
+        $options = array_merge($defaultOptions, $options);
+
+        return $options;
     }
 }
