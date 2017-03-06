@@ -388,5 +388,8 @@ The file must reside in the webroot (thus a URL or URI must be passed in as a pa
 Some things to do, and ideas for potential features:
 
 * Add a simpler way to extract the most common video/audio info from a file
+* Add a console command for doing encodings via console
+* Figure out a way to reliably do multi-pass video encoding
+* Add audio normalization via `loudnorm` http://k.ylo.ph/2016/04/04/loudnorm.html
 
 Brought to you by [nystudio107](https://nystudio107.com)
