@@ -1,6 +1,6 @@
 {
     "name": "nystudio107/craft3-transcoder",
-    "description": "Transcode videos to various formats, and provide thumbnails of the video",
+    "description": "Transcode video & audio files to various formats, and provide video thumbnails",
     "type": "craft-plugin",
     "version": "1.0.1",
     "keywords": [

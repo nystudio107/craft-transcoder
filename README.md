@@ -1,6 +1,6 @@
 # Transcoder plugin for Craft CMS 3.x
 
-Transcode videos to various formats, and provide thumbnails of the video
+Transcode video & audio files to various formats, and provide video thumbnails
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
@@ -24,90 +24,19 @@ If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
 
 ## Transcoder Overview
 
-The Transcoder video allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready `.mp4` video file.
+The Transcoder allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
 
-It also allows you to get a thumbnail of the video in any size and at any timecode.
+It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
+
+It also allows you to get a thumbnail of a video in any size and at any timecode, and can extract information about audio/video files such.
 
 Finally, it lets you download an arbitrary file (such as the transcoded video) via a special download link.
 
-If the source file has changed since the last time the video was encoded, it will re-encode the video and replace it.
+If the source file has changed since the last time the video/audio was transcoded, it will re-encode the file and replace it.
 
 ## Configuring Transcoder
 
-The only configuration for Transcoder is in the `config.php` file, which is a multi-environment friendly way to store the default settings.  Don't edit this file, instead copy it to `craft/config` as `transcoder.php` and make your changes there.  Here's the default `config.php` file:
-
-    <?php
-    /**
-     * Transcoder plugin for Craft CMS 3.x
-     *
-     * Transcode videos to various formats, and provide thumbnails of the video
-     *
-     * @link      https://nystudio107.com
-     * @copyright Copyright (c) 2017 nystudio107
-     */
-
-    /**
-     * Transcoder config.php
-     *
-     * Completely optional configuration settings for Transcoder if you want to
-     * customize some of its more esoteric behavior, or just want specific control
-     * over things.
-     *
-     * Don't edit this file, instead copy it to 'craft/config' as 'transcoder.php'
-     * and make your changes there.
-     *
-     * Once copied to 'craft/config', this file will be multi-environment aware as
-     * well, so you can have different settings groups for each environment, just as
-     * you do for 'general.php'
-     */
-
-    return [
-
-        // The path to the ffmpeg binary
-        "ffmpegPath" => "/usr/bin/ffmpeg",
-
-        // The path to the ffprobe binary
-        "ffprobePath" => "/usr/bin/ffprobe",
-
-        // The options to use for ffprobe
-        "ffprobeOptions" => "-v quiet -print_format json -show_format -show_streams",
-
-        // The path where the transcoded videos are stored
-        "transcoderPath" => $_SERVER['DOCUMENT_ROOT'] . "/transcoder/",
-
-        // The URL where the transcoded videos are stored
-        "transcoderUrl" => "/transcoder/",
-
-        // Default options for encoded videos
-        "defaultVideoOptions" => [
-            "fileSuffix" => ".mp4",
-            "bitRate" => "800k",
-            "frameRate" => 15,
-            "width" => "",
-            "height" => "",
-            "sharpen" => true,
-            // Can be "none", "crop", or "letterbox"
-            "aspectRatio" => "letterbox",
-            "letterboxColor" => "",
-            // File format settings
-            "fileSuffix" => ".mp4",
-            "videoFormat" => "mp4",
-            "videoCodec" => "libx264",
-        ],
-
-        // Default options for video thumbnails
-        "defaultThumbnailOptions" => [
-            "fileSuffix" => ".jpg",
-            "timeInSecs" => 10,
-            "width" => "",
-            "height" => "",
-            "sharpen" => true,
-            // Can be "none", "crop", or "letterbox"
-            "aspectRatio" => "letterbox",
-            "letterboxColor" => "",
-        ],
-
-    ];
+The only configuration for Transcoder is in the `config.php` file, which is a multi-environment friendly way to store the default settings.  Don't edit this file, instead copy it to `craft/config` as `transcoder.php` and make your changes there.
 
 ## Using Transcoder
 
@@ -116,8 +45,8 @@ The only configuration for Transcoder is in the `config.php` file, which is a mu
 To generate a transcoded video, do the following:
 
     {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
-        "frameRate": 20,
-        "bitRate": "500k",
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
         "width": 720,
         "height": 480
     }) %}
@@ -126,8 +55,8 @@ You can also pass in an `Asset`:
 
     {% set myAsset = entry.someAsset.first() %}
     {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
-        "frameRate": 20,
-        "bitRate": "500k",
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
         "width": 720,
         "height": 480
     }) %}
@@ -137,25 +66,23 @@ It will return to you a URL to the transcoded video if it already exists, or if 
 In the array you pass in, the default values are used if the key/value pair does not exist:
 
     {
-        "bitRate" => "800k",
-        "frameRate" => 15,
+        "videoFormat" => "mp4",
+        "videoBitRate" => "800k",
+        "videoFrameRate" => 15,
         "aspectRatio" => "letterbox",
         "sharpen" => true,
-        "fileSuffix" => ".mp4",
-        "videoFormat" => "mp4",
-        "videoCodec" => "libx264",
     }
 
 These default values come from the `config.php` file.
 
 If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
 
-    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
         "frameRate": "",
         "bitRate": ""
     }) %}
 
-The above example would cause it to not change the frameRate or bitRate of the source movie (not recommended for client-proofing purposes).
+The above example would cause it to not change the frameRate or bitRate of the source video (not recommended for client-proofing purposes).
 
 The `aspectRatio` parameter lets you control how the video aspect ratio is maintained when it is scaled:
 
@@ -175,16 +102,60 @@ You can control the color of the letterboxed area (it's `black` by default) via 
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
 
-The file format settings `fileSuffix`, `videoFormat`, and `videoCodec` are all preset to what you'll need to generate `.mp4` videos. Change these only if you know what you're doing.
+The file format setting `videoFormat` is preset to what you'll need to generate `mp4` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
+
+### Generating a Transcoded Audio File
+
+To generate a transcoded audio File, do the following:
+
+    {% set transAudioUrl = craft.transcoder.getAudioUrl('/home/vagrant/sites/nystudio107/public/podcast.mp3', {
+        "audioBitRate": "64k",
+        "audioSampleRate": 22050,
+        "audioChannels": 1
+    }) %}
+
+You can also pass in an `Asset`:
+
+    {% set myAsset = entry.someAsset.first() %}
+    {% set transAudioUrl = craft.transcoder.getAudioUrl(myAsset, {
+        "audioBitRate": "64k",
+        "audioSampleRate": 22050,
+        "audioChannels": 1
+    }) %}
+
+It will return to you a URL to the transcoded audio file if it already exists, or if it doesn't exist, it will return `""` and kick off the transcoding process (which can be somewhat lengthy for long audio files).
+
+In the array you pass in, the default values are used if the key/value pair does not exist:
+
+    {
+        "audioFormat" => "mp3",
+        "audioBitRate" => "128k",
+        "audioSampleRate" => "44100",
+        "audioChannels" => "2",
+    }
+
+These default values come from the `config.php` file.
+
+If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
+        "audioBitRate": "",
+        "audioSampleRate": "",
+        "audioChannels": ""
+    }) %}
+
+The above example would cause it to not change the audio of the source audio file at all (not recommended for client-proofing purposes).
+
+The file format setting `audioFormat` is preset to what you'll need to generate `mp3` audio files, but it can also generate `m4a`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
 ### Getting Transcoding Progress
 
-Transcoding of videos can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()`. For example:
+Transcoding of video/audio files can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()` or `craft.transcoder.getAudioProgressUrl()`. For example:
 
     {% set myAsset = entry.someAsset.first() %}
     {% set videoOptions = {
-        "frameRate": 60,
-        "bitRate": "1000k",
+        "videoFrameRate": 60,
+        "videoBitRate": "1000k",
         "width": 1000,
         "height": 800,
         "aspectRatio": "none",
@@ -267,23 +238,23 @@ You can control the color of the letterboxed area (it's `black` by default) via 
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled thumbnail image.
 
-### Getting Information About a Video
+### Getting Information About a Video/Audio File
 
-To get information about an existing video, you can use `craft.transcoder.getFileInfo()`:
+To get information about an existing video/audio file, you can use `craft.transcoder.getFileInfo()`:
 
-    {% set transVideoUrl = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4') %}
+    {% set fileInfo = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4') %}
 
 You can also pass in an `Asset`:
 
     {% set myAsset = entry.someAsset.first() %}
-    {% set transVideoUrl = craft.transcoder.getFileInfo(myAsset) %}
+    {% set fileInfo = craft.transcoder.getFileInfo(myAsset) %}
 
 This returns an array with two top-level keys:
 
 * `format` - information about the container file format
 * `streams` - information about each stream in the container; many videos have multiple streams, for instance, one for the video streams, and another for the audio stream. There can even be multiple video or audio streams in a container.
 
-Here's example output from `craft.transcoder.getFileInfo`:
+Here's example output from `craft.transcoder.getFileInfo()`:
 
     [
         'streams' => [
@@ -416,6 +387,6 @@ The file must reside in the webroot (thus a URL or URI must be passed in as a pa
 
 Some things to do, and ideas for potential features:
 
-* The videos could potentially be saved in different formats (though `.mp4` really is "the" standard for video)
+* Add a simpler way to extract the most common video/audio info from a file
 
 Brought to you by [nystudio107](https://nystudio107.com)
