@@ -66,7 +66,7 @@ It will return to you a URL to the transcoded video if it already exists, or if 
 In the array you pass in, the default values are used if the key/value pair does not exist:
 
     {
-        "videoFormat" => "mp4",
+        "videoEncoder" => "h264",
         "videoBitRate" => "800k",
         "videoFrameRate" => 15,
         "aspectRatio" => "letterbox",
@@ -102,7 +102,7 @@ You can control the color of the letterboxed area (it's `black` by default) via 
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
 
-The file format setting `videoFormat` is preset to what you'll need to generate `mp4` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
+The file format setting `videoEncoder` is preset to what you'll need to generate `h264` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
 ### Generating a Transcoded Audio File
 
@@ -128,7 +128,7 @@ It will return to you a URL to the transcoded audio file if it already exists, o
 In the array you pass in, the default values are used if the key/value pair does not exist:
 
     {
-        "audioFormat" => "mp3",
+        "audioEncoder" => "mp3",
         "audioBitRate" => "128k",
         "audioSampleRate" => "44100",
         "audioChannels" => "2",
@@ -146,7 +146,7 @@ If you want to have the Transcoder not change a parameter, pass in an empty valu
 
 The above example would cause it to not change the audio of the source audio file at all (not recommended for client-proofing purposes).
 
-The file format setting `audioFormat` is preset to what you'll need to generate `mp3` audio files, but it can also generate `m4a`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
+The file format setting `audioEncoder` is preset to what you'll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
 ### Getting Transcoding Progress
 
@@ -242,14 +242,31 @@ The `sharpen` option determines whether an unsharp mask filter should be applied
 
 To get information about an existing video/audio file, you can use `craft.transcoder.getFileInfo()`:
 
-    {% set fileInfo = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4') %}
+    {% set fileInfo = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4', true) %}
 
 You can also pass in an `Asset`:
 
     {% set myAsset = entry.someAsset.first() %}
-    {% set fileInfo = craft.transcoder.getFileInfo(myAsset) %}
+    {% set fileInfo = craft.transcoder.getFileInfo(myAsset, true) %}
 
-This returns an array with two top-level keys:
+By passing in `true` as the second argument, we get just a summary of the video/audio file information in an array:
+
+    [
+        'videoEncoder' => 'h264'
+        'videoBitRate' => '3859635'
+        'videoFrameRate' => 23.976023976024
+        'height' => 400
+        'width' => 960
+        'audioEncoder' => 'aac'
+        'audioBitRate' => '92926'
+        'audioSampleRate' => '48000'
+        'audioChannels' => 2
+        'filename' => '/htdocs/craft3/public/assets/oceans.mp4'
+        'duration' => '46.613333'
+        'size' => '23014356'
+    ]
+
+If you instead pass in `false` as the second parameter (or omit it), then `craft.transcoder.getFileInfo()` returns the full video/audio file info an array with two top-level keys:
 
 * `format` - information about the container file format
 * `streams` - information about each stream in the container; many videos have multiple streams, for instance, one for the video streams, and another for the audio stream. There can even be multiple video or audio streams in a container.
@@ -387,7 +404,6 @@ The file must reside in the webroot (thus a URL or URI must be passed in as a pa
 
 Some things to do, and ideas for potential features:
 
-* Add a simpler way to extract the most common video/audio info from a file
 * Add a console command for doing encodings via console
 * Figure out a way to reliably do multi-pass video encoding
 * Add audio normalization via `loudnorm` http://k.ylo.ph/2016/04/04/loudnorm.html

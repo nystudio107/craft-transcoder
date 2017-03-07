@@ -45,8 +45,9 @@ return [
 
     // Preset video encoders
     "videoEncoders" => [
-        "mp4" => [
+        "h264" => [
             "fileSuffix" => ".mp4",
+            "fileFormat" => "mp4",
             "videoCodec" => "libx264",
             "videoCodecOptions" => "-vprofile high -preset slow -crf 22",
             "audioCodec" => "libfdk_aac",
@@ -54,6 +55,7 @@ return [
         ],
         "webm" => [
             "fileSuffix" => ".webm",
+            "fileFormat" => "webm",
             "videoCodec" => "libvpx",
             "videoCodecOptions" => "-quality good -cpu-used 0",
             "audioCodec" => "libvorbis",
@@ -65,17 +67,20 @@ return [
     "audioEncoders" => [
         "mp3" => [
             "fileSuffix" => ".mp3",
+            "fileFormat" => "mp3",
             "audioCodec" => "libmp3lame",
             "audioCodecOptions" => "",
         ],
-        "m4a" => [
+        "aac" => [
             "fileSuffix" => ".m4a",
+            "fileFormat" => "aac",
             "audioCodec" => "libfdk_aac",
             "audioCodecOptions" => "",
 
         ],
         "ogg" => [
             "fileSuffix" => ".ogg",
+            "fileFormat" => "ogg",
             "audioCodec" => "libvorbis",
             "audioCodecOptions" => "",
         ],
@@ -84,7 +89,7 @@ return [
     // Default options for encoded videos
     "defaultVideoOptions" => [
         // Video settings
-        "videoFormat" => "mp4",
+        "videoEncoder" => "h264",
         "videoBitRate" => "800k",
         "videoFrameRate" => 15,
         // Audio settings
@@ -114,7 +119,7 @@ return [
 
     // Default options for encoded videos
     "defaultAudioOptions" => [
-        "audioFormat" => "mp3",
+        "audioEncoder" => "mp3",
         "audioBitRate" => "128k",
         "audioSampleRate" => "44100",
         "audioChannels" => "2",

@@ -1,5 +1,12 @@
 # Transcoder Changelog
 
+## 1.0.2 - 2017.03.07
+### Added
+- Added a summary option to `getFileInfo()`
+
+### Changed
+- Refactored the `config.php` options to be more consistent
+
 ## 1.0.1 - 2017.03.06
 ### Added
 - Added `height` and `width` options for resizing the videos

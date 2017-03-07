@@ -12,7 +12,6 @@ namespace nystudio107\transcoder\services;
 
 use Craft;
 use craft\base\Component;
-use craft\console\Request;
 use craft\elements\Asset;
 use craft\volumes\Local;
 
@@ -41,10 +40,32 @@ class Transcoder extends Component
 
     // Params that should be excluded from being part of the generated filename
     protected $excludeParams = [
-        'videoFormat',
-        'audioFormat',
+        'videoEncoder',
+        'audioEncoder',
         'fileSuffix',
         'sharpen'
+    ];
+
+    // Mappings for getFileInfo() summary values
+    protected $infoSummary = [
+        'format' => [
+            'filename' => 'filename',
+            'duration' => 'duration',
+            'size' => 'size',
+        ],
+        'audio' => [
+            'codec_name' => 'audioEncoder',
+            'bit_rate' => 'audioBitRate',
+            'sample_rate' => 'audioSampleRate',
+            'channels' => 'audioChannels',
+        ],
+        'video' => [
+            'codec_name' => 'videoEncoder',
+            'bit_rate' => 'videoBitRate',
+            'avg_frame_rate' => 'videoFrameRate',
+            'height' => 'height',
+            'width' => 'width',
+        ],
     ];
 
     // Public Methods
@@ -72,7 +93,7 @@ class Transcoder extends Component
 
             // Get the video encoder presets to use
             $videoEncoders = Craft::$app->config->get("videoEncoders", "transcoder");
-            $thisEncoder = $videoEncoders[$videoOptions['videoFormat']];
+            $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
 
             $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 
@@ -135,7 +156,7 @@ class Transcoder extends Component
             // Assemble the destination path and final ffmpeg command
             $destVideoPath = $destVideoPath.$destVideoFile;
             $ffmpegCmd .= ' -f '
-                .$videoOptions['videoFormat']
+                .$thisEncoder['fileFormat']
                 .' -y '.escapeshellarg($destVideoPath)
                 .' 1> '.$progressFile.' 2>&1 & echo $!';
 
@@ -249,7 +270,7 @@ class Transcoder extends Component
 
             // Get the audio encoder presets to use
             $audioEncoders = Craft::$app->config->get("audioEncoders", "transcoder");
-            $thisEncoder = $audioEncoders[$audioOptions['audioFormat']];
+            $thisEncoder = $audioEncoders[$audioOptions['audioEncoder']];
 
             $audioOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 
@@ -289,7 +310,7 @@ class Transcoder extends Component
             // Assemble the destination path and final ffmpeg command
             $destAudioPath = $destAudioPath.$destAudioFile;
             $ffmpegCmd .= ' -f '
-                .$audioOptions['audioFormat']
+                .$thisEncoder['fileFormat']
                 .' -y '.escapeshellarg($destAudioPath)
                 .' 1> '.$progressFile.' 2>&1 & echo $!';
 
@@ -325,11 +346,12 @@ class Transcoder extends Component
     /**
      * Extract information from a video/audio file
      *
-     * @param $filePath
+     * @param      $filePath
+     * @param bool $summary
      *
      * @return array
      */
-    public function getFileInfo($filePath): array
+    public function getFileInfo($filePath, $summary = false): array
     {
 
         $result = null;
@@ -346,6 +368,46 @@ class Transcoder extends Component
             Craft::info($ffprobeCmd, __METHOD__);
             $result = json_decode($shellOutput, true);
             Craft::info(print_r($result, true), __METHOD__);
+
+            // Trim down the arrays to just a summary
+            if ($summary && !empty($result)) {
+                $summaryResult = [];
+                foreach ($result as $topLevelKey => $topLevelValue) {
+                    switch ($topLevelKey) {
+                        // Format info
+                        case "format":
+                            foreach ($this->infoSummary['format'] as $settingKey => $settingValue) {
+                                if (!empty($topLevelValue[$settingKey])) {
+                                    $summaryResult[$settingValue] = $topLevelValue[$settingKey];
+                                }
+                            }
+                            break;
+                        // Stream info
+                        case "streams":
+                            foreach ($topLevelValue as $stream) {
+                                $infoSummaryType = $stream['codec_type'];
+                                foreach ($this->infoSummary[$infoSummaryType] as $settingKey => $settingValue) {
+                                    if (!empty($stream[$settingKey])) {
+                                        $summaryResult[$settingValue] = $stream[$settingKey];
+                                    }
+                                }
+
+                            }
+                            break;
+                        // Unknown info
+                        default:
+                            break;
+                    }
+                }
+                // Handle cases where the framerate is returned as XX/YY
+                if (!empty($summaryResult['videoFrameRate'])
+                    && (strpos($summaryResult['videoFrameRate'], '/') !== false)
+                ) {
+                    $parts = explode('/', $summaryResult['videoFrameRate']);
+                    $summaryResult['videoFrameRate'] = floatval($parts[0]) / floatval($parts[1]);
+                }
+                $result = $summaryResult;
+            }
         }
 
         return $result;
@@ -365,7 +427,7 @@ class Transcoder extends Component
 
         // Get the video encoder presets to use
         $videoEncoders = Craft::$app->config->get("videoEncoders", "transcoder");
-        $thisEncoder = $videoEncoders[$videoOptions['videoFormat']];
+        $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
 
         $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 
@@ -388,7 +450,7 @@ class Transcoder extends Component
 
         // Get the video encoder presets to use
         $audioEncoders = Craft::$app->config->get("audioEncoders", "transcoder");
-        $thisEncoder = $audioEncoders[$audioOptions['audioFormat']];
+        $thisEncoder = $audioEncoders[$audioOptions['audioEncoder']];
 
         $audioOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 

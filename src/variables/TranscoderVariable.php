@@ -79,9 +79,9 @@ class TranscoderVariable
      *
      * @return array
      */
-    public function getFileInfo($filePath): array
+    public function getFileInfo($filePath, $summary = false): array
     {
-        $result = Transcoder::$plugin->transcoder->getFileInfo($filePath);
+        $result = Transcoder::$plugin->transcoder->getFileInfo($filePath, $summary);
 
         return $result;
     }
