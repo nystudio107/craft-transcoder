@@ -44,6 +44,11 @@ class Transcoder extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        // Handle console commands
+        if (Craft::$app instanceof ConsoleApplication) {
+            $this->controllerNamespace = 'nystudio107\transcoder\console\controllers';
+        }
+
         // Add the Transcoder path to the list of things the Clear Caches tool can delete.
         Event::on(
             ClearCaches::className(),
