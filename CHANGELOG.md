@@ -1,5 +1,12 @@
 # Transcoder Changelog
 
+## 1.0.3 - 2017.03.11
+### Added
+- Use `php-shellcommand` to allow for proper execution on Windows & Unix servers
+
+### Changed
+- Minor code cleanup
+
 ## 1.0.2 - 2017.03.07
 ### Added
 - Added a summary option to `getFileInfo()`

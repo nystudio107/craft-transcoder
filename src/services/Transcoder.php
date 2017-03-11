@@ -17,6 +17,8 @@ use craft\volumes\Local;
 
 use yii\base\Exception;
 
+use mikehaertl\shellcommand\Command as ShellCommand;
+
 /**
  * @author    nystudio107
  * @package   Transcoder
@@ -178,8 +180,8 @@ class Transcoder extends Component
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destVideoFile;
             } else {
                 // Kick off the transcoding
-                $pid = shell_exec($ffmpegCmd);
-                Craft::info($ffmpegCmd, __METHOD__);
+                $pid = $this->_executeShellCommand($ffmpegCmd);
+                Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
 
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
@@ -239,7 +241,7 @@ class Transcoder extends Component
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
-                $shellOutput = shell_exec($ffmpegCmd);
+                $shellOutput = $this->_executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
             }
             $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
@@ -252,7 +254,7 @@ class Transcoder extends Component
      * Returns a URL to the transcoded audio file or "" if it doesn't exist
      * (at which time it will create it).
      *
-     * @param $filePath     path to the original audio file -OR- an Asset
+     * @param $filePath     string path to the original audio file -OR- an Asset
      * @param $audioOptions array of options for the audio file
      *
      * @return string       URL of the transcoded audio file or ""
@@ -332,8 +334,8 @@ class Transcoder extends Component
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destAudioFile;
             } else {
                 // Kick off the transcoding
-                $pid = shell_exec($ffmpegCmd);
-                Craft::info($ffmpegCmd, __METHOD__);
+                $pid = $this->_executeShellCommand($ffmpegCmd);
+                Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
 
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
@@ -364,7 +366,7 @@ class Transcoder extends Component
                 .' '.$ffprobeOptions
                 .' '.escapeshellarg($filePath);
 
-            $shellOutput = shell_exec($ffprobeCmd);
+            $shellOutput = $this->_executeShellCommand($ffprobeCmd);
             Craft::info($ffprobeCmd, __METHOD__);
             $result = json_decode($shellOutput, true);
             Craft::info(print_r($result, true), __METHOD__);
@@ -599,5 +601,36 @@ class Transcoder extends Component
         $options = array_merge($defaultOptions, $options);
 
         return $options;
+    }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * Execute a shell command
+     *
+     * @param string $command
+     *
+     * @return string
+     */
+    private function _executeShellCommand(string $command): string
+    {
+        // Create the shell command
+        $shellCommand = new ShellCommand();
+        $shellCommand->setCommand($command);
+
+        // If we don't have proc_open, maybe we've got exec
+        if (!function_exists('proc_open') && function_exists('exec')) {
+            $shellCommand->useExec = true;
+        }
+
+        // Return the result of the command's output or error
+        if ($shellCommand->execute()) {
+            $result = $shellCommand->getOutput();
+        } else {
+            $result = $shellCommand->getError();
+        }
+
+        return $result;
     }
 }

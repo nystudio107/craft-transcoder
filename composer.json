@@ -2,7 +2,7 @@
     "name": "nystudio107/craft3-transcoder",
     "description": "Transcode video & audio files to various formats, and provide video thumbnails",
     "type": "craft-plugin",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "keywords": [
         "craft",
         "cms",
@@ -22,6 +22,7 @@
         }
     ],
     "require": {
+        "mikehaertl/php-shellcommand": "~1.2"
     },
     "autoload": {
         "psr-4": {
