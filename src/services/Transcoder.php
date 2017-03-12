@@ -77,8 +77,8 @@ class Transcoder extends Component
      * Returns a URL to the transcoded video or "" if it doesn't exist (at which
      * time it will create it).
      *
-     * @param $filePath     path to the original video -OR- an Asset
-     * @param $videoOptions array of options for the video
+     * @param $filePath     string  path to the original video -OR- an Asset
+     * @param $videoOptions array   of options for the video
      *
      * @return string       URL of the transcoded video or ""
      */
@@ -180,7 +180,7 @@ class Transcoder extends Component
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destVideoFile;
             } else {
                 // Kick off the transcoding
-                $pid = $this->_executeShellCommand($ffmpegCmd);
+                $pid = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
 
                 // Create a lockfile in tmp
@@ -194,8 +194,8 @@ class Transcoder extends Component
     /**
      * Returns a URL to a video thumbnail
      *
-     * @param $filePath         path to the original video or an Asset
-     * @param $thumbnailOptions array of options for the thumbnail
+     * @param $filePath         string  path to the original video or an Asset
+     * @param $thumbnailOptions array   of options for the thumbnail
      *
      * @return string           URL of the video thumbnail
      */
@@ -241,7 +241,7 @@ class Transcoder extends Component
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
-                $shellOutput = $this->_executeShellCommand($ffmpegCmd);
+                $shellOutput = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
             }
             $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destThumbnailFile;
@@ -334,7 +334,7 @@ class Transcoder extends Component
                 $result = Craft::$app->config->get("transcoderUrl", "transcoder").$destAudioFile;
             } else {
                 // Kick off the transcoding
-                $pid = $this->_executeShellCommand($ffmpegCmd);
+                $pid = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
 
                 // Create a lockfile in tmp
@@ -366,7 +366,7 @@ class Transcoder extends Component
                 .' '.$ffprobeOptions
                 .' '.escapeshellarg($filePath);
 
-            $shellOutput = $this->_executeShellCommand($ffprobeCmd);
+            $shellOutput = $this->executeShellCommand($ffprobeCmd);
             Craft::info($ffprobeCmd, __METHOD__);
             $result = json_decode($shellOutput, true);
             Craft::info(print_r($result, true), __METHOD__);
@@ -393,7 +393,6 @@ class Transcoder extends Component
                                         $summaryResult[$settingValue] = $stream[$settingKey];
                                     }
                                 }
-
                             }
                             break;
                         // Unknown info
@@ -546,6 +545,7 @@ class Transcoder extends Component
     {
         if (!empty($options['width']) && !empty($options['height'])) {
             // Handle "none", "crop", and "letterbox" aspectRatios
+            $aspectRatio = "";
             if (!empty($options['aspectRatio'])) {
                 switch ($options['aspectRatio']) {
                     // Scale to the appropriate aspect ratio, padding
@@ -603,7 +603,7 @@ class Transcoder extends Component
         return $options;
     }
 
-    // Private Methods
+    // Protected Methods
     // =========================================================================
 
     /**
@@ -613,7 +613,7 @@ class Transcoder extends Component
      *
      * @return string
      */
-    private function _executeShellCommand(string $command): string
+    protected function executeShellCommand(string $command): string
     {
         // Create the shell command
         $shellCommand = new ShellCommand();

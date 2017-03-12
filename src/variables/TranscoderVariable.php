@@ -75,7 +75,8 @@ class TranscoderVariable
     /**
      * Extract information from a video/audio file
      *
-     * @param $filePath
+     * @param      $filePath
+     * @param bool $summary
      *
      * @return array
      */

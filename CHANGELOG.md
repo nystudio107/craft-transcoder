@@ -1,5 +1,13 @@
 # Transcoder Changelog
 
+## 1.0.4 - 2017.03.12
+### Added
+- Added `craft/cms` as a composer dependency
+- Added code inspection typehinting for the plugin & services
+
+### Changed
+- Code refactor/cleanup
+
 ## 1.0.3 - 2017.03.11
 ### Added
 - Use `php-shellcommand` to allow for proper execution on Windows & Unix servers

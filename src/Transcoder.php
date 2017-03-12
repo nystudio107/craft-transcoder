@@ -10,18 +10,25 @@
 
 namespace nystudio107\transcoder;
 
+use nystudio107\transcoder\services\Transcoder as TranscoderService;
 use nystudio107\transcoder\variables\TranscoderVariable;
 
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\utilities\ClearCaches;
+use craft\console\Application as ConsoleApplication;
+
 use yii\base\Event;
 
 /**
+ * Class Transcoder
+ *
  * @author    nystudio107
  * @package   Transcoder
  * @since     1.0.0
+ *
+ * @property  TranscoderService transcoder
  */
 class Transcoder extends Plugin
 {
@@ -29,7 +36,7 @@ class Transcoder extends Plugin
     // =========================================================================
 
     /**
-     * @var static
+     * @var Transcoder
      */
     public static $plugin;
 
@@ -57,7 +64,7 @@ class Transcoder extends Plugin
                 $event->options[] = [
                     'key' => 'transcoder',
                     'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => Craft::$app->config->get("transcoderPath", "transcoder")
+                    'action' => Craft::$app->config->get('transcoderPath', 'transcoder')
                 ];
             }
         );
@@ -72,5 +79,4 @@ class Transcoder extends Plugin
     {
         return TranscoderVariable::class;
     }
-
 }
