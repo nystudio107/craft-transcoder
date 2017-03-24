@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.0.5 - 2017.03.24
+### Changed
+* `hasSettings` -> `hasCpSettings` for Craft 3 beta 8 compatibility
+
 ## 1.0.4 - 2017.03.12
 ### Added
 - Added `craft/cms` as a composer dependency
