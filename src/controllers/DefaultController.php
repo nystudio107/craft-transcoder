@@ -18,7 +18,7 @@ use craft\helpers\Json;
 
 /**
  * @author    nystudio107
- * @package   Transcoder
+ * @package   Transcode
  * @since     1.0.0
  */
 class DefaultController extends Controller
@@ -34,7 +34,7 @@ class DefaultController extends Controller
      */
     protected $allowAnonymous = [
         'download-file',
-        'progress'
+        'progress',
     ];
 
     // Public Methods
@@ -49,7 +49,7 @@ class DefaultController extends Controller
     public function actionDownloadFile($url)
     {
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
             null,
@@ -73,7 +73,7 @@ class DefaultController extends Controller
     public function actionProgress($filename)
     {
         $result = [];
-        $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$filename.".progress";
+        $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . ".progress";
         if (file_exists($progressFile)) {
             $content = @file_get_contents($progressFile);
             if ($content) {
@@ -117,7 +117,7 @@ class DefaultController extends Controller
                     $result = [
                         'filename' => $filename,
                         'duration' => $duration,
-                        'time' => $time,
+                        'time'     => $time,
                         'progress' => $progress,
                     ];
                 }

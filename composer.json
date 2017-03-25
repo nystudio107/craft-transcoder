@@ -38,7 +38,7 @@
         "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/nystudio107/craft3-transcoder/master/CHANGELOG.md",
         "components": {
-            "transcoder": "nystudio107\\transcoder\\services\\Transcoder"
+            "transcode": "nystudio107\\transcoder\\services\\Transcode"
         },
         "class": "nystudio107\\transcoder\\Transcoder"
     }

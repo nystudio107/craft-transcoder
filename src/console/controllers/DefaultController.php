@@ -1,11 +1,11 @@
 <?php
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcode plugin for Craft CMS 3.x
  *
- * Transcoder
+ * Transcode
  *
  * @link      https://nystudio107.com
- * @copyright Copyright (c) 2017 Transcoder
+ * @copyright Copyright (c) 2017 Transcode
  */
 
 namespace nystudio107\transcoder\console\controllers;
@@ -19,8 +19,8 @@ use yii\helpers\Console;
 /**
  * Default Command
  *
- * @author    Transcoder
- * @package   Transcoder
+ * @author    Transcode
+ * @package   Transcode
  * @since     1.0.0
  */
 class DefaultController extends Controller

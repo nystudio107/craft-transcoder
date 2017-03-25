@@ -10,8 +10,9 @@
 
 namespace nystudio107\transcoder;
 
-use nystudio107\transcoder\services\Transcoder as TranscoderService;
+use nystudio107\transcoder\services\Transcode;
 use nystudio107\transcoder\variables\TranscoderVariable;
+use nystudio107\transcoder\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
@@ -22,13 +23,13 @@ use craft\console\Application as ConsoleApplication;
 use yii\base\Event;
 
 /**
- * Class Transcoder
+ * Class Transcode
  *
  * @author    nystudio107
- * @package   Transcoder
+ * @package   Transcode
  * @since     1.0.0
  *
- * @property  TranscoderService transcoder
+ * @property  Transcode $transcode
  */
 class Transcoder extends Plugin
 {
@@ -56,7 +57,7 @@ class Transcoder extends Plugin
             $this->controllerNamespace = 'nystudio107\transcoder\console\controllers';
         }
 
-        // Add the Transcoder path to the list of things the Clear Caches tool can delete.
+        // Add the Transcode path to the list of things the Clear Caches tool can delete.
         Event::on(
             ClearCaches::className(),
             ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
@@ -64,12 +65,19 @@ class Transcoder extends Plugin
                 $event->options[] = [
                     'key' => 'transcoder',
                     'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => Craft::$app->config->get('transcoderPath', 'transcoder')
+                    'action' => Transcoder::$plugin->getSettings()->transcoderPath,
                 ];
             }
         );
 
-        Craft::info('Transcoder ' . Craft::t('transcoder', 'plugin loaded'), __METHOD__);
+        Craft::info(
+            Craft::t(
+                'transcoder',
+                '{name} plugin loaded',
+                ['name' => $this->name]
+            ),
+            __METHOD__
+        );
     }
 
     /**
@@ -78,5 +86,16 @@ class Transcoder extends Plugin
     public function defineTemplateComponent()
     {
         return TranscoderVariable::class;
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function createSettingsModel()
+    {
+        return new Settings();
     }
 }

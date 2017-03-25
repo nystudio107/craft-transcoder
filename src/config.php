@@ -11,12 +11,11 @@
 /**
  * Transcoder config.php
  *
- * Completely optional configuration settings for Transcoder if you want to
- * customize some of its more esoteric behavior, or just want specific control
- * over things.
+ * This file exists only as a template for the Transcoder settings.
+ * It does nothing on its own.
  *
  * Don't edit this file, instead copy it to 'craft/config' as 'transcoder.php'
- * and make your changes there.
+ * and make your changes there to override default settings.
  *
  * Once copied to 'craft/config', this file will be multi-environment aware as
  * well, so you can have different settings groups for each environment, just as
@@ -26,103 +25,103 @@
 return [
 
     // The path to the ffmpeg binary
-    "ffmpegPath" => "/usr/bin/ffmpeg",
+    'ffmpegPath' => '/usr/bin/ffmpeg',
 
     // The path to the ffprobe binary
-    "ffprobePath" => "/usr/bin/ffprobe",
+    'ffprobePath' => '/usr/bin/ffprobe',
 
     // The options to use for ffprobe
-    "ffprobeOptions" => "-v quiet -print_format json -show_format -show_streams",
+    'ffprobeOptions' => '-v quiet -print_format json -show_format -show_streams',
 
     // The path where the transcoded videos are stored; must have a trailing /
-    "transcoderPath" => $_SERVER['DOCUMENT_ROOT'] . "/transcoder/",
+    'transcoderPath' => '{DOCUMENT_ROOT}/transcoder/',
 
     // The URL where the transcoded videos are stored; must have a trailing /
-    "transcoderUrl" => "/transcoder/",
+    'transcoderUrl' => '/transcoder/',
 
     // Use a md5 hash for the filenames instead of parameterized naming
-    "useHashedNames" => false,
+    'useHashedNames' => false,
 
     // Preset video encoders
-    "videoEncoders" => [
-        "h264" => [
-            "fileSuffix" => ".mp4",
-            "fileFormat" => "mp4",
-            "videoCodec" => "libx264",
-            "videoCodecOptions" => "-vprofile high -preset slow -crf 22",
-            "audioCodec" => "libfdk_aac",
-            "audioCodecOptions" => "-async 1000",
+    'videoEncoders' => [
+        'h264' => [
+            'fileSuffix' => '.mp4',
+            'fileFormat' => 'mp4',
+            'videoCodec' => 'libx264',
+            'videoCodecOptions' => '-vprofile high -preset slow -crf 22',
+            'audioCodec' => 'libfdk_aac',
+            'audioCodecOptions' => '-async 1000',
         ],
-        "webm" => [
-            "fileSuffix" => ".webm",
-            "fileFormat" => "webm",
-            "videoCodec" => "libvpx",
-            "videoCodecOptions" => "-quality good -cpu-used 0",
-            "audioCodec" => "libvorbis",
-            "audioCodecOptions" => "-async 1000",
+        'webm' => [
+            'fileSuffix' => '.webm',
+            'fileFormat' => 'webm',
+            'videoCodec' => 'libvpx',
+            'videoCodecOptions' => '-quality good -cpu-used 0',
+            'audioCodec' => 'libvorbis',
+            'audioCodecOptions' => '-async 1000',
         ],
     ],
 
     // Preset audio encoders
-    "audioEncoders" => [
-        "mp3" => [
-            "fileSuffix" => ".mp3",
-            "fileFormat" => "mp3",
-            "audioCodec" => "libmp3lame",
-            "audioCodecOptions" => "",
+    'audioEncoders' => [
+        'mp3' => [
+            'fileSuffix' => '.mp3',
+            'fileFormat' => 'mp3',
+            'audioCodec' => 'libmp3lame',
+            'audioCodecOptions' => '',
         ],
-        "aac" => [
-            "fileSuffix" => ".m4a",
-            "fileFormat" => "aac",
-            "audioCodec" => "libfdk_aac",
-            "audioCodecOptions" => "",
+        'aac' => [
+            'fileSuffix' => '.m4a',
+            'fileFormat' => 'aac',
+            'audioCodec' => 'libfdk_aac',
+            'audioCodecOptions' => '',
 
         ],
-        "ogg" => [
-            "fileSuffix" => ".ogg",
-            "fileFormat" => "ogg",
-            "audioCodec" => "libvorbis",
-            "audioCodecOptions" => "",
+        'ogg' => [
+            'fileSuffix' => '.ogg',
+            'fileFormat' => 'ogg',
+            'audioCodec' => 'libvorbis',
+            'audioCodecOptions' => '',
         ],
     ],
 
     // Default options for encoded videos
-    "defaultVideoOptions" => [
+    'defaultVideoOptions' => [
         // Video settings
-        "videoEncoder" => "h264",
-        "videoBitRate" => "800k",
-        "videoFrameRate" => 15,
+        'videoEncoder' => 'h264',
+        'videoBitRate' => '800k',
+        'videoFrameRate' => 15,
         // Audio settings
-        "audioBitRate" => "",
-        "audioSampleRate" => "",
-        "audioChannels" => "",
+        'audioBitRate' => '',
+        'audioSampleRate' => '',
+        'audioChannels' => '',
         // Spatial settings
-        "width" => "",
-        "height" => "",
-        "sharpen" => true,
-        // Can be "none", "crop", or "letterbox"
-        "aspectRatio" => "letterbox",
-        "letterboxColor" => "",
+        'width' => '',
+        'height' => '',
+        'sharpen' => true,
+        // Can be 'none', 'crop', or 'letterbox'
+        'aspectRatio' => 'letterbox',
+        'letterboxColor' => '',
     ],
 
     // Default options for video thumbnails
-    "defaultThumbnailOptions" => [
-        "fileSuffix" => ".jpg",
-        "timeInSecs" => 10,
-        "width" => "",
-        "height" => "",
-        "sharpen" => true,
-        // Can be "none", "crop", or "letterbox"
-        "aspectRatio" => "letterbox",
-        "letterboxColor" => "",
+    'defaultThumbnailOptions' => [
+        'fileSuffix' => '.jpg',
+        'timeInSecs' => 10,
+        'width' => '',
+        'height' => '',
+        'sharpen' => true,
+        // Can be 'none', 'crop', or 'letterbox'
+        'aspectRatio' => 'letterbox',
+        'letterboxColor' => '',
     ],
 
     // Default options for encoded videos
-    "defaultAudioOptions" => [
-        "audioEncoder" => "mp3",
-        "audioBitRate" => "128k",
-        "audioSampleRate" => "44100",
-        "audioChannels" => "2",
+    'defaultAudioOptions' => [
+        'audioEncoder' => 'mp3',
+        'audioBitRate' => '128k',
+        'audioSampleRate' => '44100',
+        'audioChannels' => '2',
     ],
 
 ];

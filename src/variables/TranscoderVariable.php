@@ -17,7 +17,7 @@ use craft\helpers\UrlHelper;
 
 /**
  * @author    nystudio107
- * @package   Transcoder
+ * @package   Transcode
  * @since     1.0.0
  */
 class TranscoderVariable
@@ -36,7 +36,7 @@ class TranscoderVariable
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
-        $result = Transcoder::$plugin->transcoder->getVideoUrl($filePath, $videoOptions);
+        $result = Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions);
 
         return $result;
     }
@@ -51,7 +51,7 @@ class TranscoderVariable
      */
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
     {
-        $result = Transcoder::$plugin->transcoder->getVideoThumbnailUrl($filePath, $thumbnailOptions);
+        $result = Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
 
         return $result;
     }
@@ -67,7 +67,7 @@ class TranscoderVariable
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
-        $result = Transcoder::$plugin->transcoder->getAudioUrl($filePath, $audioOptions);
+        $result = Transcoder::$plugin->transcode->getAudioUrl($filePath, $audioOptions);
 
         return $result;
     }
@@ -82,7 +82,7 @@ class TranscoderVariable
      */
     public function getFileInfo($filePath, $summary = false): array
     {
-        $result = Transcoder::$plugin->transcoder->getFileInfo($filePath, $summary);
+        $result = Transcoder::$plugin->transcode->getFileInfo($filePath, $summary);
 
         return $result;
     }
@@ -98,7 +98,7 @@ class TranscoderVariable
     public function getVideoProgressUrl($filePath, $videoOptions): string
     {
         $result = "";
-        $filename = Transcoder::$plugin->transcoder->getVideoFileName($filePath, $videoOptions);
+        $filename = Transcoder::$plugin->transcode->getVideoFileName($filePath, $videoOptions);
         if (!empty($filename)) {
             $urlParams = [
                 'filename' => $filename,
@@ -120,7 +120,7 @@ class TranscoderVariable
     public function getAudioProgressUrl($filePath, $audioOptions): string
     {
         $result = "";
-        $filename = Transcoder::$plugin->transcoder->getAudioFileName($filePath, $audioOptions);
+        $filename = Transcoder::$plugin->transcode->getAudioFileName($filePath, $audioOptions);
         if (!empty($filename)) {
             $urlParams = [
                 'filename' => $filename,
@@ -142,7 +142,7 @@ class TranscoderVariable
     {
         $result = "";
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         if (file_exists($filePath)) {
             $urlParams = [
                 'url' => $url,

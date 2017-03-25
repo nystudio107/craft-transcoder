@@ -10,9 +10,9 @@
 
 /**
  * @author    nystudio107
- * @package   Transcoder
+ * @package   Transcode
  * @since     1.0.0
  */
 return [
-    'plugin loaded' => 'plugin loaded',
+    'Transcoder plugin loaded' => 'Transcoder plugin loaded',
 ];
