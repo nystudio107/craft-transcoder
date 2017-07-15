@@ -1,4 +1,4 @@
-The Transcoder License
+Transcoder License
 Copyright (c) 2017 nystudio107
 
 Permission is hereby granted, free of charge, to any person or entity obtaining a copy of this software and associated documentation files (the "Software"), to use the software in any capacity, including commercial and for-profit use.  Permission is also granted to alter, modify, or extend the Software for your own use, or commission a third-party to perform modifications for you.

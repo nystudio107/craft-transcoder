@@ -16,9 +16,11 @@ use nystudio107\transcoder\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
+use craft\console\Application as ConsoleApplication;
+use craft\events\DefineComponentsEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\utilities\ClearCaches;
-use craft\console\Application as ConsoleApplication;
+use craft\web\twig\variables\CraftVariable;
 
 use yii\base\Event;
 
@@ -52,6 +54,14 @@ class Transcoder extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        Event::on(
+            CraftVariable::class,
+            CraftVariable::EVENT_DEFINE_COMPONENTS,
+            function (DefineComponentsEvent $event) {
+                $event->components['transcoder'] = TranscoderVariable::class;
+            }
+        );
+
         // Handle console commands
         if (Craft::$app instanceof ConsoleApplication) {
             $this->controllerNamespace = 'nystudio107\transcoder\console\controllers';
@@ -78,14 +88,6 @@ class Transcoder extends Plugin
             ),
             __METHOD__
         );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function defineTemplateComponent()
-    {
-        return TranscoderVariable::class;
     }
 
     // Protected Methods

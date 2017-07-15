@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.0.6 - 2017.07.15
+### Changed
+* Craft 3 beta 20 compatibility
+
 ## 1.0.5 - 2017.03.24
 ### Changed
 * `hasSettings` -> `hasCpSettings` for Craft 3 beta 8 compatibility
