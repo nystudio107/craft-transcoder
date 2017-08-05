@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.0.7 - 2017.08.05
+### Changed
+* Craft 3 beta 23 compatibility
+
 ## 1.0.6 - 2017.07.15
 ### Changed
 * Craft 3 beta 20 compatibility

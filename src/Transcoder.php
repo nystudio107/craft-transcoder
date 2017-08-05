@@ -17,7 +17,6 @@ use nystudio107\transcoder\models\Settings;
 use Craft;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
-use craft\events\DefineComponentsEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
@@ -56,9 +55,11 @@ class Transcoder extends Plugin
 
         Event::on(
             CraftVariable::class,
-            CraftVariable::EVENT_DEFINE_COMPONENTS,
-            function (DefineComponentsEvent $event) {
-                $event->components['transcoder'] = TranscoderVariable::class;
+            CraftVariable::EVENT_INIT,
+            function (Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('transcoder', TranscoderVariable::class);
             }
         );
 
