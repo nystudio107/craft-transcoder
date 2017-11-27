@@ -53,6 +53,7 @@ class Transcoder extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        // Register our variables
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
