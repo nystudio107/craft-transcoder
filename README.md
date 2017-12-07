@@ -6,6 +6,10 @@ Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
 **Note**: This plugin may become a paid add-on when the Craft Plugin store becomes available.
 
+## Requirements
+
+This plugin requires Craft CMS 3.0.0-RC1 or later.
+
 ## Installation
 
 To install Transcoder, follow these steps:
