@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.0.8 - 2017.12.06
+### Changed
+* Updated to require craftcms/cms `^3.0.0-RC1`
+
 ## 1.0.7 - 2017.08.05
 ### Changed
 * Craft 3 beta 23 compatibility
