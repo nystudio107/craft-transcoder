@@ -45,6 +45,8 @@ class DefaultController extends Controller
      * from downloading things that are outside of the server root.
      *
      * @param $url
+     *
+     * @throws \yii\base\ExitException
      */
     public function actionDownloadFile($url)
     {
