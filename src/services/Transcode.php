@@ -83,6 +83,7 @@ class Transcode extends Component
      * @param $videoOptions array   of options for the video
      *
      * @return string       URL of the transcoded video or ""
+     * @throws Exception
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
@@ -201,6 +202,7 @@ class Transcode extends Component
      * @param $thumbnailOptions array   of options for the thumbnail
      *
      * @return string           URL of the video thumbnail
+     * @throws Exception
      */
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
     {
@@ -262,6 +264,7 @@ class Transcode extends Component
      * @param $audioOptions array of options for the audio file
      *
      * @return string       URL of the transcoded audio file or ""
+     * @throws Exception
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
@@ -357,6 +360,7 @@ class Transcode extends Component
      * @param bool $summary
      *
      * @return array
+     * @throws Exception
      */
     public function getFileInfo($filePath, $summary = false): array
     {
@@ -427,6 +431,7 @@ class Transcode extends Component
      * @param $videoOptions
      *
      * @return string
+     * @throws Exception
      */
     public function getVideoFilename($filePath, $videoOptions): string
     {
@@ -451,6 +456,7 @@ class Transcode extends Component
      * @param $audioOptions
      *
      * @return string
+     * @throws Exception
      */
     public function getAudioFilename($filePath, $audioOptions): string
     {
@@ -478,6 +484,7 @@ class Transcode extends Component
      * @param $options
      *
      * @return string
+     * @throws Exception
      */
     protected function getFilename($filePath, $options)
     {
@@ -539,7 +546,7 @@ class Transcode extends Component
             $filePath = $sourcePath . $folderPath . $asset->filename;
         }
 
-        return $filePath;
+        return Craft::getAlias($filePath);
     }
 
     /**

@@ -12,7 +12,6 @@ namespace nystudio107\transcoder\variables;
 
 use nystudio107\transcoder\Transcoder;
 
-use Craft;
 use craft\helpers\UrlHelper;
 
 /**
@@ -33,6 +32,7 @@ class TranscoderVariable
      * @param $videoOptions
      *
      * @return string
+     * @throws \yii\base\Exception
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
@@ -48,6 +48,7 @@ class TranscoderVariable
      * @param $thumbnailOptions
      *
      * @return string
+     * @throws \yii\base\Exception
      */
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
     {
@@ -64,6 +65,7 @@ class TranscoderVariable
      * @param $audioOptions
      *
      * @return string
+     * @throws \yii\base\Exception
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
@@ -79,6 +81,7 @@ class TranscoderVariable
      * @param bool $summary
      *
      * @return array
+     * @throws \yii\base\Exception
      */
     public function getFileInfo($filePath, $summary = false): array
     {
@@ -94,6 +97,7 @@ class TranscoderVariable
      * @param $videoOptions
      *
      * @return string
+     * @throws \yii\base\Exception
      */
     public function getVideoProgressUrl($filePath, $videoOptions): string
     {
@@ -116,6 +120,7 @@ class TranscoderVariable
      * @param $audioOptions
      *
      * @return string
+     * @throws \yii\base\Exception
      */
     public function getAudioProgressUrl($filePath, $audioOptions): string
     {

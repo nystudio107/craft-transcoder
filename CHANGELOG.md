@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.0.9 - 2018.01.25
+### Changed
+* Handle Asset Volumes that use aliases
+* Updated DocBlock comments
+
 ## 1.0.8 - 2017.12.06
 ### Changed
 * Updated to require craftcms/cms `^3.0.0-RC1`
