@@ -47,17 +47,19 @@ class Settings extends Model
 
     /**
      * The path where the transcoded videos are stored; must have a trailing /
+     * Yii2 aliases are supported here
      *
      * @var string
      */
-    public $transcoderPath = '{DOCUMENT_ROOT}/transcoder/';
+    public $transcoderPath = '@webroot/transcoder/';
 
     /**
      * The URL where the transcoded videos are stored; must have a trailing /
+     * Yii2 aliases are supported here
      *
      * @var string
      */
-    public $transcoderUrl = '/transcoder/';
+    public $transcoderUrl = '@web/transcoder/';
 
     /**
      * Use a md5 hash for the filenames instead of parameterized naming
