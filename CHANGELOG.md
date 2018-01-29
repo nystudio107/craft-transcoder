@@ -1,5 +1,12 @@
 # Transcoder Changelog
 
+## 1.0.10 - 2018.01.29
+### Added
+* Added support for Yii2 aliases for `transcoderPath` & `transcoderUrl` settings in `config.php`
+
+### Changed
+* Changed the default `config.php` to use `@webroot` and `@web` Yii2 aliases
+
 ## 1.0.9 - 2018.01.25
 ### Changed
 * Handle Asset Volumes that use aliases
