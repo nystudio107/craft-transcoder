@@ -34,10 +34,12 @@ return [
     'ffprobeOptions' => '-v quiet -print_format json -show_format -show_streams',
 
     // The path where the transcoded videos are stored; must have a trailing /
-    'transcoderPath' => '{DOCUMENT_ROOT}/transcoder/',
+    // Yii2 aliases are supported here
+    'transcoderPath' => '@webroot/transcoder/',
 
     // The URL where the transcoded videos are stored; must have a trailing /
-    'transcoderUrl' => '/transcoder/',
+    // Yii2 aliases are supported here
+    'transcoderUrl' => '@web/transcoder/',
 
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
