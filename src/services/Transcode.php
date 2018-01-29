@@ -93,7 +93,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (file_exists($filePath)) {
-            $destVideoPath = $settings['transcoderPath'];
+            $destVideoPath = Craft::getAlias($settings['transcoderPath']);
 
             $videoOptions = $this->coalesceOptions("defaultVideoOptions", $videoOptions);
 
@@ -181,7 +181,7 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
-                $result = $settings['transcoderUrl'] . $destVideoFile;
+                $result = Craft::getAlias($settings['transcoderUrl']) . $destVideoFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -212,7 +212,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (file_exists($filePath)) {
-            $destThumbnailPath = $settings['transcoderPath'];
+            $destThumbnailPath = Craft::getAlias($settings['transcoderPath']);
 
             $thumbnailOptions = $this->coalesceOptions("defaultThumbnailOptions", $thumbnailOptions);
 
@@ -250,7 +250,7 @@ class Transcode extends Component
                 $shellOutput = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
             }
-            $result = $settings['transcoderUrl'] . $destThumbnailFile;
+            $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
         }
 
         return $result;
@@ -274,7 +274,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (file_exists($filePath)) {
-            $destAudioPath = $settings['transcoderPath'];
+            $destAudioPath = Craft::getAlias($settings['transcoderPath']);
 
             $audioOptions = $this->coalesceOptions("defaultAudioOptions", $audioOptions);
 
@@ -339,7 +339,7 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (filemtime($destAudioPath) >= filemtime($filePath))) {
-                $result = $settings['transcoderUrl'] . $destAudioFile;
+                $result = Craft::getAlias($settings['transcoderUrl']) . $destAudioFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
