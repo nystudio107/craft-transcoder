@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.0.11 - 2018.02.01
+### Added
+* Renamed the composer package name to `craft-transcoder`
+
 ## 1.0.10 - 2018.01.29
 ### Added
 * Added support for Yii2 aliases for `transcoderPath` & `transcoderUrl` settings in `config.php`
