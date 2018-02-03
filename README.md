@@ -121,6 +121,10 @@ The `sharpen` option determines whether an unsharp mask filter should be applied
 
 The file format setting `videoEncoder` is preset to what you'll need to generate `h264` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
+![Screenshot](resources/screenshots/admin-cp-video-thumbnails.png)
+
+Transcoder will also automatically add video thumbnails in the AdminCP Asset index.
+
 ### Generating a Transcoded Audio File
 
 To generate a transcoded audio File, do the following:
