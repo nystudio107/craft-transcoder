@@ -200,12 +200,14 @@ class Transcode extends Component
     /**
      * Returns a URL to a video thumbnail
      *
-     * @param $filePath         string  path to the original video or an Asset
-     * @param $thumbnailOptions array   of options for the thumbnail
+     * @param string $filePath         path to the original video or an Asset
+     * @param array  $thumbnailOptions of options for the thumbnail
+     * @param bool   $generate         whether the thumbnail should be
+     *                                 generated if it doesn't exists
      *
-     * @return string           URL of the video thumbnail
+     * @return string URL of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true): string
     {
 
         $result = "";
@@ -247,7 +249,7 @@ class Transcode extends Component
             $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null';
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
-            if (!file_exists($destThumbnailPath)) {
+            if (!file_exists($destThumbnailPath) && $generate) {
                 $shellOutput = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd, __METHOD__);
             }
@@ -481,10 +483,10 @@ class Transcode extends Component
     public function handleGetAssetThumbUrl(GetAssetThumbUrlEvent $event)
     {
         $options = [
-            "width" => $event->width,
+            "width"  => $event->width,
             "height" => $event->height,
         ];
-        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options);
+        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options, $event->generate);
 
         return empty($thumbUrl) ? null : $thumbUrl;
     }
