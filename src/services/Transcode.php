@@ -249,9 +249,15 @@ class Transcode extends Component
             $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null';
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
-            if (!file_exists($destThumbnailPath) && $generate) {
-                $shellOutput = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd, __METHOD__);
+            if (!file_exists($destThumbnailPath)) {
+                if ($generate) {
+                    $shellOutput = $this->executeShellCommand($ffmpegCmd);
+                    Craft::info($ffmpegCmd, __METHOD__);
+                } else {
+                    Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
+                    // The file doesn't exist, and we weren't asked to generate it
+                    return '';
+                }
             }
             $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
         }
