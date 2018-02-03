@@ -200,12 +200,14 @@ class Transcode extends Component
     /**
      * Returns a URL to a video thumbnail
      *
-     * @param $filePath         string  path to the original video or an Asset
-     * @param $thumbnailOptions array   of options for the thumbnail
+     * @param string $filePath         path to the original video or an Asset
+     * @param array  $thumbnailOptions of options for the thumbnail
+     * @param bool   $generate         whether the thumbnail should be
+     *                                 generated if it doesn't exists
      *
-     * @return string           URL of the video thumbnail
+     * @return string URL of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true): string
     {
 
         $result = "";
@@ -248,8 +250,14 @@ class Transcode extends Component
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
-                $shellOutput = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd, __METHOD__);
+                if ($generate) {
+                    $shellOutput = $this->executeShellCommand($ffmpegCmd);
+                    Craft::info($ffmpegCmd, __METHOD__);
+                } else {
+                    Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
+                    // The file doesn't exist, and we weren't asked to generate it
+                    return '';
+                }
             }
             $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
         }
@@ -481,10 +489,10 @@ class Transcode extends Component
     public function handleGetAssetThumbUrl(GetAssetThumbUrlEvent $event)
     {
         $options = [
-            "width" => $event->width,
+            "width"  => $event->width,
             "height" => $event->height,
         ];
-        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options);
+        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options, $event->generate);
 
         return empty($thumbUrl) ? null : $thumbUrl;
     }
