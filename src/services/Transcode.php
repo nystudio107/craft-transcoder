@@ -15,11 +15,14 @@ use nystudio107\transcoder\Transcoder;
 use Craft;
 use craft\base\Component;
 use craft\elements\Asset;
+use craft\events\GetAssetThumbUrlEvent;
 use craft\volumes\Local;
 
 use yii\base\Exception;
+use yii\validators\UrlValidator;
 
 use mikehaertl\shellcommand\Command as ShellCommand;
+use yii\base\InvalidConfigException;
 
 /**
  * @author    nystudio107
@@ -83,7 +86,6 @@ class Transcode extends Component
      * @param $videoOptions array   of options for the video
      *
      * @return string       URL of the transcoded video or ""
-     * @throws Exception
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
@@ -92,7 +94,7 @@ class Transcode extends Component
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
-        if (file_exists($filePath)) {
+        if (!empty($filePath)) {
             $destVideoPath = Craft::getAlias($settings['transcoderPath']);
 
             $videoOptions = $this->coalesceOptions("defaultVideoOptions", $videoOptions);
@@ -202,7 +204,6 @@ class Transcode extends Component
      * @param $thumbnailOptions array   of options for the thumbnail
      *
      * @return string           URL of the video thumbnail
-     * @throws Exception
      */
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
     {
@@ -211,7 +212,7 @@ class Transcode extends Component
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
-        if (file_exists($filePath)) {
+        if (!empty($filePath)) {
             $destThumbnailPath = Craft::getAlias($settings['transcoderPath']);
 
             $thumbnailOptions = $this->coalesceOptions("defaultThumbnailOptions", $thumbnailOptions);
@@ -264,7 +265,6 @@ class Transcode extends Component
      * @param $audioOptions array of options for the audio file
      *
      * @return string       URL of the transcoded audio file or ""
-     * @throws Exception
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
@@ -273,7 +273,7 @@ class Transcode extends Component
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
-        if (file_exists($filePath)) {
+        if (!empty($filePath)) {
             $destAudioPath = Craft::getAlias($settings['transcoderPath']);
 
             $audioOptions = $this->coalesceOptions("defaultAudioOptions", $audioOptions);
@@ -360,7 +360,6 @@ class Transcode extends Component
      * @param bool $summary
      *
      * @return array
-     * @throws Exception
      */
     public function getFileInfo($filePath, $summary = false): array
     {
@@ -369,7 +368,7 @@ class Transcode extends Component
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
-        if (file_exists($filePath)) {
+        if (!empty($filePath)) {
             // Build the basic command for ffprobe
             $ffprobeOptions = $settings['ffprobeOptions'];
             $ffprobeCmd = $settings['ffprobePath']
@@ -431,7 +430,6 @@ class Transcode extends Component
      * @param $videoOptions
      *
      * @return string
-     * @throws Exception
      */
     public function getVideoFilename($filePath, $videoOptions): string
     {
@@ -456,7 +454,6 @@ class Transcode extends Component
      * @param $audioOptions
      *
      * @return string
-     * @throws Exception
      */
     public function getAudioFilename($filePath, $audioOptions): string
     {
@@ -474,6 +471,24 @@ class Transcode extends Component
         return $result;
     }
 
+    /**
+     * Handle generated a thumbnail for the AdminCP
+     *
+     * @param GetAssetThumbUrlEvent $event
+     *
+     * @return null|string
+     */
+    public function handleGetAssetThumbUrl(GetAssetThumbUrlEvent $event)
+    {
+        $options = [
+            "width" => $event->width,
+            "height" => $event->height,
+        ];
+        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options);
+
+        return empty($thumbUrl) ? null : $thumbUrl;
+    }
+
     // Protected Methods
     // =========================================================================
 
@@ -484,13 +499,20 @@ class Transcode extends Component
      * @param $options
      *
      * @return string
-     * @throws Exception
      */
     protected function getFilename($filePath, $options)
     {
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
-        $pathParts = pathinfo($filePath);
+
+        $validator = new UrlValidator();
+        $error = '';
+        if ($validator->validate($filePath, $error)) {
+            $urlParts = parse_url($filePath);
+            $pathParts = pathinfo($urlParts['path']);
+        } else {
+            $pathParts = pathinfo($filePath);
+        }
         $fileName = $pathParts['filename'];
 
         // Add our options to the file name
@@ -523,30 +545,54 @@ class Transcode extends Component
      * @param $filePath
      *
      * @return string
-     * @throws Exception
      */
     protected function getAssetPath($filePath): string
     {
         // If we're passed an Asset, extract the path from it
         if (is_object($filePath) && ($filePath instanceof Asset)) {
+            /** @var Asset $asset */
             $asset = $filePath;
-            $assetVolume = $asset->getVolume();
-
-            if (!(($assetVolume instanceof Local) || is_subclass_of($assetVolume, Local::class))) {
-                throw new Exception(
-                    Craft::t('transcoder', 'Paths not available for non-local asset sources')
-                );
+            $assetVolume = null;
+            try {
+                $assetVolume = $asset->getVolume();
+            } catch (InvalidConfigException $e) {
+                Craft::error($e->getMessage(), __METHOD__);
             }
 
-            $sourcePath = rtrim($assetVolume->path, DIRECTORY_SEPARATOR);
-            $sourcePath .= strlen($sourcePath) ? DIRECTORY_SEPARATOR : '';
-            $folderPath = rtrim($asset->getFolder()->path, DIRECTORY_SEPARATOR);
-            $folderPath .= strlen($folderPath) ? DIRECTORY_SEPARATOR : '';
+            if ($assetVolume) {
+                // If it's local, get a path to the file
+                if ($assetVolume instanceof Local) {
+                    $sourcePath = rtrim($assetVolume->path, DIRECTORY_SEPARATOR);
+                    $sourcePath .= strlen($sourcePath) ? DIRECTORY_SEPARATOR : '';
+                    $folderPath = '';
+                    try {
+                        $folderPath = rtrim($asset->getFolder()->path, DIRECTORY_SEPARATOR);
+                    } catch (InvalidConfigException $e) {
+                        Craft::error($e->getMessage(), __METHOD__);
+                    }
+                    $folderPath .= strlen($folderPath) ? DIRECTORY_SEPARATOR : '';
 
-            $filePath = $sourcePath . $folderPath . $asset->filename;
+                    $filePath = $sourcePath . $folderPath . $asset->filename;
+                } else {
+                    // Otherwise, get a URL
+                    $filePath = $asset->getUrl();
+                }
+            }
         }
 
-        return Craft::getAlias($filePath);
+        $filePath = Craft::getAlias($filePath);
+
+        // Make sure that $filePath is either an existing file, or a valid URL
+        if (!file_exists($filePath)) {
+            $validator = new UrlValidator();
+            $error = '';
+            if (!$validator->validate($filePath, $error)) {
+                Craft::error($error, __METHOD__);
+                $filePath = '';
+            }
+        }
+
+        return $filePath;
     }
 
     /**

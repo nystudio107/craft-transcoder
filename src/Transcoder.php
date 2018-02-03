@@ -17,7 +17,11 @@ use nystudio107\transcoder\models\Settings;
 use Craft;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
+use craft\elements\Asset;
 use craft\events\RegisterCacheOptionsEvent;
+use craft\events\GetAssetThumbUrlEvent;
+use craft\helpers\Assets as AssetsHelper;
+use craft\services\Assets;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 
@@ -61,6 +65,23 @@ class Transcoder extends Plugin
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('transcoder', TranscoderVariable::class);
+            }
+        );
+
+        // Handler: Elements::EVENT_AFTER_SAVE_ELEMENT
+        Event::on(
+            Assets::class,
+            Assets::EVENT_GET_ASSET_THUMB_URL,
+            function (GetAssetThumbUrlEvent $event) {
+                Craft::trace(
+                    'Assets::EVENT_GET_ASSET_THUMB_URL',
+                    __METHOD__
+                );
+                /** @var Asset $asset */
+                $asset = $event->asset;
+                if (AssetsHelper::getFileKindByExtension($asset->filename) == Asset::KIND_VIDEO) {
+                    $event->url = Transcoder::$plugin->transcode->handleGetAssetThumbUrl($event);
+                }
             }
         );
 

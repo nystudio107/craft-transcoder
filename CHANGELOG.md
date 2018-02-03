@@ -1,5 +1,13 @@
 # Transcoder Changelog
 
+## 1.1.0 - 2018.02.02
+### Added
+* Transcoder now supports the transcoding of remote video & audio files
+* Added the ability to generate a thumbnail for videos in the AdminCP Assets index
+
+### Changed
+* Cleaned up the exception handling
+
 ## 1.0.11 - 2018.02.01
 ### Added
 * Renamed the composer package name to `craft-transcoder`

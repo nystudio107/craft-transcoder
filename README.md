@@ -32,11 +32,11 @@ If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
 
 ## Transcoder Overview
 
-The Transcoder allows you to take any locally stored video, and transcode it into any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
+The Transcoder plugin allows you to take any video (local or remote), and transcode it into any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
 
 It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
 
-It also allows you to get a thumbnail of a video in any size and at any timecode, and can extract information about audio/video files such.
+Transcoder also allows you to get a thumbnail of a video in any size and at any timecode, and can extract information about audio/video files such.
 
 Finally, it lets you download an arbitrary file (such as the transcoded video) via a special download link.
 
@@ -53,6 +53,15 @@ The only configuration for Transcoder is in the `config.php` file, which is a mu
 To generate a transcoded video, do the following:
 
     {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
+        "width": 720,
+        "height": 480
+    }) %}
+
+You can also pass in an URL:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('http://vjs.zencdn.net/v/oceans.mp4', {
         "videoFrameRate": 20,
         "videoBitRate": "500k",
         "width": 720,
@@ -117,6 +126,14 @@ The file format setting `videoEncoder` is preset to what you'll need to generate
 To generate a transcoded audio File, do the following:
 
     {% set transAudioUrl = craft.transcoder.getAudioUrl('/home/vagrant/sites/nystudio107/public/podcast.mp3', {
+        "audioBitRate": "64k",
+        "audioSampleRate": 22050,
+        "audioChannels": 1
+    }) %}
+
+You can also pass in a URL:
+
+    {% set transAudioUrl = craft.transcoder.getAudioUrl('http://www.noiseaddicts.com/samples_1w72b820/2514.mp3', {
         "audioBitRate": "64k",
         "audioSampleRate": 22050,
         "audioChannels": 1
@@ -197,6 +214,14 @@ To generate a thumbnail from a video, do the following:
         "timeInSecs": 20,
     }) %}
 
+You can also pass in a URL:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('http://vjs.zencdn.net/v/oceans.mp4', {
+        "width": 300,
+        "height": 200,
+        "timeInSecs": 20,
+    }) %}
+
 You can also pass in an `Asset`:
 
     {% set myAsset = entry.someAsset.first() %}
@@ -251,6 +276,10 @@ The `sharpen` option determines whether an unsharp mask filter should be applied
 To get information about an existing video/audio file, you can use `craft.transcoder.getFileInfo()`:
 
     {% set fileInfo = craft.transcoder.getFileInfo('/home/vagrant/sites/nystudio107/public/oceans.mp4', true) %}
+
+You can also pass in a URL:
+
+    {% set fileInfo = craft.transcoder.getFileInfo('http://vjs.zencdn.net/v/oceans.mp4', true) %}
 
 You can also pass in an `Asset`:
 
