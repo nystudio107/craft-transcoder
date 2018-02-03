@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.1.1 - 2018.02.03
+### Changed
+* Only generate a thumbnail when we're actually asked to do so via `$generate1`
+
 ## 1.1.0 - 2018.02.02
 ### Added
 * Transcoder now supports the transcoding of remote video & audio files
