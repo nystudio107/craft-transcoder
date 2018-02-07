@@ -206,9 +206,9 @@ class Transcode extends Component
      *                                 generated if it doesn't exists
      * @param bool   $asPath           Whether we should return a path or not
      *
-     * @return string URL or path of the video thumbnail
+     * @return string|false|null URL or path of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true, $asPath = false): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true, $asPath = false)
     {
 
         $result = null;
