@@ -15,7 +15,7 @@ use nystudio107\transcoder\Transcoder;
 use Craft;
 use craft\base\Component;
 use craft\elements\Asset;
-use craft\events\GetAssetThumbUrlEvent;
+use craft\events\AssetThumbEvent;
 use craft\volumes\Local;
 
 use yii\base\Exception;
@@ -204,13 +204,14 @@ class Transcode extends Component
      * @param array  $thumbnailOptions of options for the thumbnail
      * @param bool   $generate         whether the thumbnail should be
      *                                 generated if it doesn't exists
+     * @param bool   $asPath           Whether we should return a path or not
      *
-     * @return string URL of the video thumbnail
+     * @return string URL or path of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true, $asPath = false): string
     {
 
-        $result = "";
+        $result = null;
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
@@ -256,10 +257,15 @@ class Transcode extends Component
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
                     // The file doesn't exist, and we weren't asked to generate it
-                    return '';
+                    return false;
                 }
             }
-            $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
+            // Return either a path or a URL
+            if ($asPath) {
+                $result = $destThumbnailPath;
+            } else {
+                $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
+            }
         }
 
         return $result;
@@ -482,19 +488,19 @@ class Transcode extends Component
     /**
      * Handle generated a thumbnail for the AdminCP
      *
-     * @param GetAssetThumbUrlEvent $event
+     * @param AssetThumbEvent $event
      *
-     * @return null|string
+     * @return null|false|string
      */
-    public function handleGetAssetThumbUrl(GetAssetThumbUrlEvent $event)
+    public function handleGetAssetThumbPath(AssetThumbEvent $event)
     {
         $options = [
             "width"  => $event->width,
             "height" => $event->height,
         ];
-        $thumbUrl = $this->getVideoThumbnailUrl($event->asset, $options, $event->generate);
+        $thumbPath = $this->getVideoThumbnailUrl($event->asset, $options, $event->generate, true);
 
-        return empty($thumbUrl) ? null : $thumbUrl;
+        return $thumbPath;
     }
 
     // Protected Methods

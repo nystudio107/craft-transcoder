@@ -18,8 +18,8 @@ use Craft;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
+use craft\events\AssetThumbEvent;
 use craft\events\RegisterCacheOptionsEvent;
-use craft\events\GetAssetThumbUrlEvent;
 use craft\helpers\Assets as AssetsHelper;
 use craft\services\Assets;
 use craft\utilities\ClearCaches;
@@ -68,19 +68,19 @@ class Transcoder extends Plugin
             }
         );
 
-        // Handler: Elements::EVENT_AFTER_SAVE_ELEMENT
+        // Handler: Assets::EVENT_GET_THUMB_PATH
         Event::on(
             Assets::class,
-            Assets::EVENT_GET_ASSET_THUMB_URL,
-            function (GetAssetThumbUrlEvent $event) {
+            Assets::EVENT_GET_THUMB_PATH,
+            function (AssetThumbEvent $event) {
                 Craft::trace(
-                    'Assets::EVENT_GET_ASSET_THUMB_URL',
+                    'Assets::EVENT_GET_THUMB_PATH',
                     __METHOD__
                 );
                 /** @var Asset $asset */
                 $asset = $event->asset;
                 if (AssetsHelper::getFileKindByExtension($asset->filename) == Asset::KIND_VIDEO) {
-                    $event->url = Transcoder::$plugin->transcode->handleGetAssetThumbUrl($event);
+                    $event->path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
                 }
             }
         );
