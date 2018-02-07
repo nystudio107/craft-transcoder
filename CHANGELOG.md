@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.1.2 - 2018.02.06
+### Changed
+* Switched video thumbnail generation to use `EVENT_GET_THUMB_PATH`
+* Transcoder now requires Craft CMS 3 RC 9 or later
+
 ## 1.1.1 - 2018.02.03
 ### Changed
 * Only generate a thumbnail when we're actually asked to do so via `$generate1`
