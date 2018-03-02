@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.1.3 - 2018.03.02
+### Changed
+* Fixed deprecation errors from Craft CMS 3 RC13
+
 ## 1.1.2 - 2018.02.06
 ### Changed
 * Switched video thumbnail generation to use `EVENT_GET_THUMB_PATH`
