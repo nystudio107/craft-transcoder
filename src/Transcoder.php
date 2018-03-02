@@ -73,7 +73,7 @@ class Transcoder extends Plugin
             Assets::class,
             Assets::EVENT_GET_THUMB_PATH,
             function (AssetThumbEvent $event) {
-                Craft::trace(
+                Craft::debug(
                     'Assets::EVENT_GET_THUMB_PATH',
                     __METHOD__
                 );
@@ -92,7 +92,7 @@ class Transcoder extends Plugin
 
         // Add the Transcode path to the list of things the Clear Caches tool can delete.
         Event::on(
-            ClearCaches::className(),
+            ClearCaches::class,
             ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
             function (RegisterCacheOptionsEvent $event) {
                 $event->options[] = [
