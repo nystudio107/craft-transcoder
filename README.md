@@ -1,3 +1,4 @@
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1)[![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1)
 # Transcoder plugin for Craft CMS 3.x
 
 Transcode video & audio files to various formats, and provide video thumbnails
