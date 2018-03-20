@@ -1,4 +1,5 @@
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1)[![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1) [![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1) [![Build Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/build.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/build-status/v1) [![Code Intelligence Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/code-intelligence.svg?b=v1)](https://scrutinizer-ci.com/code-intelligence)
+
 # Transcoder plugin for Craft CMS 3.x
 
 Transcode video & audio files to various formats, and provide video thumbnails
@@ -7,7 +8,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
-**Note**: This plugin may become a paid add-on when the Craft Plugin store becomes available.
+**Note**: _This plugin will cost $59.00 once Craft 3 GA is released._
 
 ## Requirements
 
@@ -19,6 +20,8 @@ To install Transcoder, follow these steps:
 
 1. Install with Composer via `composer require nystudio107/craft-transcoder` from your project directory
 2. Install plugin in the Craft Control Panel under Settings > Plugins
+
+You can also install Transcoder via the **Plugin Store** in the Craft AdminCP.
 
 Transcoder works on Craft 3.x.
 
