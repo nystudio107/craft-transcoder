@@ -79,19 +79,26 @@ class DefaultController extends Controller
         if (file_exists($progressFile)) {
             $content = @file_get_contents($progressFile);
             if ($content) {
+
                 // get duration of source
                 preg_match("/Duration: (.*?), start:/", $content, $matches);
-                $rawDuration = $matches[1];
-
-                // rawDuration is in 00:00:00.00 format. This converts it to seconds.
-                $ar = array_reverse(explode(":", $rawDuration));
-                $duration = floatval($ar[0]);
-                if (!empty($ar[1])) {
-                    $duration += intval($ar[1]) * 60;
-                }
-                if (!empty($ar[2])) {
-                    $duration += intval($ar[2]) * 60 * 60;
-                }
+            
+                if(count($matches) > 0) {
+	        
+	                $rawDuration = $matches[1];
+	        	
+	                // rawDuration is in 00:00:00.00 format. This converts it to seconds.
+	                $ar = array_reverse(explode(":", $rawDuration));
+	                $duration = floatval($ar[0]);
+	                if (!empty($ar[1])) {
+	                    $duration += intval($ar[1]) * 60;
+	                }
+	                if (!empty($ar[2])) {
+	                    $duration += intval($ar[2]) * 60 * 60;
+	                }             	                
+				} else {
+					$duration = 'unknown'; // with GIF as input, duration is unknown
+				}
 
                 // Get the time in the file that is already encoded
                 preg_match_all("/time=(.*?) bitrate/", $content, $matches);
@@ -113,16 +120,29 @@ class DefaultController extends Controller
                 }
 
                 //calculate the progress
-                $progress = round(($time / $duration) * 100);
-
-                if ($progress < 100) {
-                    $result = [
-                        'filename' => $filename,
-                        'duration' => $duration,
-                        'time'     => $time,
-                        'progress' => $progress,
-                    ];
+                if($duration != 'unknown') {
+	                $progress = round(($time / $duration) * 100);
+                } else {
+	                $progress = 'unknown';
                 }
+                		
+				// return results
+                if($progress != "unknown" && $progress < 100) {
+		            $result = [
+	                    'filename' => $filename,
+	                    'duration' => $duration,
+	                    'time'     => $time,
+	                    'progress' => $progress,
+	                ];
+	            } elseif($progress == "unknown") {
+		            $result = [
+	                    'filename' => $filename,
+	                    'duration' => 'unknown',
+	                    'time'     => $time,
+	                    'progress' => 'unknown',
+	                    'message' => 'encoding GIF, can\'t determine duration'
+	                ];            
+	            }
             }
         }
 

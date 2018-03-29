@@ -98,7 +98,7 @@ class Transcoder extends Plugin
                 $event->options[] = [
                     'key' => 'transcoder',
                     'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => Transcoder::$plugin->getSettings()->transcoderPath,
+                    'action' => Transcoder::$plugin->getSettings()->transcoderPaths['default'],
                 ];
             }
         );
