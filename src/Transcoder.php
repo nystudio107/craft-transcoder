@@ -57,6 +57,11 @@ class Transcoder extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        // Load plugin components
+        $this->setComponents([
+            'get' => Transcode::class
+        ]);
+
         // Register our variables
         Event::on(
             CraftVariable::class,
