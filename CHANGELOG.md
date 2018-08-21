@@ -1,5 +1,14 @@
 # Transcoder Changelog
 
+## 1.2.0 - 2018.08.22
+### Added
+* Added the ability to encode to animated `.gif` files
+* Added multiple output paths and URLs for different media types
+
+### Changed
+* Moved to a modern webpack build config for the AdminCP
+* Added install confetti
+
 ## 1.1.3 - 2018.03.02
 ### Changed
 * Fixed deprecation errors from Craft CMS 3 RC13
