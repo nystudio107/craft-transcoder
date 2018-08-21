@@ -14,5 +14,6 @@
  * @since     1.0.0
  */
 return [
-    'Transcoder plugin loaded' => 'Transcoder plugin loaded',
+    'Transcoder caches' => 'Transcoder caches',
+    '{name} plugin loaded' => '{name} plugin loaded'
 ];
