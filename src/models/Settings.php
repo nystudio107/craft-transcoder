@@ -11,6 +11,7 @@
 namespace nystudio107\transcoder\models;
 
 use craft\base\Model;
+use craft\validators\ArrayValidator;
 
 /**
  * Transcoder Settings model
@@ -245,9 +246,9 @@ class Settings extends Model
             ['ffprobeOptions', 'safe'],
             ['transcoderPath', 'string'],
             ['transcoderPath', 'required'],
-            ['transcoderPaths', 'array'],
+            ['transcoderPaths', ArrayValidator::class],
             ['transcoderPaths', 'required'],
-            ['transcoderUrls', 'array'],
+            ['transcoderUrls', ArrayValidator::class],
             ['transcoderUrls', 'required'],
             ['useHashedNames', 'boolean'],
             ['useHashedNames', 'default', 'value' => false],
