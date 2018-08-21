@@ -137,6 +137,29 @@ class TranscoderVariable
     }
 
     /**
+     * Get a GIF progress URL
+     *
+     * @param $filePath
+     * @param $videoOptions
+     *
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public function getGifProgressUrl($filePath, $gifOptions): string
+    {
+        $result = "";
+        $filename = Transcoder::$plugin->transcode->getGifFilename($filePath, $gifOptions);
+        if (!empty($filename)) {
+            $urlParams = [
+                'filename' => $filename,
+            ];
+            $result = UrlHelper::actionUrl('transcoder/default/progress', $urlParams);
+        }
+
+        return $result;
+    }
+    
+    /**
      * Get a download URL
      *
      * @param $url
@@ -157,4 +180,20 @@ class TranscoderVariable
 
         return $result;
     }
+    
+    /**
+     * Returns a URL to a GIF file
+     *
+     * @param $filePath
+     * @param $gifOptions
+     *
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public function getGifUrl($filePath, $gifOptions): string
+    {
+        $result = Transcoder::$plugin->transcode->getGifUrl($filePath, $gifOptions);
+
+        return $result;
+    }  
 }

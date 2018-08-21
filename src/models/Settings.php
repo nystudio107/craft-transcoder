@@ -51,15 +51,15 @@ class Settings extends Model
      *
      * @var string
      */
-    public $transcoderPath = '@webroot/transcoder/';
-
+	 public $transcoderPaths = [];
+	 
     /**
      * The URL where the transcoded videos are stored; must have a trailing /
      * Yii2 aliases are supported here
      *
      * @var string
      */
-    public $transcoderUrl = '@web/transcoder/';
+    public $transcoderUrls = [];
 
     /**
      * Use a md5 hash for the filenames instead of parameterized naming
@@ -90,6 +90,12 @@ class Settings extends Model
             'audioCodec'        => 'libvorbis',
             'audioCodecOptions' => '-async 1000',
         ],
+        'gif' => [
+	        'fileSuffix' => '.mp4',
+	        'fileFormat' => 'mp4',
+	        'videoCodec' => 'libx264',
+	        'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
+        ]           
     ];
 
     /**
@@ -170,7 +176,19 @@ class Settings extends Model
         'audioChannels'   => '2',
     ];
 
-
+    /**
+     * Default options for encoded GIF
+     *
+     * @var array
+     */
+    public $defaultGifOptions = [
+		'videoEncoder'    	=> 'gif',
+        'fileSuffix'        => '',
+        'fileFormat'        => '',
+        'videoCodec'        => '',
+        'videoCodecOptions' => '',
+    ];
+      
     // Public Methods
     // =========================================================================
 
@@ -199,8 +217,10 @@ class Settings extends Model
             ['ffprobeOptions', 'safe'],
             ['transcoderPath', 'string'],
             ['transcoderPath', 'required'],
-            ['transcoderUrl', 'string'],
-            ['transcoderUrl', 'required'],
+            ['transcoderPaths', 'array'],
+            ['transcoderPaths', 'required'],
+            ['transcoderUrls', 'array'],
+            ['transcoderUrls', 'required'],
             ['useHashedNames', 'boolean'],
             ['useHashedNames', 'default', 'value' => false],
             ['videoEncoders', 'required'],

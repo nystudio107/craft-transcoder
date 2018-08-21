@@ -89,14 +89,13 @@ class Transcode extends Component
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
-
         $result = "";
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destVideoPath = Craft::getAlias($settings['transcoderPath']);
 
+            $destVideoPath = Craft::getAlias($settings['transcoderPaths']['video']);
             $videoOptions = $this->coalesceOptions("defaultVideoOptions", $videoOptions);
 
             // Get the video encoder presets to use
@@ -183,10 +182,11 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
-                $result = Craft::getAlias($settings['transcoderUrl']) . $destVideoFile;
+                $result = Craft::getAlias($settings['transcoderUrls']['video']) . $destVideoFile;
             } else {
+
                 // Kick off the transcoding
-                $pid = $this->executeShellCommand($ffmpegCmd);
+				$pid = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
 
                 // Create a lockfile in tmp
@@ -216,7 +216,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = Craft::getAlias($settings['transcoderPath']);
+            $destThumbnailPath = Craft::getAlias($settings['transcoderPaths']['thumbnail']);
 
             $thumbnailOptions = $this->coalesceOptions("defaultThumbnailOptions", $thumbnailOptions);
 
@@ -247,7 +247,7 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destThumbnailPath = $destThumbnailPath . $destThumbnailFile;
-            $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null';
+            $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null &';
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
@@ -264,7 +264,7 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $result = Craft::getAlias($settings['transcoderUrl']) . $destThumbnailFile;
+                $result = Craft::getAlias($settings['transcoderUrls']['thumbnail']) . $destThumbnailFile;
             }
         }
 
@@ -288,7 +288,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destAudioPath = Craft::getAlias($settings['transcoderPath']);
+            $destAudioPath = Craft::getAlias($settings['transcoderPaths']['audio']);
 
             $audioOptions = $this->coalesceOptions("defaultAudioOptions", $audioOptions);
 
@@ -353,7 +353,7 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (filemtime($destAudioPath) >= filemtime($filePath))) {
-                $result = Craft::getAlias($settings['transcoderUrl']) . $destAudioFile;
+                $result = Craft::getAlias($settings['transcoderUrls']['audio']) . $destAudioFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -481,6 +481,30 @@ class Transcode extends Component
         $audioOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 
         $result = $this->getFilename($filePath, $audioOptions);
+
+        return $result;
+    }
+
+    /**
+     * Get the name of a gif video file from a path and options
+     *
+     * @param $filePath
+     * @param $gifOptions
+     *
+     * @return string
+     */
+    public function getGifFilename($filePath, $gifOptions): string
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $gifOptions = $this->coalesceOptions("defaultGifOptions", $gifOptions);
+
+        // Get the video encoder presets to use
+        $videoEncoders = $settings['videoEncoders'];
+        $thisEncoder = $videoEncoders[$gifOptions['videoEncoder']];
+
+        $gifOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
+
+        $result = $this->getFilename($filePath, $gifOptions);
 
         return $result;
     }
@@ -710,4 +734,90 @@ class Transcode extends Component
 
         return $result;
     }
+    
+    /**
+     * Returns a URL to a encoded GIF file (mp4)
+     *
+     * @param string $filePath         path to the original video or an Asset
+     * @param array  $fileOptions of options for the GIF file
+     * @param bool   $generate         whether the GIF should be
+     *                                 generated if it doesn't exists
+     * @param bool   $asPath           Whether we should return a path or not
+     *
+     * @return string|false|null URL or path of the GIF file
+     */
+     
+    public function getGifUrl($filePath, $gifOptions): string
+    {
+        $result = "";
+        $settings = Transcoder::$plugin->getSettings();
+        $filePath = $this->getAssetPath($filePath);
+
+        if (!empty($filePath)) {
+
+			// Dest path
+            $destVideoPath = Craft::getAlias($settings['transcoderPaths']['gif']);
+                        
+            // Options
+            $gifOptions = $this->coalesceOptions("defaultGifOptions", $gifOptions);
+
+            // Get the video encoder presets to use
+            $videoEncoders = $settings['videoEncoders'];
+            $thisEncoder = $videoEncoders[$gifOptions['videoEncoder']];
+            $gifOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
+
+            // Build the basic command for ffmpeg
+            $ffmpegCmd = $settings['ffmpegPath']
+            	. ' -f gif' 
+                . ' -i ' . escapeshellarg($filePath)
+                . ' -vcodec ' . $thisEncoder['videoCodec']
+                . ' ' . $thisEncoder['videoCodecOptions'];
+
+
+             // Create the directory if it isn't there already
+            if (!file_exists($destVideoPath)) {
+                mkdir($destVideoPath);
+            }
+
+            $destVideoFile = $this->getFilename($filePath, $gifOptions);
+
+            // File to store the video encoding progress in
+            $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . ".progress";
+
+            // Assemble the destination path and final ffmpeg command
+            $destVideoPath = $destVideoPath . $destVideoFile;
+            $ffmpegCmd .= ' '
+                . ' -y ' . escapeshellarg($destVideoPath)
+                . ' 1> ' . $progressFile . ' 2>&1 & echo $!';
+			
+            // Make sure there isn't a lockfile for this video already
+            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . ".lock";
+            $oldPid = @file_get_contents($lockFile);
+            if ($oldPid !== false) {
+                exec("ps $oldPid", $ProcessState);
+                if (count($ProcessState) >= 2) {
+                    return $result;
+                }
+                // It's finished transcoding, so delete the lockfile and progress file
+                @unlink($lockFile);
+                @unlink($progressFile);
+            }
+
+            // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
+            if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
+                $result = Craft::getAlias($settings['transcoderUrls']['gif']) . $destVideoFile;
+            } else {
+
+                // Kick off the transcoding
+				$pid = $this->executeShellCommand($ffmpegCmd);
+                Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
+
+                // Create a lockfile in tmp
+                file_put_contents($lockFile, $pid);
+            }
+        }
+
+        return $result;
+    }
+          
 }
