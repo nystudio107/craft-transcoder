@@ -36,7 +36,7 @@ If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
 
 ## Transcoder Overview
 
-The Transcoder plugin allows you to take any video (local or remote), and transcode it into any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
+The Transcoder plugin allows you to transcode any video (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
 
 It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
 
