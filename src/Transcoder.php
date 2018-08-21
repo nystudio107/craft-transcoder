@@ -84,7 +84,7 @@ class Transcoder extends Plugin
                 );
                 /** @var Asset $asset */
                 $asset = $event->asset;
-                if (AssetsHelper::getFileKindByExtension($asset->filename) == Asset::KIND_VIDEO) {
+                if (AssetsHelper::getFileKindByExtension($asset->filename) === Asset::KIND_VIDEO) {
                     $event->path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
                 }
             }
