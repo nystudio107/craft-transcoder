@@ -23,6 +23,7 @@ use craft\events\PluginEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\helpers\Assets as AssetsHelper;
+use craft\helpers\FileHelper;
 use craft\helpers\UrlHelper;
 use craft\services\Assets;
 use craft\services\Plugins;
@@ -30,7 +31,9 @@ use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 
+use yii\base\ErrorException;
 use yii\base\Event;
+use yii\base\InvalidArgumentException;
 
 /**
  * Class Transcode
@@ -78,6 +81,31 @@ class Transcoder extends Plugin
             ),
             __METHOD__
         );
+    }
+
+    /**
+     * Clear all the caches!
+     */
+    public function clearAllCaches()
+    {
+        $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
+        foreach ($transcoderPaths as $key => $value) {
+            $dir = Craft::getAlias($value);
+            try {
+                FileHelper::clearDirectory($dir);
+                Craft::info(
+                    Craft::t(
+                        'transcoder',
+                        '{name} cache directory cleared',
+                        ['name' => $key]
+                    ),
+                    __METHOD__
+                );
+            } catch (ErrorException $e) {
+                // the directory doesn't exist
+                Craft::error($e->getMessage(), __METHOD__);
+            }
+        }
     }
 
     // Protected Methods
@@ -137,7 +165,7 @@ class Transcoder extends Plugin
                 $event->options[] = [
                     'key' => 'transcoder',
                     'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => Transcoder::$plugin->getSettings()->transcoderPaths['default'],
+                    'action' => [$this, 'clearAllCaches']
                 ];
             }
         );
