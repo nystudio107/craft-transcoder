@@ -14,6 +14,7 @@
  * @since     1.0.0
  */
 return [
-    'Transcoder caches' => 'Transcoder caches',
-    '{name} plugin loaded' => '{name} plugin loaded'
+    'Transcoder caches'              => 'Transcoder caches',
+    '{name} plugin loaded'           => '{name} plugin loaded',
+    '{name} cache directory cleared' => '{name} cache directory cleared'
 ];
