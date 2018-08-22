@@ -44,9 +44,9 @@ class TranscoderVariable
      * @param $filePath
      * @param $thumbnailOptions
      *
-     * @return string
+     * @return string|false|null URL or path of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions)
     {
         return Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
     }
