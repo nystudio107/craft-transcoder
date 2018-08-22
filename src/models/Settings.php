@@ -33,7 +33,15 @@ class Settings extends Model
     {
         // Unset any deprecated properties
         if (!empty($config)) {
-            unset($config['transcoderPath'], $config['transcoderUrl']);
+            // If the old properties are set, remap them to the default
+            if (isset($config['transcoderPath'])) {
+                $config['transcoderPaths']['default'] = $config['transcoderPath'];
+                unset($config['transcoderPath']);
+            }
+            if (isset($config['transcoderUrl'])) {
+                $config['$transcoderUrls']['default'] = $config['transcoderUrl'];
+                unset($config['transcoderUrl']);
+            }
         }
         parent::__construct($config);
     }
@@ -70,10 +78,10 @@ class Settings extends Model
      */
     public $transcoderPaths = [
         'default' => '@webroot/transcoder/',
-        'video' => '@webroot/transcoder/video/',
-        'audio' => '@webroot/transcoder/audio/',
-        'thumbnail' => '@webroot/transcoder/thumbnail/',
-        'gif' => '@webroot/transcoder/gif/',
+        'video' => '@webroot/transcoder/',
+        'audio' => '@webroot/transcoder/',
+        'thumbnail' => '@webroot/transcoder/',
+        'gif' => '@webroot/transcoder/',
     ];
 
     /**
@@ -84,10 +92,10 @@ class Settings extends Model
      */
     public $transcoderUrls = [
         'default' => '@web/transcoder/',
-        'video' => '@web/transcoder/video/',
-        'audio' => '@web/transcoder/audio/',
-        'thumbnail' => '@web/transcoder/thumbnail/',
-        'gif' => '@web/transcoder/gif/',
+        'video' => '@web/transcoder/',
+        'audio' => '@web/transcoder/',
+        'thumbnail' => '@web/transcoder/',
+        'gif' => '@web/transcoder/',
     ];
 
     /**
@@ -226,10 +234,7 @@ class Settings extends Model
      */
     public function init()
     {
-        $tokens = [
-            '{DOCUMENT_ROOT}' => $_SERVER['DOCUMENT_ROOT'],
-        ];
-        $this->transcoderPath = str_replace(array_keys($tokens), array_values($tokens), $this->transcoderPath);
+        parent::init();
     }
 
     /**
