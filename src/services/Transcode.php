@@ -96,7 +96,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destVideoPath = Craft::getAlias($settings['transcoderPaths']['video']);
+            $destVideoPath = $settings['transcoderPaths']['video'] ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = Craft::getAlias($destVideoPath);
             $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
 
             // Get the video encoder presets to use
@@ -187,7 +188,8 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
-                $result = Craft::getAlias($settings['transcoderUrls']['video']).$destVideoFile;
+                $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
+                $result = Craft::getAlias($url).$destVideoFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -220,7 +222,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = Craft::getAlias($settings['transcoderPaths']['thumbnail']);
+            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] ?? $settings['transcoderPaths']['default'];
+            $destThumbnailPath = Craft::getAlias($destThumbnailPath);
 
             $thumbnailOptions = $this->coalesceOptions('defaultThumbnailOptions', $thumbnailOptions);
 
@@ -274,7 +277,8 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $result = Craft::getAlias($settings['transcoderUrls']['thumbnail']).$destThumbnailFile;
+                $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
+                $result = Craft::getAlias($url).$destThumbnailFile;
             }
         }
 
@@ -298,7 +302,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destAudioPath = Craft::getAlias($settings['transcoderPaths']['audio']);
+            $destAudioPath = $settings['transcoderPaths']['audio'] ?? $settings['transcoderPaths']['default'];
+            $destAudioPath = Craft::getAlias($destAudioPath);
 
             $audioOptions = $this->coalesceOptions('defaultAudioOptions', $audioOptions);
 
@@ -367,7 +372,8 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (filemtime($destAudioPath) >= filemtime($filePath))) {
-                $result = Craft::getAlias($settings['transcoderUrls']['audio']).$destAudioFile;
+                $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
+                $result = Craft::getAlias($url).$destAudioFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -555,7 +561,8 @@ class Transcode extends Component
 
         if (!empty($filePath)) {
             // Dest path
-            $destVideoPath = Craft::getAlias($settings['transcoderPaths']['gif']);
+            $destVideoPath = $settings['transcoderPaths']['gif'] ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = Craft::getAlias($destVideoPath);
 
             // Options
             $gifOptions = $this->coalesceOptions('defaultGifOptions', $gifOptions);
@@ -608,7 +615,8 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
-                $result = Craft::getAlias($settings['transcoderUrls']['gif']).$destVideoFile;
+                $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
+                $result = Craft::getAlias($url).$destVideoFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
