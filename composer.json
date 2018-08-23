@@ -8,7 +8,13 @@
         "cms",
         "craftcms",
         "craft-plugin",
-        "transcoder"
+        "transcoder",
+        "transcode",
+        "video",
+        "audio",
+        "gif",
+        "convert",
+        "format"
     ],
     "support": {
         "docs": "https://github.com/nystudio107/craft-transcoder/blob/v1/README.md",
