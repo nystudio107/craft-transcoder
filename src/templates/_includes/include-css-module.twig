@@ -1,0 +1,12 @@
+{% macro includeCssModule(cssModuleName) -%}
+    {% set hashLookup = {
+        
+        
+            "transcoder": "/cpresources/transcoder/css/transcoder.3082ccee289f2bb55b13.css",
+        
+            "welcome": "",
+        
+    } %}
+    <link rel="preload" href="{{ hashLookup[cssModuleName] }}" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ hashLookup[cssModuleName] }}"></noscript>
+{%- endmacro includeCssModule %}

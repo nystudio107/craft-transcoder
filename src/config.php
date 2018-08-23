@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Transcoder plugin for Craft CMS 3.x
  *
@@ -35,11 +36,23 @@ return [
 
     // The path where the transcoded videos are stored; must have a trailing /
     // Yii2 aliases are supported here
-    'transcoderPath' => '@webroot/transcoder/',
+    'transcoderPaths' => [
+        'default' => '@webroot/transcoder/',
+        'video' => '@webroot/transcoder/video/',
+        'audio' => '@webroot/transcoder/audio/',
+        'thumbnail' => '@webroot/transcoder/thumbnail/',
+        'gif' => '@webroot/transcoder/gif/',
+    ],
 
     // The URL where the transcoded videos are stored; must have a trailing /
     // Yii2 aliases are supported here
-    'transcoderUrl' => '@web/transcoder/',
+    'transcoderUrls' => [
+        'default' => '@web/transcoder/',
+        'video' => '@web/transcoder/video/',
+        'audio' => '@web/transcoder/audio/',
+        'thumbnail' => '@web/transcoder/thumbnail/',
+        'gif' => '@web/transcoder/gif/',
+    ],
 
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
@@ -61,6 +74,12 @@ return [
             'videoCodecOptions' => '-quality good -cpu-used 0',
             'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '-async 1000',
+        ],
+        'gif' => [
+            'fileSuffix' => '.mp4',
+            'fileFormat' => 'mp4',
+            'videoCodec' => 'libx264',
+            'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
         ],
     ],
 
@@ -126,4 +145,12 @@ return [
         'audioChannels' => '2',
     ],
 
+    // Default options for Gif encoding
+    'defaultGifOptions' => [
+        'videoEncoder' => 'gif',
+        'fileSuffix' => '.mp4',
+        'fileFormat' => 'gif',
+        'videoCodec' => 'libx264',
+        'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
+    ],
 ];

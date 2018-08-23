@@ -10,8 +10,6 @@
 
 namespace nystudio107\transcoder\controllers;
 
-use nystudio107\transcoder\Transcoder;
-
 use Craft;
 use craft\web\Controller;
 use craft\helpers\Json;
@@ -51,7 +49,7 @@ class DefaultController extends Controller
     public function actionDownloadFile($url)
     {
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
             null,
@@ -75,52 +73,69 @@ class DefaultController extends Controller
     public function actionProgress($filename)
     {
         $result = [];
-        $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . ".progress";
+        $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$filename.'.progress';
         if (file_exists($progressFile)) {
             $content = @file_get_contents($progressFile);
             if ($content) {
                 // get duration of source
-                preg_match("/Duration: (.*?), start:/", $content, $matches);
-                $rawDuration = $matches[1];
+                preg_match('/Duration: (.*?), start:/', $content, $matches);
+                if (\count($matches) > 0) {
+                    $rawDuration = $matches[1];
 
-                // rawDuration is in 00:00:00.00 format. This converts it to seconds.
-                $ar = array_reverse(explode(":", $rawDuration));
-                $duration = floatval($ar[0]);
-                if (!empty($ar[1])) {
-                    $duration += intval($ar[1]) * 60;
-                }
-                if (!empty($ar[2])) {
-                    $duration += intval($ar[2]) * 60 * 60;
+                    // rawDuration is in 00:00:00.00 format. This converts it to seconds.
+                    $ar = array_reverse(explode(':', $rawDuration));
+                    $duration = (float)$ar[0];
+                    if (!empty($ar[1])) {
+                        $duration += (int)$ar[1] * 60;
+                    }
+                    if (!empty($ar[2])) {
+                        $duration += (int)$ar[2] * 60 * 60;
+                    }
+                } else {
+                    $duration = 'unknown'; // with GIF as input, duration is unknown
                 }
 
                 // Get the time in the file that is already encoded
-                preg_match_all("/time=(.*?) bitrate/", $content, $matches);
+                preg_match_all('/time=(.*?) bitrate/', $content, $matches);
                 $rawTime = array_pop($matches);
 
                 // this is needed if there is more than one match
-                if (is_array($rawTime)) {
+                if (\is_array($rawTime)) {
                     $rawTime = array_pop($rawTime);
                 }
 
                 //rawTime is in 00:00:00.00 format. This converts it to seconds.
-                $ar = array_reverse(explode(":", $rawTime));
-                $time = floatval($ar[0]);
+                $ar = array_reverse(explode(':', $rawTime));
+                $time = (float)$ar[0];
                 if (!empty($ar[1])) {
-                    $time += intval($ar[1]) * 60;
+                    $time += (int)$ar[1] * 60;
                 }
                 if (!empty($ar[2])) {
-                    $time += intval($ar[2]) * 60 * 60;
+                    $time += (int)$ar[2] * 60 * 60;
                 }
 
                 //calculate the progress
-                $progress = round(($time / $duration) * 100);
+                if ($duration !== 'unknown') {
+                    $progress = round(($time / $duration) * 100);
+                } else {
+                    $progress = 'unknown';
+                }
 
-                if ($progress < 100) {
+                // return results
+                if ($progress !== 'unknown' && $progress < 100) {
                     $result = [
                         'filename' => $filename,
                         'duration' => $duration,
-                        'time'     => $time,
+                        'time' => $time,
                         'progress' => $progress,
+                    ];
+                } elseif ($progress === 'unknown') {
+                    $result = [
+                        'filename' => $filename,
+                        'duration' => 'unknown',
+                        'time' => $time,
+                        'progress' => 'unknown',
+                        'message' => 'encoding GIF, can\'t determine duration',
                     ];
                 }
             }

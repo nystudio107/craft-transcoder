@@ -19,13 +19,21 @@ use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
 use craft\events\AssetThumbEvent;
+use craft\events\PluginEvent;
+use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\helpers\Assets as AssetsHelper;
+use craft\helpers\FileHelper;
+use craft\helpers\UrlHelper;
 use craft\services\Assets;
+use craft\services\Plugins;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
+use craft\web\UrlManager;
 
+use yii\base\ErrorException;
 use yii\base\Event;
+use yii\base\InvalidArgumentException;
 
 /**
  * Class Transcode
@@ -56,53 +64,15 @@ class Transcoder extends Plugin
     {
         parent::init();
         self::$plugin = $this;
-
-        // Register our variables
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('transcoder', TranscoderVariable::class);
-            }
-        );
-
-        // Handler: Assets::EVENT_GET_THUMB_PATH
-        Event::on(
-            Assets::class,
-            Assets::EVENT_GET_THUMB_PATH,
-            function (AssetThumbEvent $event) {
-                Craft::debug(
-                    'Assets::EVENT_GET_THUMB_PATH',
-                    __METHOD__
-                );
-                /** @var Asset $asset */
-                $asset = $event->asset;
-                if (AssetsHelper::getFileKindByExtension($asset->filename) == Asset::KIND_VIDEO) {
-                    $event->path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
-                }
-            }
-        );
-
         // Handle console commands
         if (Craft::$app instanceof ConsoleApplication) {
             $this->controllerNamespace = 'nystudio107\transcoder\console\controllers';
         }
-
-        // Add the Transcode path to the list of things the Clear Caches tool can delete.
-        Event::on(
-            ClearCaches::class,
-            ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
-            function (RegisterCacheOptionsEvent $event) {
-                $event->options[] = [
-                    'key' => 'transcoder',
-                    'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => Transcoder::$plugin->getSettings()->transcoderPath,
-                ];
-            }
-        );
-
+        // Add in our Craft components
+        $this->addComponents();
+        // Install our global event handlers
+        $this->installEventHandlers();
+        // We've loaded!
         Craft::info(
             Craft::t(
                 'transcoder',
@@ -111,6 +81,31 @@ class Transcoder extends Plugin
             ),
             __METHOD__
         );
+    }
+
+    /**
+     * Clear all the caches!
+     */
+    public function clearAllCaches()
+    {
+        $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
+        foreach ($transcoderPaths as $key => $value) {
+            $dir = Craft::getAlias($value);
+            try {
+                FileHelper::clearDirectory($dir);
+                Craft::info(
+                    Craft::t(
+                        'transcoder',
+                        '{name} cache directory cleared',
+                        ['name' => $key]
+                    ),
+                    __METHOD__
+                );
+            } catch (ErrorException $e) {
+                // the directory doesn't exist
+                Craft::error($e->getMessage(), __METHOD__);
+            }
+        }
     }
 
     // Protected Methods
@@ -122,5 +117,111 @@ class Transcoder extends Plugin
     protected function createSettingsModel()
     {
         return new Settings();
+    }
+
+    /**
+     * Add in our Craft components
+     */
+    protected function addComponents()
+    {
+        // Register our variables
+        Event::on(
+            CraftVariable::class,
+            CraftVariable::EVENT_INIT,
+            function (Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('transcoder', TranscoderVariable::class);
+            }
+        );
+    }
+
+    /**
+     * Install our event handlers
+     */
+    protected function installEventHandlers()
+    {
+        // Handler: Assets::EVENT_GET_THUMB_PATH
+        Event::on(
+            Assets::class,
+            Assets::EVENT_GET_THUMB_PATH,
+            function (AssetThumbEvent $event) {
+                Craft::debug(
+                    'Assets::EVENT_GET_THUMB_PATH',
+                    __METHOD__
+                );
+                /** @var Asset $asset */
+                $asset = $event->asset;
+                if (AssetsHelper::getFileKindByExtension($asset->filename) === Asset::KIND_VIDEO) {
+                    $event->path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
+                }
+            }
+        );
+        // Add the Transcode path to the list of things the Clear Caches tool can delete.
+        Event::on(
+            ClearCaches::class,
+            ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+            function (RegisterCacheOptionsEvent $event) {
+                $event->options[] = [
+                    'key' => 'transcoder',
+                    'label' => Craft::t('transcoder', 'Transcoder caches'),
+                    'action' => [$this, 'clearAllCaches']
+                ];
+            }
+        );
+        // Handler: Plugins::EVENT_AFTER_INSTALL_PLUGIN
+        Event::on(
+            Plugins::class,
+            Plugins::EVENT_AFTER_INSTALL_PLUGIN,
+            function (PluginEvent $event) {
+                if ($event->plugin === $this) {
+                    $request = Craft::$app->getRequest();
+                    if ($request->isCpRequest) {
+                        Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('transcoder/welcome'))->send();
+                    }
+                }
+            }
+        );
+        $request = Craft::$app->getRequest();
+        // Install only for non-console site requests
+        if ($request->getIsSiteRequest() && !$request->getIsConsoleRequest()) {
+            $this->installSiteEventListeners();
+        }
+    }
+
+    /**
+     * Install site event listeners for site requests only
+     */
+    protected function installSiteEventListeners()
+    {
+        // Handler: UrlManager::EVENT_REGISTER_SITE_URL_RULES
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+            function (RegisterUrlRulesEvent $event) {
+                Craft::debug(
+                    'UrlManager::EVENT_REGISTER_SITE_URL_RULES',
+                    __METHOD__
+                );
+                // Register our AdminCP routes
+                $event->rules = array_merge(
+                    $event->rules,
+                    $this->customFrontendRoutes()
+                );
+            }
+        );
+    }
+
+    /**
+     * Return the custom frontend routes
+     *
+     * @return array
+     */
+    protected function customFrontendRoutes(): array
+    {
+        return [
+            // Make webpack async bundle loading work out of published AssetBundles
+            '/cpresources/transcoder/<resourceType:{handle}>/<fileName>' => 'transcoder/cp-nav/resource',
+        ];
     }
 }

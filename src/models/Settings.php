@@ -11,9 +11,10 @@
 namespace nystudio107\transcoder\models;
 
 use craft\base\Model;
+use craft\validators\ArrayValidator;
 
 /**
- * Transcode Settings model
+ * Transcoder Settings model
  *
  * @author    nystudio107
  * @package   Transcode
@@ -21,6 +22,30 @@ use craft\base\Model;
  */
 class Settings extends Model
 {
+
+    // Static Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(array $config = [])
+    {
+        // Unset any deprecated properties
+        if (!empty($config)) {
+            // If the old properties are set, remap them to the default
+            if (isset($config['transcoderPath'])) {
+                $config['transcoderPaths']['default'] = $config['transcoderPath'];
+                unset($config['transcoderPath']);
+            }
+            if (isset($config['transcoderUrl'])) {
+                $config['$transcoderUrls']['default'] = $config['transcoderUrl'];
+                unset($config['transcoderUrl']);
+            }
+        }
+        parent::__construct($config);
+    }
+
     // Public Properties
     // =========================================================================
 
@@ -51,7 +76,13 @@ class Settings extends Model
      *
      * @var string
      */
-    public $transcoderPath = '@webroot/transcoder/';
+    public $transcoderPaths = [
+        'default' => '@webroot/transcoder/',
+        'video' => '@webroot/transcoder/',
+        'audio' => '@webroot/transcoder/',
+        'thumbnail' => '@webroot/transcoder/',
+        'gif' => '@webroot/transcoder/',
+    ];
 
     /**
      * The URL where the transcoded videos are stored; must have a trailing /
@@ -59,7 +90,13 @@ class Settings extends Model
      *
      * @var string
      */
-    public $transcoderUrl = '@web/transcoder/';
+    public $transcoderUrls = [
+        'default' => '@web/transcoder/',
+        'video' => '@web/transcoder/',
+        'audio' => '@web/transcoder/',
+        'thumbnail' => '@web/transcoder/',
+        'gif' => '@web/transcoder/',
+    ];
 
     /**
      * Use a md5 hash for the filenames instead of parameterized naming
@@ -75,20 +112,26 @@ class Settings extends Model
      */
     public $videoEncoders = [
         'h264' => [
-            'fileSuffix'        => '.mp4',
-            'fileFormat'        => 'mp4',
-            'videoCodec'        => 'libx264',
+            'fileSuffix' => '.mp4',
+            'fileFormat' => 'mp4',
+            'videoCodec' => 'libx264',
             'videoCodecOptions' => '-vprofile high -preset slow -crf 22',
-            'audioCodec'        => 'libfdk_aac',
+            'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '-async 1000',
         ],
         'webm' => [
-            'fileSuffix'        => '.webm',
-            'fileFormat'        => 'webm',
-            'videoCodec'        => 'libvpx',
+            'fileSuffix' => '.webm',
+            'fileFormat' => 'webm',
+            'videoCodec' => 'libvpx',
             'videoCodecOptions' => '-quality good -cpu-used 0',
-            'audioCodec'        => 'libvorbis',
+            'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '-async 1000',
+        ],
+        'gif' => [
+            'fileSuffix' => '.mp4',
+            'fileFormat' => 'mp4',
+            'videoCodec' => 'libx264',
+            'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
         ],
     ];
 
@@ -99,22 +142,22 @@ class Settings extends Model
      */
     public $audioEncoders = [
         'mp3' => [
-            'fileSuffix'        => '.mp3',
-            'fileFormat'        => 'mp3',
-            'audioCodec'        => 'libmp3lame',
+            'fileSuffix' => '.mp3',
+            'fileFormat' => 'mp3',
+            'audioCodec' => 'libmp3lame',
             'audioCodecOptions' => '',
         ],
         'aac' => [
-            'fileSuffix'        => '.m4a',
-            'fileFormat'        => 'aac',
-            'audioCodec'        => 'libfdk_aac',
+            'fileSuffix' => '.m4a',
+            'fileFormat' => 'aac',
+            'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '',
 
         ],
         'ogg' => [
-            'fileSuffix'        => '.ogg',
-            'fileFormat'        => 'ogg',
-            'audioCodec'        => 'libvorbis',
+            'fileSuffix' => '.ogg',
+            'fileFormat' => 'ogg',
+            'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '',
         ],
     ];
@@ -126,20 +169,20 @@ class Settings extends Model
      */
     public $defaultVideoOptions = [
         // Video settings
-        'videoEncoder'    => 'h264',
-        'videoBitRate'    => '800k',
-        'videoFrameRate'  => 15,
+        'videoEncoder' => 'h264',
+        'videoBitRate' => '800k',
+        'videoFrameRate' => 15,
         // Audio settings
-        'audioBitRate'    => '',
+        'audioBitRate' => '',
         'audioSampleRate' => '',
-        'audioChannels'   => '',
+        'audioChannels' => '',
         // Spatial settings
-        'width'           => '',
-        'height'          => '',
-        'sharpen'         => true,
+        'width' => '',
+        'height' => '',
+        'sharpen' => true,
         // Can be 'none', 'crop', or 'letterbox'
-        'aspectRatio'     => 'letterbox',
-        'letterboxColor'  => '',
+        'aspectRatio' => 'letterbox',
+        'letterboxColor' => '',
     ];
 
     /**
@@ -148,13 +191,13 @@ class Settings extends Model
      * @var array
      */
     public $defaultThumbnailOptions = [
-        'fileSuffix'     => '.jpg',
-        'timeInSecs'     => 10,
-        'width'          => '',
-        'height'         => '',
-        'sharpen'        => true,
+        'fileSuffix' => '.jpg',
+        'timeInSecs' => 10,
+        'width' => '',
+        'height' => '',
+        'sharpen' => true,
         // Can be 'none', 'crop', or 'letterbox'
-        'aspectRatio'    => 'letterbox',
+        'aspectRatio' => 'letterbox',
         'letterboxColor' => '',
     ];
 
@@ -164,12 +207,24 @@ class Settings extends Model
      * @var array
      */
     public $defaultAudioOptions = [
-        'audioEncoder'    => 'mp3',
-        'audioBitRate'    => '128k',
+        'audioEncoder' => 'mp3',
+        'audioBitRate' => '128k',
         'audioSampleRate' => '44100',
-        'audioChannels'   => '2',
+        'audioChannels' => '2',
     ];
 
+    /**
+     * Default options for encoded GIF
+     *
+     * @var array
+     */
+    public $defaultGifOptions = [
+        'videoEncoder' => 'gif',
+        'fileSuffix' => '',
+        'fileFormat' => '',
+        'videoCodec' => '',
+        'videoCodecOptions' => '',
+    ];
 
     // Public Methods
     // =========================================================================
@@ -179,10 +234,7 @@ class Settings extends Model
      */
     public function init()
     {
-        $tokens = [
-            '{DOCUMENT_ROOT}' => $_SERVER['DOCUMENT_ROOT'],
-        ];
-        $this->transcoderPath = str_replace(array_keys($tokens), array_values($tokens), $this->transcoderPath);
+        parent::init();
     }
 
     /**
@@ -199,8 +251,10 @@ class Settings extends Model
             ['ffprobeOptions', 'safe'],
             ['transcoderPath', 'string'],
             ['transcoderPath', 'required'],
-            ['transcoderUrl', 'string'],
-            ['transcoderUrl', 'required'],
+            ['transcoderPaths', ArrayValidator::class],
+            ['transcoderPaths', 'required'],
+            ['transcoderUrls', ArrayValidator::class],
+            ['transcoderUrls', 'required'],
             ['useHashedNames', 'boolean'],
             ['useHashedNames', 'default', 'value' => false],
             ['videoEncoders', 'required'],
