@@ -8,7 +8,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
-**Note**: _This plugin will costs $59.00 and is available in the Craft CMS 3 plugin store._
+**Note**: _This plugin costs $59.00 and is available in the Craft CMS 3 plugin store._
 
 ## Requirements
 
@@ -36,7 +36,7 @@ If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
 
 ## Transcoder Overview
 
-The Transcoder plugin allows you to transcode any video (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
+The Transcoder plugin allows you to transcode any video or animated gif (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
 
 It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
 
@@ -180,6 +180,83 @@ If you want to have the Transcoder not change a parameter, pass in an empty valu
 The above example would cause it to not change the audio of the source audio file at all (not recommended for client-proofing purposes).
 
 The file format setting `audioEncoder` is preset to what you'll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
+
+### Generating a Transcoded Video
+
+To generate a transcoded video, do the following:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
+        "width": 720,
+        "height": 480
+    }) %}
+
+You can also pass in an URL:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('http://vjs.zencdn.net/v/oceans.mp4', {
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
+        "width": 720,
+        "height": 480
+    }) %}
+
+You can also pass in an `Asset`:
+
+    {% set myAsset = entry.someAsset.first() %}
+    {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
+        "videoFrameRate": 20,
+        "videoBitRate": "500k",
+        "width": 720,
+        "height": 480
+    }) %}
+
+It will return to you a URL to the transcoded video if it already exists, or if it doesn't exist, it will return `""` and kick off the transcoding process (which can be quite lengthy for long videos).
+
+In the array you pass in, the default values are used if the key/value pair does not exist:
+
+    {
+        "videoEncoder" => "h264",
+        "videoBitRate" => "800k",
+        "videoFrameRate" => 15,
+        "aspectRatio" => "letterbox",
+        "sharpen" => true,
+    }
+
+These default values come from the `config.php` file.
+
+If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
+
+    {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
+        "frameRate": "",
+        "bitRate": ""
+    }) %}
+
+The above example would cause it to not change the frameRate or bitRate of the source video (not recommended for client-proofing purposes).
+
+The `aspectRatio` parameter lets you control how the video aspect ratio is maintained when it is scaled:
+
+`none` results in the aspect ratio of the original video not being maintained, and the video scaled to the dimensions passed in:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_none.jpg)
+
+`crop` scales the video up to maintain the original aspect ratio, and then crops it so that it's full-frame:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_crop.jpg)
+
+`letterbox` scales the video to fit the new frame, putting a letterboxed or pillarboxed border to pad it:
+
+![Screenshot](resources/screenshots/oceans_20s_300w_200h_letterbox.jpg)
+
+You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
+
+The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
+
+The file format setting `videoEncoder` is preset to what you'll need to generate `h264` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
+
+![Screenshot](resources/screenshots/admin-cp-video-thumbnails.png)
+
+Transcoder will also automatically add video thumbnails in the AdminCP Asset index.
 
 ### Getting Transcoding Progress
 
