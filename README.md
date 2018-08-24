@@ -8,7 +8,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
-**Note**: _This plugin costs $59.00 and is available in the Craft CMS 3 plugin store._
+**Note**: _The license fee for this plugin is $59.00 via the Craft Plugin Store._
 
 ## Requirements
 
