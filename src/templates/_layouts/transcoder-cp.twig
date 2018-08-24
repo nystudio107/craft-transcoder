@@ -3,12 +3,12 @@
 {% set welcomeJs = "welcome" %}
 {% set welcomeLegacyJs = "welcome-legacy" %}
 
-{% from "image-optimize/_includes/macros.twig" import includeJsModule %}
-{% from "image-optimize/_includes/macros.twig" import includeCssModule %}
+{% from "transcoder/_includes/macros.twig" import includeJsModule %}
+{% from "transcoder/_includes/macros.twig" import includeCssModule %}
 
 {% block head %}
     {{ parent() }}
-    {{ includeCssModule("imageoptimize") }}
-    {% include "image-optimize/_includes/safari-nomodule-fix.twig" %}
-    {{ includeJsModule("imageoptimize") }}
+    {{ includeCssModule("transcoder") }}
+    {% include "transcoder/_includes/safari-nomodule-fix.twig" %}
+    {{ includeJsModule("transcoder") }}
 {% endblock %}
