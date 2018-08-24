@@ -187,7 +187,7 @@ class Transcode extends Component
             }
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
-            if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
+            if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
             } else {
@@ -371,7 +371,7 @@ class Transcode extends Component
             }
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
-            if (file_exists($destAudioPath) && (filemtime($destAudioPath) >= filemtime($filePath))) {
+            if (file_exists($destAudioPath) && (@filemtime($destAudioPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destAudioFile;
             } else {
@@ -614,7 +614,7 @@ class Transcode extends Component
             }
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
-            if (file_exists($destVideoPath) && (filemtime($destVideoPath) >= filemtime($filePath))) {
+            if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
             } else {

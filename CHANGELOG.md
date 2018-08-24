@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.1 - 2018.08.23
+### Changed
+* Fixed namespacing issues
+
 ## 1.2.0 - 2018.08.22
 ### Added
 * Added the ability to encode to animated `.gif` files
