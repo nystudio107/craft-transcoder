@@ -221,7 +221,7 @@ class Transcoder extends Plugin
     {
         return [
             // Make webpack async bundle loading work out of published AssetBundles
-            '/cpresources/transcoder/<resourceType:{handle}>/<fileName>' => 'transcoder/cp-nav/resource',
+            '/cpresources/transcoder/<resourceType:{handle}>/<fileName>' => 'transcoder/manifest/resource',
         ];
     }
 }

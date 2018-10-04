@@ -19,7 +19,7 @@ use craft\helpers\UrlHelper;
  * @package   Transcode
  * @since     1.0.0
  */
-class TranscoderVariable
+class TranscoderVariable extends ManifestVariable
 {
     // Public Methods
     // =========================================================================

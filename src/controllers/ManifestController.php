@@ -20,7 +20,7 @@ use yii\web\Response;
  * @package   Transcode
  * @since     1.0.0
  */
-class CpNavController extends Controller
+class ManifestController extends Controller
 {
     // Constants
     // =========================================================================
