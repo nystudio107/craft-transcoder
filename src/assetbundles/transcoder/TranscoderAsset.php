@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Optimize plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS 3.x
  *
- * Automatically optimize images after they've been transformed
+ * Transcode videos to various formats, and provide thumbnails of the video
  *
  * @link      https://nystudio107.com
  * @copyright Copyright (c) 2017 nystudio107
@@ -15,8 +15,8 @@ use craft\web\assets\cp\CpAsset;
 
 /**
  * @author    nystudio107
- * @package   ImageOptimize
- * @since     1.2.0
+ * @package   Transcode
+ * @since     1.0.0
  */
 class TranscoderAsset extends AssetBundle
 {

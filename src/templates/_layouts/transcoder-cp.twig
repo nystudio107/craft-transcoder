@@ -1,14 +1,8 @@
 {% extends "_layouts/cp" %}
 
-{% set welcomeJs = "welcome" %}
-{% set welcomeLegacyJs = "welcome-legacy" %}
-
-{% from "transcoder/_includes/macros.twig" import includeJsModule %}
-{% from "transcoder/_includes/macros.twig" import includeCssModule %}
-
 {% block head %}
     {{ parent() }}
-    {{ includeCssModule("transcoder") }}
-    {% include "transcoder/_includes/safari-nomodule-fix.twig" %}
-    {{ includeJsModule("transcoder") }}
+    {{ craft.transcoder.includeCssModule("styles.css") }}
+    {{ craft.transcoder.includeSafariNomoduleFix() }}
+    {{ craft.transcoder.includeJsModule("transcoder.js", true) }}
 {% endblock %}

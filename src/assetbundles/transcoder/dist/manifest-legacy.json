@@ -1,14 +1,14 @@
 {
-  "vendors~confetti~vue.js": "/cpresources/transcoder/js/vendors~confetti~vue-legacy.1e150b9a3825a680b683.js",
-  "vendors~confetti~vue.js.map": "/cpresources/transcoder/js/vendors~confetti~vue-legacy.1e150b9a3825a680b683.js.map",
-  "transcoder.css": "/cpresources/transcoder/css/transcoder.3082ccee289f2bb55b13.css",
-  "transcoder.js": "/cpresources/transcoder/js/transcoder-legacy.3082ccee289f2bb55b13.js",
-  "transcoder.js.map": "/cpresources/transcoder/js/transcoder-legacy.3082ccee289f2bb55b13.js.map",
-  "welcome.js": "/cpresources/transcoder/js/welcome-legacy.9a4d721332de21dd435f.js",
-  "welcome.js.map": "/cpresources/transcoder/js/welcome-legacy.9a4d721332de21dd435f.js.map",
-  "confetti.js": "/cpresources/transcoder/js/confetti-legacy.2c59fc97e0f4737d4547.js",
-  "confetti.js.map": "/cpresources/transcoder/js/confetti-legacy.2c59fc97e0f4737d4547.js.map",
-  "css/transcoder.3082ccee289f2bb55b13.css.map": "/cpresources/transcoder/css/transcoder.3082ccee289f2bb55b13.css.map",
-  "../../../templates/_includes/include-legacy-module.twig": "/cpresources/transcoder/../../../templates/_includes/include-legacy-module.twig",
-  "../../../templates/_includes/include-css-module.twig": "/cpresources/transcoder/../../../templates/_includes/include-css-module.twig"
+  "styles.css": "/cpresources/transcoder/css/styles.ff7dcd9158e0d5435c51.css",
+  "styles.js": "/cpresources/transcoder/js/styles-legacy.ff7dcd9158e0d5435c51.js",
+  "styles.js.map": "/cpresources/transcoder/js/styles-legacy.ff7dcd9158e0d5435c51.js.map",
+  "vendors~confetti~vue.js": "/cpresources/transcoder/js/vendors~confetti~vue-legacy.0d9acfb2213ba26e8362.js",
+  "vendors~confetti~vue.js.map": "/cpresources/transcoder/js/vendors~confetti~vue-legacy.0d9acfb2213ba26e8362.js.map",
+  "transcoder.js": "/cpresources/transcoder/js/transcoder-legacy.73f6accae9a9fc22c01e.js",
+  "transcoder.js.map": "/cpresources/transcoder/js/transcoder-legacy.73f6accae9a9fc22c01e.js.map",
+  "welcome.js": "/cpresources/transcoder/js/welcome-legacy.e40a10706388b152cea3.js",
+  "welcome.js.map": "/cpresources/transcoder/js/welcome-legacy.e40a10706388b152cea3.js.map",
+  "confetti.js": "/cpresources/transcoder/js/confetti-legacy.5d948a89718ce1513bbf.js",
+  "confetti.js.map": "/cpresources/transcoder/js/confetti-legacy.5d948a89718ce1513bbf.js.map",
+  "css/styles.ff7dcd9158e0d5435c51.css.map": "/cpresources/transcoder/css/styles.ff7dcd9158e0d5435c51.css.map"
 }
