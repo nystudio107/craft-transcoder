@@ -4,7 +4,7 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
-![Screenshot](resources/img/plugin-logo.png)
+![Screenshot](resources/img/plugin-banner.jpg)
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
