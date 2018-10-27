@@ -86,11 +86,13 @@ class Transcode extends Component
      *
      * @param $filePath     string  path to the original video -OR- an Asset
      * @param $videoOptions array   of options for the video
+     * @param bool   $generate         whether the video should be encoded
      *
      * @return string       URL of the transcoded video or ""
      */
-    public function getVideoUrl($filePath, $videoOptions): string
+    public function getVideoUrl($filePath, $videoOptions, $generate = true): string
     {
+	    	    
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
@@ -190,6 +192,10 @@ class Transcode extends Component
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
+                
+            // skip encoding
+            } elseif (!$generate) {
+	            $result = "";
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -266,6 +272,12 @@ class Transcode extends Component
                     /** @noinspection PhpUnusedLocalVariableInspection */
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
+                    
+                    // if ffmpeg fails which we can't check because the process is ran in the background
+                    // dont return the future path of the image or else we can't check this in the front end 
+
+                    return false; 
+                    
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: '.$filePath, __METHOD__);
 
