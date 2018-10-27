@@ -1,0 +1,8 @@
+{% extends "_layouts/cp" %}
+
+{% block head %}
+    {{ parent() }}
+    {{ craft.transcoder.includeCssModule("styles.css") }}
+    {{ craft.transcoder.includeSafariNomoduleFix() }}
+    {{ craft.transcoder.includeJsModule("transcoder.js", true) }}
+{% endblock %}

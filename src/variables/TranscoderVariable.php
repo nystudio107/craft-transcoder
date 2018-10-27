@@ -19,7 +19,7 @@ use craft\helpers\UrlHelper;
  * @package   Transcode
  * @since     1.0.0
  */
-class TranscoderVariable
+class TranscoderVariable extends ManifestVariable
 {
     // Public Methods
     // =========================================================================
@@ -32,13 +32,10 @@ class TranscoderVariable
      * @param $videoOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getVideoUrl($filePath, $videoOptions): string
     {
-        $result = Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions);
-
-        return $result;
+        return Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions);
     }
 
     /**
@@ -47,14 +44,11 @@ class TranscoderVariable
      * @param $filePath
      * @param $thumbnailOptions
      *
-     * @return string
-     * @throws \yii\base\Exception
+     * @return string|false|null URL or path of the video thumbnail
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions)
     {
-        $result = Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
-
-        return $result;
+        return Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
     }
 
     /**
@@ -65,13 +59,10 @@ class TranscoderVariable
      * @param $audioOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
-        $result = Transcoder::$plugin->transcode->getAudioUrl($filePath, $audioOptions);
-
-        return $result;
+        return Transcoder::$plugin->transcode->getAudioUrl($filePath, $audioOptions);
     }
 
     /**
@@ -81,13 +72,10 @@ class TranscoderVariable
      * @param bool $summary
      *
      * @return array
-     * @throws \yii\base\Exception
      */
     public function getFileInfo($filePath, $summary = false): array
     {
-        $result = Transcoder::$plugin->transcode->getFileInfo($filePath, $summary);
-
-        return $result;
+        return Transcoder::$plugin->transcode->getFileInfo($filePath, $summary);
     }
 
     /**
@@ -97,12 +85,11 @@ class TranscoderVariable
      * @param $videoOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getVideoProgressUrl($filePath, $videoOptions): string
     {
-        $result = "";
-        $filename = Transcoder::$plugin->transcode->getVideoFileName($filePath, $videoOptions);
+        $result = '';
+        $filename = Transcoder::$plugin->transcode->getVideoFilename($filePath, $videoOptions);
         if (!empty($filename)) {
             $urlParams = [
                 'filename' => $filename,
@@ -120,12 +107,11 @@ class TranscoderVariable
      * @param $audioOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getAudioProgressUrl($filePath, $audioOptions): string
     {
-        $result = "";
-        $filename = Transcoder::$plugin->transcode->getAudioFileName($filePath, $audioOptions);
+        $result = '';
+        $filename = Transcoder::$plugin->transcode->getAudioFilename($filePath, $audioOptions);
         if (!empty($filename)) {
             $urlParams = [
                 'filename' => $filename,
@@ -140,14 +126,13 @@ class TranscoderVariable
      * Get a GIF progress URL
      *
      * @param $filePath
-     * @param $videoOptions
+     * @param $gifOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getGifProgressUrl($filePath, $gifOptions): string
     {
-        $result = "";
+        $result = '';
         $filename = Transcoder::$plugin->transcode->getGifFilename($filePath, $gifOptions);
         if (!empty($filename)) {
             $urlParams = [
@@ -168,7 +153,7 @@ class TranscoderVariable
      */
     public function getDownloadUrl($url): string
     {
-        $result = "";
+        $result = '';
         $filePath = parse_url($url, PHP_URL_PATH);
         $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         if (file_exists($filePath)) {
@@ -188,12 +173,9 @@ class TranscoderVariable
      * @param $gifOptions
      *
      * @return string
-     * @throws \yii\base\Exception
      */
     public function getGifUrl($filePath, $gifOptions): string
     {
-        $result = Transcoder::$plugin->transcode->getGifUrl($filePath, $gifOptions);
-
-        return $result;
-    }  
+        return Transcoder::$plugin->transcode->getGifUrl($filePath, $gifOptions);
+    }
 }

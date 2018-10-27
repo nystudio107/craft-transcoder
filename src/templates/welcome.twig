@@ -1,0 +1,44 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{% extends 'transcoder/_layouts/transcoder-cp.twig' %}
+
+{% from "transcoder/_includes/macros.twig" import includeJsModule %}
+
+{% set title = 'Welcome to Transcoder!' %}
+
+{% set docsUrl = "https://github.com/nystudio107/craft-transcoder/blob/v1/README.md" %}
+{% set linkGetStarted = "https://github.com/nystudio107/craft-transcoder" %}
+
+{% do view.registerAssetBundle("nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderWelcomeAsset") %}
+{% set baseAssetsUrl = view.getAssetManager().getPublishedUrl('@nystudio107/transcoder/assetbundles/transcoder/dist', true) %}
+
+{% set crumbs = [
+    { label: "Transcoder", url: url('transcoder') },
+    { label: "Welcome"|t, url: url('transcoder/welcome') },
+] %}
+
+{% block content %}
+    <div id="cp-nav-content" class="readable" style="text-align:center; margin:0 auto; padding: 5% 10%;">
+        <confetti>
+        </confetti>
+        <img src="{{ baseAssetsUrl ~ '/img/Transcoder-icon.svg' }}" width="30%" height="auto" />
+        <h2>Thanks for using Transcoder!</h2>
+        <p>The Transcoder plugin allows you to transcode any video (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.</p>
+        <p>It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.</p>
+
+        <p>For more information, please <a href="{{ docsUrl }}" target="_blank" rel="noopener">see the documentation</a>.</p>
+        <p>
+            &nbsp;
+        </p>
+        <p>
+            <a href="{{ linkGetStarted }}" target="_blank" rel="noopener"><button class="btn submit">Get Started</button></a>
+        </p>
+    </div>
+    <div style="text-align:center; margin:0 auto; padding: 0;">
+        <p class="instructions">
+            Brought to you by <a href="http://nystudio107.com" target="_blank" rel="noopener">nystudio107</a>
+        </p>
+    </div>
+    {# include our JavaScript modules #}
+    {{ parent() }}
+    {{ craft.transcoder.includeJsModule("welcome.js", true) }}
+{% endblock %}
