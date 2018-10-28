@@ -57,6 +57,9 @@ return [
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
 
+	// if a upload location has a subfolder defined, add this to the transcoder paths too
+	'createSubfolders' => true,
+	
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [
