@@ -14,7 +14,7 @@
 * Added multiple output paths and URLs for different media types
 
 ### Changed
-* Moved to a modern webpack build config for the AdminCP
+* Moved to a modern webpack build config for the Control Panel
 * Added install confetti
 
 ## 1.1.3 - 2018.03.02
@@ -33,7 +33,7 @@
 ## 1.1.0 - 2018.02.02
 ### Added
 * Transcoder now supports the transcoding of remote video & audio files
-* Added the ability to generate a thumbnail for videos in the AdminCP Assets index
+* Added the ability to generate a thumbnail for videos in the Control Panel Assets index
 
 ### Changed
 * Cleaned up the exception handling

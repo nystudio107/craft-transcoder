@@ -524,7 +524,7 @@ class Transcode extends Component
     }
 
     /**
-     * Handle generated a thumbnail for the AdminCP
+     * Handle generated a thumbnail for the Control Panel
      *
      * @param AssetThumbEvent $event
      *
