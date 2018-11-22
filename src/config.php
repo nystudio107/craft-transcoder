@@ -60,6 +60,9 @@ return [
 	// if a upload location has a subfolder defined, add this to the transcoder paths too
 	'createSubfolders' => true,
 	
+	// clear caches when somebody clears all caches from the CP?
+	'clearCaches' => false,
+	
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [
