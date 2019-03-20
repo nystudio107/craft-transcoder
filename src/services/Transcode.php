@@ -425,9 +425,9 @@ class Transcode extends Component
      * @param      $filePath
      * @param bool $summary
      *
-     * @return array
+     * @return null|array
      */
-    public function getFileInfo($filePath, $summary = false): array
+    public function getFileInfo($filePath, $summary = false)
     {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
