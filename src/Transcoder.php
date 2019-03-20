@@ -89,23 +89,28 @@ class Transcoder extends Plugin
     public function clearAllCaches()
     {
         $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
-        foreach ($transcoderPaths as $key => $value) {
-            $dir = Craft::getAlias($value);
-            try {
-                FileHelper::clearDirectory($dir);
-                Craft::info(
-                    Craft::t(
-                        'transcoder',
-                        '{name} cache directory cleared',
-                        ['name' => $key]
-                    ),
-                    __METHOD__
-                );
-            } catch (ErrorException $e) {
-                // the directory doesn't exist
-                Craft::error($e->getMessage(), __METHOD__);
+        $clearCaches = Transcoder::$plugin->getSettings()->clearCaches;
+        
+        if($clearCaches) {
+            foreach ($transcoderPaths as $key => $value) {
+                $dir = Craft::getAlias($value);
+                try {
+                    FileHelper::clearDirectory($dir);
+                    Craft::info(
+                        Craft::t(
+                            'transcoder',
+                            '{name} cache directory cleared',
+                            ['name' => $key]
+                        ),
+                        __METHOD__
+                    );
+                } catch (ErrorException $e) {
+                    // the directory doesn't exist
+                    Craft::error($e->getMessage(), __METHOD__);
+                }
             }
         }
+            
     }
 
     // Protected Methods
