@@ -112,7 +112,7 @@ class Transcode extends Component
                 .' -vcodec '.$thisEncoder['videoCodec']
                 .' '.$thisEncoder['videoCodecOptions']
                 .' -bufsize 1000k'
-                .' -threads 0';
+                .' -threads '.$thisEncoder['threads'];
 
             // Set the framerate if desired
             if (!empty($videoOptions['videoFrameRate'])) {
@@ -319,7 +319,7 @@ class Transcode extends Component
                 .' -acodec '.$thisEncoder['audioCodec']
                 .' '.$thisEncoder['audioCodecOptions']
                 .' -bufsize 1000k'
-                .' -threads 0';
+                .' -threads '.$thisEncoder['threads'];
 
             // Set the bitrate if desired
             if (!empty($audioOptions['audioBitRate'])) {

@@ -118,6 +118,7 @@ class Settings extends Model
             'videoCodecOptions' => '-vprofile high -preset slow -crf 22',
             'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '-async 1000',
+            'threads' => '0',
         ],
         'webm' => [
             'fileSuffix' => '.webm',
@@ -126,12 +127,14 @@ class Settings extends Model
             'videoCodecOptions' => '-quality good -cpu-used 0',
             'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '-async 1000',
+            'threads' => '0',
         ],
         'gif' => [
             'fileSuffix' => '.mp4',
             'fileFormat' => 'mp4',
             'videoCodec' => 'libx264',
             'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
+            'threads' => '0',
         ],
     ];
 
@@ -146,12 +149,14 @@ class Settings extends Model
             'fileFormat' => 'mp3',
             'audioCodec' => 'libmp3lame',
             'audioCodecOptions' => '',
+            'threads' => '0',
         ],
         'aac' => [
             'fileSuffix' => '.m4a',
             'fileFormat' => 'aac',
             'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '',
+            'threads' => '0',
 
         ],
         'ogg' => [
@@ -159,6 +164,7 @@ class Settings extends Model
             'fileFormat' => 'ogg',
             'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '',
+            'threads' => '0',
         ],
     ];
 
