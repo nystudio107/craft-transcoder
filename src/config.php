@@ -57,12 +57,12 @@ return [
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
 
-	// if a upload location has a subfolder defined, add this to the transcoder paths too
-	'createSubfolders' => true,
-	
-	// clear caches when somebody clears all caches from the CP?
-	'clearCaches' => false,
-	
+    // if a upload location has a subfolder defined, add this to the transcoder paths too
+    'createSubfolders' => true,
+
+    // clear caches when somebody clears all caches from the CP?
+    'clearCaches' => false,
+
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [
