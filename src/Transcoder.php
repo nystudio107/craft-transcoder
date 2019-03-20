@@ -43,6 +43,8 @@ use yii\base\InvalidArgumentException;
  * @since     1.0.0
  *
  * @property  Transcode $transcode
+ * @property Settings   $settings
+ * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
 {
@@ -89,28 +91,24 @@ class Transcoder extends Plugin
     public function clearAllCaches()
     {
         $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
-        $clearCaches = Transcoder::$plugin->getSettings()->clearCaches;
-        
-        if($clearCaches) {
-            foreach ($transcoderPaths as $key => $value) {
-                $dir = Craft::getAlias($value);
-                try {
-                    FileHelper::clearDirectory($dir);
-                    Craft::info(
-                        Craft::t(
-                            'transcoder',
-                            '{name} cache directory cleared',
-                            ['name' => $key]
-                        ),
-                        __METHOD__
-                    );
-                } catch (ErrorException $e) {
-                    // the directory doesn't exist
-                    Craft::error($e->getMessage(), __METHOD__);
-                }
+
+        foreach ($transcoderPaths as $key => $value) {
+            $dir = Craft::getAlias($value);
+            try {
+                FileHelper::clearDirectory($dir);
+                Craft::info(
+                    Craft::t(
+                        'transcoder',
+                        '{name} cache directory cleared',
+                        ['name' => $key]
+                    ),
+                    __METHOD__
+                );
+            } catch (ErrorException $e) {
+                // the directory doesn't exist
+                Craft::error($e->getMessage(), __METHOD__);
             }
         }
-            
     }
 
     // Protected Methods
@@ -146,6 +144,7 @@ class Transcoder extends Plugin
      */
     protected function installEventHandlers()
     {
+        $settings = $this->getSettings();
         // Handler: Assets::EVENT_GET_THUMB_PATH
         Event::on(
             Assets::class,
@@ -162,18 +161,20 @@ class Transcoder extends Plugin
                 }
             }
         );
-        // Add the Transcode path to the list of things the Clear Caches tool can delete.
-        Event::on(
-            ClearCaches::class,
-            ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
-            function (RegisterCacheOptionsEvent $event) {
-                $event->options[] = [
-                    'key' => 'transcoder',
-                    'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => [$this, 'clearAllCaches']
-                ];
-            }
-        );
+        if ($settings->clearCaches) {
+            // Add the Transcode path to the list of things the Clear Caches tool can delete.
+            Event::on(
+                ClearCaches::class,
+                ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+                function (RegisterCacheOptionsEvent $event) {
+                    $event->options[] = [
+                        'key' => 'transcoder',
+                        'label' => Craft::t('transcoder', 'Transcoder caches'),
+                        'action' => [$this, 'clearAllCaches'],
+                    ];
+                }
+            );
+        }
         // Handler: Plugins::EVENT_AFTER_INSTALL_PLUGIN
         Event::on(
             Plugins::class,
