@@ -4,7 +4,7 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
-![Screenshot](resources/img/plugin-logo.png)
+![Screenshot](resources/img/plugin-banner.jpg)
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
@@ -21,7 +21,7 @@ To install Transcoder, follow these steps:
 1. Install with Composer via `composer require nystudio107/craft-transcoder` from your project directory
 2. Install plugin in the Craft Control Panel under Settings > Plugins
 
-You can also install Transcoder via the **Plugin Store** in the Craft AdminCP.
+You can also install Transcoder via the **Plugin Store** in the Craft Control Panel.
 
 Transcoder works on Craft 3.x.
 
@@ -40,7 +40,7 @@ The Transcoder plugin allows you to transcode any video or animated gif (local o
 
 It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
 
-Transcoder also allows you to get a thumbnail of a video in any size and at any timecode, and can extract information about audio/video files such. It also automatically adds video thumbnails in the Assets index in the AdminCP.
+Transcoder also allows you to get a thumbnail of a video in any size and at any timecode, and can extract information about audio/video files such. It also automatically adds video thumbnails in the Assets index in the Control Panel.
 
 Finally, it lets you download an arbitrary file (such as the transcoded video) via a special download link.
 
@@ -127,7 +127,7 @@ The file format setting `videoEncoder` is preset to what you'll need to generate
 
 ![Screenshot](resources/screenshots/admin-cp-video-thumbnails.png)
 
-Transcoder will also automatically add video thumbnails in the AdminCP Asset index.
+Transcoder will also automatically add video thumbnails in the Control Panel Asset index.
 
 ### Generating a Transcoded Audio File
 
@@ -256,7 +256,7 @@ The file format setting `videoEncoder` is preset to what you'll need to generate
 
 ![Screenshot](resources/screenshots/admin-cp-video-thumbnails.png)
 
-Transcoder will also automatically add video thumbnails in the AdminCP Asset index.
+Transcoder will also automatically add video thumbnails in the Control Panel Asset index.
 
 ### Getting Transcoding Progress
 

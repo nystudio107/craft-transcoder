@@ -1,5 +1,15 @@
 # Transcoder Changelog
 
+## 1.2.3 - 2019.03.20
+### Changed
+* Allow setting threads in config
+* Added a "generate" (bool) parameter to `getVideoUrl()`, just like `getVideoThumbnailUrl()`, to optionally skip encoding
+* Added return value false to `getVideoThumbnailUrl()` when `ffmpeg` is executed which prevents a URL is always returned, also in case of `ffmpeg` fails te run/create the thumbnail
+* Added new config parameter "createSubfolder" (boolean) to create the same subfolders that are defined in the upload target paths of the asset.
+* Added config option to prevent cache clearing
+* Fixed an issue where `getFileInfo()` would throw an error if `null` was returned
+* Fixed an error where certain types of video streams would cause the encoder to throw an exception
+
 ## 1.2.2 - 2018.10.05
 ### Changed
 * Updated build process
@@ -14,7 +24,7 @@
 * Added multiple output paths and URLs for different media types
 
 ### Changed
-* Moved to a modern webpack build config for the AdminCP
+* Moved to a modern webpack build config for the Control Panel
 * Added install confetti
 
 ## 1.1.3 - 2018.03.02
@@ -33,7 +43,7 @@
 ## 1.1.0 - 2018.02.02
 ### Added
 * Transcoder now supports the transcoding of remote video & audio files
-* Added the ability to generate a thumbnail for videos in the AdminCP Assets index
+* Added the ability to generate a thumbnail for videos in the Control Panel Assets index
 
 ### Changed
 * Cleaned up the exception handling

@@ -30,12 +30,13 @@ class TranscoderVariable extends ManifestVariable
      *
      * @param $filePath
      * @param $videoOptions
+	 * @bool $generate 
      *
      * @return string
      */
-    public function getVideoUrl($filePath, $videoOptions): string
+    public function getVideoUrl($filePath, $videoOptions, $generate = true): string
     {
-        return Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions);
+        return Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions, $generate);
     }
 
     /**

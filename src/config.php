@@ -57,6 +57,12 @@ return [
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
 
+    // if a upload location has a subfolder defined, add this to the transcoder paths too
+    'createSubfolders' => true,
+
+    // Add the Clear Caches utility to the CP?
+    'clearCaches' => false,
+
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [
@@ -66,6 +72,7 @@ return [
             'videoCodecOptions' => '-vprofile high -preset slow -crf 22',
             'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '-async 1000',
+            'threads' => '0',
         ],
         'webm' => [
             'fileSuffix' => '.webm',
@@ -74,12 +81,14 @@ return [
             'videoCodecOptions' => '-quality good -cpu-used 0',
             'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '-async 1000',
+            'threads' => '0',
         ],
         'gif' => [
             'fileSuffix' => '.mp4',
             'fileFormat' => 'mp4',
             'videoCodec' => 'libx264',
             'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart -filter:v crop=\'floor(in_w/2)*2:floor(in_h/2)*2\' ',
+            'threads' => '0',
         ],
     ],
 
@@ -90,12 +99,14 @@ return [
             'fileFormat' => 'mp3',
             'audioCodec' => 'libmp3lame',
             'audioCodecOptions' => '',
+            'threads' => '0',
         ],
         'aac' => [
             'fileSuffix' => '.m4a',
             'fileFormat' => 'aac',
             'audioCodec' => 'libfdk_aac',
             'audioCodecOptions' => '',
+            'threads' => '0',
 
         ],
         'ogg' => [
@@ -103,6 +114,7 @@ return [
             'fileFormat' => 'ogg',
             'audioCodec' => 'libvorbis',
             'audioCodecOptions' => '',
+            'threads' => '0',
         ],
     ],
 

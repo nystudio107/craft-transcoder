@@ -43,6 +43,8 @@ use yii\base\InvalidArgumentException;
  * @since     1.0.0
  *
  * @property  Transcode $transcode
+ * @property Settings   $settings
+ * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
 {
@@ -89,6 +91,7 @@ class Transcoder extends Plugin
     public function clearAllCaches()
     {
         $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
+
         foreach ($transcoderPaths as $key => $value) {
             $dir = Craft::getAlias($value);
             try {
@@ -141,6 +144,7 @@ class Transcoder extends Plugin
      */
     protected function installEventHandlers()
     {
+        $settings = $this->getSettings();
         // Handler: Assets::EVENT_GET_THUMB_PATH
         Event::on(
             Assets::class,
@@ -157,18 +161,20 @@ class Transcoder extends Plugin
                 }
             }
         );
-        // Add the Transcode path to the list of things the Clear Caches tool can delete.
-        Event::on(
-            ClearCaches::class,
-            ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
-            function (RegisterCacheOptionsEvent $event) {
-                $event->options[] = [
-                    'key' => 'transcoder',
-                    'label' => Craft::t('transcoder', 'Transcoder caches'),
-                    'action' => [$this, 'clearAllCaches']
-                ];
-            }
-        );
+        if ($settings->clearCaches) {
+            // Add the Transcode path to the list of things the Clear Caches tool can delete.
+            Event::on(
+                ClearCaches::class,
+                ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+                function (RegisterCacheOptionsEvent $event) {
+                    $event->options[] = [
+                        'key' => 'transcoder',
+                        'label' => Craft::t('transcoder', 'Transcoder caches'),
+                        'action' => [$this, 'clearAllCaches'],
+                    ];
+                }
+            );
+        }
         // Handler: Plugins::EVENT_AFTER_INSTALL_PLUGIN
         Event::on(
             Plugins::class,
@@ -203,7 +209,7 @@ class Transcoder extends Plugin
                     'UrlManager::EVENT_REGISTER_SITE_URL_RULES',
                     __METHOD__
                 );
-                // Register our AdminCP routes
+                // Register our Control Panel routes
                 $event->rules = array_merge(
                     $event->rules,
                     $this->customFrontendRoutes()
