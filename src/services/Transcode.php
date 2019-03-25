@@ -202,6 +202,10 @@ class Transcode extends Component
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
 
+                if ($remoteUrl = $this->moveAssetToVolume('video', $destVideoPath)) {
+                    $result = $remoteUrl;
+                }
+
             // skip encoding
             } elseif (!$generate) {
 	            $result = "";
@@ -214,9 +218,6 @@ class Transcode extends Component
                 file_put_contents($lockFile, $pid);
             }
 
-            if ($remoteUrl = $this->moveAssetToVolume('video', $destVideoPath)) {
-                $result = $remoteUrl;
-            }
             return $result;
         }
 
@@ -415,6 +416,10 @@ class Transcode extends Component
             if ($this->shouldGenerateAsset('audio', $destAudioPath, $filePath)) {
                 $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destAudioFile;
+
+                if ($remoteUrl = $this->moveAssetToVolume('audio', $destAudioPath)) {
+                    $result = $remoteUrl;
+                }
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -423,10 +428,6 @@ class Transcode extends Component
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
             }
-        }
-
-        if ($remoteUrl = $this->moveAssetToVolume('audio', $destAudioPath)) {
-            $result = $remoteUrl;
         }
 
         return $result;
@@ -603,12 +604,12 @@ class Transcode extends Component
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
-		$subfolder = '';
+        $subfolder = '';
 
-		// sub folder check
-		if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
-			$subfolder = $filePath->folderPath;
-		}
+        // sub folder check
+        if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+            $subfolder = $filePath->folderPath;
+        }
 
         $filePath = $this->getAssetPath($filePath);
 
@@ -669,6 +670,10 @@ class Transcode extends Component
             if ($this->shouldGenerateAsset('gif', $destVideoPath, $filePath)) {
                 $url = $settings['transcoderUrls']['gif'] . $subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
+
+                if ($remoteUrl = $this->moveAssetToVolume('gif', $destVideoPath)) {
+                    $result = $remoteUrl;
+                }
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -676,10 +681,6 @@ class Transcode extends Component
 
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
-            }
-
-            if ($remoteUrl = $this->moveAssetToVolume('gif', $destVideoPath)) {
-                $result = $remoteUrl;
             }
         }
 
@@ -920,7 +921,7 @@ class Transcode extends Component
         $settings = Transcoder::$plugin->getSettings();
         $destSettings = $settings['transcoderPaths'][$type]  ?? $settings['transcoderPaths']['default'];
         if (is_array($destSettings)) {
-            return sys_get_temp_dir();
+            return sys_get_temp_dir().DIRECTORY_SEPARATOR;
         }
         if (isset($settings['transcoderPaths'][$type])) {
             $destSettings .= $subfolder;
