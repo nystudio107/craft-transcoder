@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.4 - 2019.04.22
+### Changed
+* Updated Twig namespacing to be compliant with deprecated class aliases in 2.7.x
+
 ## 1.2.3 - 2019.03.20
 ### Changed
 * Allow setting threads in config
