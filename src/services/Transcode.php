@@ -81,33 +81,34 @@ class Transcode extends Component
     // =========================================================================
 
     /**
-     * Returns a URL to the transcoded video or "" if it doesn't exist (at which
+     * Returns a URL to the transcoded video or "" if it doesn't exist (at
+     * which
      * time it will create it).
      *
-     * @param $filePath     string  path to the original video -OR- an Asset
-     * @param $videoOptions array   of options for the video
-     * @param bool   $generate         whether the video should be encoded
+     * @param      $filePath     string  path to the original video -OR- an
+     *                           Asset
+     * @param      $videoOptions array   of options for the video
+     * @param bool $generate     whether the video should be encoded
      *
      * @return string       URL of the transcoded video or ""
      */
     public function getVideoUrl($filePath, $videoOptions, $generate = true): string
     {
-	    	    
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
-		$subfolder = '';
-		
-		// sub folder check
-		if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
-			$subfolder = $filePath->folderPath;
-		}
+        $subfolder = '';
 
-		// file path
+        // sub folder check
+        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+            $subfolder = $filePath->folderPath;
+        }
+
+        // file path
         $filePath = $this->getAssetPath($filePath);
-				
+
         if (!empty($filePath)) {
-            $destVideoPath = $settings['transcoderPaths']['video'] . $subfolder ?? $settings['transcoderPaths']['default'];
-            $destVideoPath = Craft::getAlias($destVideoPath);           
+            $destVideoPath = $settings['transcoderPaths']['video'].$subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = Craft::getAlias($destVideoPath);
             $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
 
             // Get the video encoder presets to use
@@ -198,12 +199,11 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['video'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['video'].$subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
-                
-            // skip encoding
+                // skip encoding
             } elseif (!$generate) {
-	            $result = "";
+                $result = "";
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -229,20 +229,20 @@ class Transcode extends Component
      * @return string|false|null URL or path of the video thumbnail
      */
     public function getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate = true, $asPath = false)
-    {		
+    {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
-		$subfolder = '';
-		
-		// sub folder check
-		if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
-			$subfolder = $filePath->folderPath;
-		}
-		        
+        $subfolder = '';
+
+        // sub folder check
+        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+            $subfolder = $filePath->folderPath;
+        }
+
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'].$subfolder ?? $settings['transcoderPaths']['default'];
             $destThumbnailPath = Craft::getAlias($destThumbnailPath);
 
             $thumbnailOptions = $this->coalesceOptions('defaultThumbnailOptions', $thumbnailOptions);
@@ -286,12 +286,11 @@ class Transcode extends Component
                     /** @noinspection PhpUnusedLocalVariableInspection */
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
-                    
-                    // if ffmpeg fails which we can't check because the process is ran in the background
-                    // dont return the future path of the image or else we can't check this in the front end 
 
-                    return false; 
-                    
+                    // if ffmpeg fails which we can't check because the process is ran in the background
+                    // dont return the future path of the image or else we can't check this in the front end
+
+                    return false;
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: '.$filePath, __METHOD__);
 
@@ -303,7 +302,7 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $url = $settings['transcoderUrls']['thumbnail'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['thumbnail'].$subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destThumbnailFile;
             }
         }
@@ -324,17 +323,17 @@ class Transcode extends Component
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
-		$subfolder = '';
-		
-		// sub folder check
-		if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
-			$subfolder = $filePath->folderPath;
-		}
-		
+        $subfolder = '';
+
+        // sub folder check
+        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+            $subfolder = $filePath->folderPath;
+        }
+
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destAudioPath = $settings['transcoderPaths']['audio'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destAudioPath = $settings['transcoderPaths']['audio'].$subfolder ?? $settings['transcoderPaths']['default'];
             $destAudioPath = Craft::getAlias($destAudioPath);
 
             $audioOptions = $this->coalesceOptions('defaultAudioOptions', $audioOptions);
@@ -404,7 +403,7 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (@filemtime($destAudioPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['audio'].$subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destAudioFile;
             } else {
                 // Kick off the transcoding
@@ -580,8 +579,8 @@ class Transcode extends Component
     /**
      * Returns a URL to a encoded GIF file (mp4)
      *
-     * @param string $filePath         path to the original video or an Asset
-     * @param array  $gifOptions       of options for the GIF file
+     * @param string $filePath   path to the original video or an Asset
+     * @param array  $gifOptions of options for the GIF file
      *
      * @return string|false|null URL or path of the GIF file
      */
@@ -590,18 +589,18 @@ class Transcode extends Component
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
-		$subfolder = '';
-		
-		// sub folder check
-		if(\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
-			$subfolder = $filePath->folderPath;
-		}
-		        
+        $subfolder = '';
+
+        // sub folder check
+        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+            $subfolder = $filePath->folderPath;
+        }
+
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
             // Dest path
-            $destVideoPath = $settings['transcoderPaths']['gif'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = $settings['transcoderPaths']['gif'].$subfolder ?? $settings['transcoderPaths']['default'];
             $destVideoPath = Craft::getAlias($destVideoPath);
 
             // Options
@@ -655,7 +654,7 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['gif'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['gif'].$subfolder ?? $settings['transcoderUrls']['default'];
                 $result = Craft::getAlias($url).$destVideoFile;
             } else {
                 // Kick off the transcoding
@@ -741,14 +740,14 @@ class Transcode extends Component
                 // If it's local, get a path to the file
                 if ($assetVolume instanceof Local) {
                     $sourcePath = rtrim($assetVolume->path, DIRECTORY_SEPARATOR);
-                    $sourcePath .= '' === $sourcePath ? '': DIRECTORY_SEPARATOR;
+                    $sourcePath .= '' === $sourcePath ? '' : DIRECTORY_SEPARATOR;
                     $folderPath = '';
                     try {
                         $folderPath = rtrim($asset->getFolder()->path, DIRECTORY_SEPARATOR);
                     } catch (InvalidConfigException $e) {
                         Craft::error($e->getMessage(), __METHOD__);
                     }
-                    $folderPath .= '' === $folderPath ? '': DIRECTORY_SEPARATOR;
+                    $folderPath .= '' === $folderPath ? '' : DIRECTORY_SEPARATOR;
 
                     $filePath = $sourcePath.$folderPath.$asset->filename;
                 } else {
