@@ -322,6 +322,7 @@ class Transcode extends Component
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
+        Craft::info('testing123', __METHOD__);
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
 		$subfolder = '';
@@ -389,21 +390,22 @@ class Transcode extends Component
             $destAudioPath .= $destAudioFile;
             $ffmpegCmd .= ' -f '
                 .$thisEncoder['fileFormat']
-                .' -y '.escapeshellarg($destAudioPath)
-                .' 1> '.$progressFile.' 2>&1 & echo $!';
-
+                .' -y '.escapeshellarg($destAudioPath);
+                //.' 1> '.$progressFile.' 2>&1 & echo $!';
+            Craft::info('laget command', __METHOD__);
             // Make sure there isn't a lockfile for this audio file already
-            $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.lock';
-            $oldPid = @file_get_contents($lockFile);
-            if ($oldPid !== false) {
-                exec("ps $oldPid", $ProcessState);
-                if (\count($ProcessState) >= 2) {
-                    return $result;
-                }
-                // It's finished transcoding, so delete the lockfile and progress file
-                @unlink($lockFile);
-                @unlink($progressFile);
-            }
+            // $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.lock';
+            // $oldPid = @file_get_contents($lockFile);
+            // if ($oldPid !== false) {
+            //     exec("ps $oldPid", $ProcessState);
+            //     if (\count($ProcessState) >= 2) {
+            //         return $result;
+            //     }
+            //     // It's finished transcoding, so delete the lockfile and progress file
+            //     @unlink($lockFile);
+            //     @unlink($progressFile);
+            // }
+            Craft::info('lockfile', __METHOD__);
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (@filemtime($destAudioPath) >= @filemtime($filePath))) {
@@ -411,11 +413,14 @@ class Transcode extends Component
                 $result = Craft::getAlias($url).$destAudioFile;
             } else {
                 // Kick off the transcoding
-                $pid = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
+                Craft::info($ffmpegCmd, __METHOD__);
+                $this->executeShellCommand($ffmpegCmd);
+                $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $result = Craft::getAlias($url).$destAudioFile;
+                Craft::info($result, __METHOD__);
 
                 // Create a lockfile in tmp
-                file_put_contents($lockFile, $pid);
+                // file_put_contents($lockFile, $pid);
             }
         }
 
