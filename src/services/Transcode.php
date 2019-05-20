@@ -367,6 +367,9 @@ class Transcode extends Component
             }
             $ffmpegCmd .= ' '.$thisEncoder['audioCodecOptions'];
 
+            if (!empty($audioOptions['timeInSecs'])) {
+                $ffmpegCmd .= ' -t '.$audioOptions['timeInSecs'];
+            }
 
             // Create the directory if it isn't there already
             if (!is_dir($destAudioPath)) {
