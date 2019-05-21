@@ -387,6 +387,11 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destAudioPath .= $destAudioFile;
+            
+            if ($audioOptions['stripMetadata']) {
+                $ffmpegCmd .= ' -map_metadata -1 ';
+            }
+            
             $ffmpegCmd .= ' -f '
                 .$thisEncoder['fileFormat']
                 .' -y '.escapeshellarg($destAudioPath);
