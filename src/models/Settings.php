@@ -199,6 +199,7 @@ class Settings extends Model
         'audioBitRate' => '128k',
         'audioSampleRate' => '44100',
         'audioChannels' => '2',
+        'synchronous' => false
     ];
     /**
      * Default options for encoded GIF
