@@ -30,7 +30,7 @@ class TranscoderVariable extends ManifestVariable
      *
      * @param $filePath
      * @param $videoOptions
-	 * @bool $generate 
+     * @bool $generate
      *
      * @return string
      */
@@ -144,7 +144,7 @@ class TranscoderVariable extends ManifestVariable
 
         return $result;
     }
-    
+
     /**
      * Get a download URL
      *
@@ -156,7 +156,7 @@ class TranscoderVariable extends ManifestVariable
     {
         $result = '';
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
         if (file_exists($filePath)) {
             $urlParams = [
                 'url' => $url,
@@ -166,7 +166,7 @@ class TranscoderVariable extends ManifestVariable
 
         return $result;
     }
-    
+
     /**
      * Returns a URL to a GIF file
      *

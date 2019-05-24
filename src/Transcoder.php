@@ -33,7 +33,6 @@ use craft\web\UrlManager;
 
 use yii\base\ErrorException;
 use yii\base\Event;
-use yii\base\InvalidArgumentException;
 
 /**
  * Class Transcode
@@ -90,7 +89,7 @@ class Transcoder extends Plugin
      */
     public function clearAllCaches()
     {
-        $transcoderPaths = Transcoder::$plugin->getSettings()->transcoderPaths;
+        $transcoderPaths = self::$plugin->getSettings()->transcoderPaths;
 
         foreach ($transcoderPaths as $key => $value) {
             $dir = Craft::getAlias($value);
