@@ -2,7 +2,7 @@
     "name": "nystudio107/craft-transcoder",
     "description": "Transcode video & audio files to various formats, and provide video thumbnails",
     "type": "craft-plugin",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "keywords": [
         "craft",
         "cms",
@@ -17,8 +17,8 @@
         "format"
     ],
     "support": {
-        "docs": "https://github.com/nystudio107/craft-transcoder/blob/v1/README.md",
-        "issues": "https://github.com/nystudio107/craft-transcoder/issues"
+        "docs": "https://nystudio107.com/plugins/transcoder/documentation",
+        "issues": "https://nystudio107.com/plugins/transcoder/support"
     },
     "license": "proprietary",
     "authors": [
