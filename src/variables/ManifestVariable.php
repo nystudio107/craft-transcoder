@@ -8,6 +8,10 @@ use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
 use Craft;
 use craft\helpers\Template;
 
+use yii\web\NotFoundHttpException;
+
+use Twig\Markup;
+
 class ManifestVariable
 {
     // Protected Static Properties
@@ -17,17 +21,17 @@ class ManifestVariable
         // If `devMode` is on, use webpack-dev-server to all for HMR (hot module reloading)
         'useDevServer' => true,
         // Manifest names
-        'manifest'     => [
+        'manifest' => [
             'legacy' => 'manifest-legacy.json',
             'modern' => 'manifest.json',
         ],
         // Public server config
-        'server'       => [
+        'server' => [
             'manifestPath' => '/',
             'publicPath' => '/',
         ],
         // webpack-dev-server config
-        'devServer'    => [
+        'devServer' => [
             'manifestPath' => 'http://127.0.0.1:8080',
             'publicPath' => '/',
         ],
@@ -51,8 +55,8 @@ class ManifestVariable
      * @param bool       $async
      * @param null|array $config
      *
-     * @return null|\Twig_Markup
-     * @throws \yii\web\NotFoundHttpException
+     * @return null|Markup
+     * @throws NotFoundHttpException
      */
     public function includeCssModule(string $moduleName, bool $async = false, $config = null)
     {
@@ -80,8 +84,8 @@ class ManifestVariable
      * @param bool       $async
      * @param null|array $config
      *
-     * @return null|\Twig_Markup
-     * @throws \yii\web\NotFoundHttpException
+     * @return null|Markup
+     * @throws NotFoundHttpException
      */
     public function includeJsModule(string $moduleName, bool $async = false, $config = null)
     {
@@ -97,8 +101,8 @@ class ManifestVariable
      * @param string $type
      * @param null   $config
      *
-     * @return null|\Twig_Markup
-     * @throws \yii\web\NotFoundHttpException
+     * @return null|Markup
+     * @throws NotFoundHttpException
      */
     public function getModuleUri(string $moduleName, string $type = 'modern', $config = null)
     {
@@ -110,7 +114,7 @@ class ManifestVariable
     /**
      * Include the Safari 10.1 nomodule fix JavaScript
      *
-     * @return \Twig_Markup
+     * @return Markup
      */
     public function includeSafariNomoduleFix()
     {

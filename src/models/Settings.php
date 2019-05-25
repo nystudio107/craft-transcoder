@@ -50,7 +50,7 @@ class Settings extends Model
      * The path where the transcoded videos are stored; must have a trailing /
      * Yii2 aliases are supported here
      *
-     * @var string
+     * @var array
      */
     public $transcoderPaths = [
         'default' => '@webroot/transcoder/',
@@ -63,7 +63,7 @@ class Settings extends Model
      * The URL where the transcoded videos are stored; must have a trailing /
      * Yii2 aliases are supported here
      *
-     * @var string
+     * @var array
      */
     public $transcoderUrls = [
         'default' => '@web/transcoder/',
