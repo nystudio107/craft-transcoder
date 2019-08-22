@@ -4,7 +4,7 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
-![Screenshot](./docs/docs/resources/img/plugin-banner.jpg)
+![Screenshot](./resources/img/plugin-banner.jpg)
 
 Related: [Transcoder for Craft 2.x](https://github.com/nystudio107/transcoder)
 
@@ -40,17 +40,5 @@ You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to wor
 To install `ffmpeg` on Centos 6/7, you can follow the guide [How to Install FFmpeg on CentOS](https://www.vultr.com/docs/how-to-install-ffmpeg-on-centos)
 
 If you have managed hosting, contact your sysadmin to get `ffmpeg` installed.
-
-## Documentation
-
-Click here -> [Transcoder Documentation](https://nystudio107.com/plugins/transcoder/documentation)
-
-## Transcoder Roadmap
-
-Some things to do, and ideas for potential features:
-
-* Add a console command for doing encodings via console
-* Figure out a way to reliably do multi-pass video encoding
-* Add audio normalization via `loudnorm` http://k.ylo.ph/2016/04/04/loudnorm.html
 
 Brought to you by [nystudio107](https://nystudio107.com)
