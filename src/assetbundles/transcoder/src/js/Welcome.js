@@ -1,21 +1,22 @@
-// Dashboard main
-const main = async () => {
-    // Async load the vue module
-    const Vue = await import(/* webpackChunkName: "vue" */ 'vue');
-    // Create our vue instance
-    const vm = new Vue.default({
-        el: "#cp-nav-content",
-        delimiters: ["${", "}"],
-        components: {
-            'confetti': () => import(/* webpackChunkName: "confetti" */ '../vue/Confetti.vue')
-        },
-        data: {
-        },
-        methods: {
-        },
-        mounted() {
-        }
-    });
-};
-// Execute async function
-main().then({});
+import Vue from 'vue';
+import Confetti from '../vue/Confetti.vue';
+
+// Create our vue instance
+const vm = new Vue({
+    el: "#cp-nav-content",
+    delimiters: ["${", "}"],
+    components: {
+        'confetti': Confetti,
+    },
+    data: {
+    },
+    methods: {
+    },
+    mounted() {
+    },
+});
+
+// Accept HMR as per: https://webpack.js.org/api/hot-module-replacement#accept
+if (module.hot) {
+    module.hot.accept();
+}

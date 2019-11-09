@@ -21,17 +21,17 @@ class ManifestVariable
         // If `devMode` is on, use webpack-dev-server to all for HMR (hot module reloading)
         'useDevServer' => true,
         // Manifest names
-        'manifest' => [
-            'legacy' => 'manifest-legacy.json',
+        'manifest'     => [
+            'legacy' => 'manifest.json',
             'modern' => 'manifest.json',
         ],
         // Public server config
-        'server' => [
+        'server'       => [
             'manifestPath' => '/',
             'publicPath' => '/',
         ],
         // webpack-dev-server config
-        'devServer' => [
+        'devServer'    => [
             'manifestPath' => 'http://127.0.0.1:8080',
             'publicPath' => '/',
         ],
@@ -47,7 +47,16 @@ class ManifestVariable
     {
         ManifestHelper::invalidateCaches();
         $bundle = new TranscoderAsset();
+        $baseAssetsUrl = Craft::$app->assetManager->getPublishedUrl(
+            $bundle->sourcePath,
+            true
+        );
         self::$config['server']['manifestPath'] = Craft::getAlias($bundle->sourcePath);
+        self::$config['server']['publicPath'] = $baseAssetsUrl;
+        $useDevServer = getenv('NYS_PLUGIN_DEVSERVER');
+        if ($useDevServer !== false) {
+            self::$config['useDevServer'] = (bool)$useDevServer;
+        }
     }
 
     /**
@@ -55,8 +64,8 @@ class ManifestVariable
      * @param bool       $async
      * @param null|array $config
      *
-     * @return null|Markup
-     * @throws NotFoundHttpException
+     * @return null|\Twig_Markup
+     * @throws \yii\web\NotFoundHttpException
      */
     public function includeCssModule(string $moduleName, bool $async = false, $config = null)
     {
@@ -84,8 +93,8 @@ class ManifestVariable
      * @param bool       $async
      * @param null|array $config
      *
-     * @return null|Markup
-     * @throws NotFoundHttpException
+     * @return null|\Twig_Markup
+     * @throws \yii\web\NotFoundHttpException
      */
     public function includeJsModule(string $moduleName, bool $async = false, $config = null)
     {
@@ -101,8 +110,8 @@ class ManifestVariable
      * @param string $type
      * @param null   $config
      *
-     * @return null|Markup
-     * @throws NotFoundHttpException
+     * @return null|\Twig_Markup
+     * @throws \yii\web\NotFoundHttpException
      */
     public function getModuleUri(string $moduleName, string $type = 'modern', $config = null)
     {
@@ -114,7 +123,7 @@ class ManifestVariable
     /**
      * Include the Safari 10.1 nomodule fix JavaScript
      *
-     * @return Markup
+     * @return \Twig_Markup
      */
     public function includeSafariNomoduleFix()
     {
