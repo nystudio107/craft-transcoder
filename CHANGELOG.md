@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.6 - 2019.11.09
+### Changed
+* Updated to latest npm dependencies via `npm audit fix`
+
 ## 1.2.5 - 2019.05.23
 ### Changed
 * Updated build system
