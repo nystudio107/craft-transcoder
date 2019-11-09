@@ -113,6 +113,8 @@ In the array you pass in, the default values are used if the key/value pair does
         "audioBitRate" => "128k",
         "audioSampleRate" => "44100",
         "audioChannels" => "2",
+        'synchronous' => false,
+        'stripMetadata' => false,
     }
 
 These default values come from the `config.php` file.
