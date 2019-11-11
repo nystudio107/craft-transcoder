@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.6 - 2019.11.09
+## 1.2.6 - 2019.11.11
 ### Added
 * Added trimming to audio transcoding
 
