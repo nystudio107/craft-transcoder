@@ -1,5 +1,13 @@
 # Transcoder Changelog
 
+## 1.2.6 - 2019.11.11
+### Added
+* Added trimming to audio transcoding
+
+### Changed
+* Updated to latest npm dependencies via `npm audit fix`
+* Changed `.first()` → `.one()` in the docs
+
 ## 1.2.5 - 2019.05.23
 ### Changed
 * Updated build system

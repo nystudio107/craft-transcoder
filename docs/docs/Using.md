@@ -22,7 +22,7 @@ You can also pass in an URL:
 
 You can also pass in an `Asset`:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
         "videoFrameRate": 20,
         "videoBitRate": "500k",
@@ -97,7 +97,7 @@ You can also pass in a URL:
 
 You can also pass in an `Asset`:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set transAudioUrl = craft.transcoder.getAudioUrl(myAsset, {
         "audioBitRate": "64k",
         "audioSampleRate": 22050,
@@ -113,6 +113,8 @@ In the array you pass in, the default values are used if the key/value pair does
         "audioBitRate" => "128k",
         "audioSampleRate" => "44100",
         "audioChannels" => "2",
+        'synchronous' => false,
+        'stripMetadata' => false,
     }
 
 These default values come from the `config.php` file.
@@ -151,7 +153,7 @@ You can also pass in an URL:
 
 You can also pass in an `Asset`:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
         "videoFrameRate": 20,
         "videoBitRate": "500k",
@@ -210,7 +212,7 @@ Transcoder will also automatically add video thumbnails in the Control Panel Ass
 
 Transcoding of video/audio files can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()` or `craft.transcoder.getAudioProgressUrl()`. For example:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set videoOptions = {
         "videoFrameRate": 60,
         "videoBitRate": "1000k",
@@ -257,7 +259,7 @@ You can also pass in a URL:
 
 You can also pass in an `Asset`:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
         "width": 300,
         "height": 200,
@@ -316,7 +318,7 @@ You can also pass in a URL:
 
 You can also pass in an `Asset`:
 
-    {% set myAsset = entry.someAsset.first() %}
+    {% set myAsset = entry.someAsset.one() %}
     {% set fileInfo = craft.transcoder.getFileInfo(myAsset, true) %}
 
 By passing in `true` as the second argument, we get just a summary of the video/audio file information in an array:

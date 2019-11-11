@@ -3,6 +3,7 @@
 {% block head %}
     {{ parent() }}
     {{ craft.transcoder.includeCssModule("styles.css") }}
-    {{ craft.transcoder.includeSafariNomoduleFix() }}
-    {{ craft.transcoder.includeJsModule("transcoder.js", true) }}
+    {{ craft.transcoder.includeCssModule("vendor.css") }}
+    {{ craft.transcoder.includeJsModule("vendor.js", false) }}
+    {{ craft.transcoder.includeJsModule("transcoder.js", false) }}
 {% endblock %}
