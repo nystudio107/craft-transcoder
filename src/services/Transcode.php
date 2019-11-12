@@ -386,16 +386,24 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destAudioPath .= $destAudioFile;
-            
-            if ($audioOptions['stripMetadata']) {
+            // Handle the `stripMetadata` setting
+            $stripMetadata = false;
+            if (!empty($audioOptions['stripMetadata'])) {
+                $stripMetadata = $audioOptions['stripMetadata'];
+            }
+            if ($stripMetadata) {
                 $ffmpegCmd .= ' -map_metadata -1 ';
             }
-            
+            // Add the file format
             $ffmpegCmd .= ' -f '
                 .$thisEncoder['fileFormat']
                 .' -y '.escapeshellarg($destAudioPath);
-            
-            if (!$audioOptions['synchronous']) {
+            // Handle the `synchronous` setting
+            $synchronous = false;
+            if (!empty($audioOptions['synchronous'])) {
+                $synchronous = $audioOptions['synchronous'];
+            }
+            if (!$synchronous) {
                 $ffmpegCmd .=' 1> '.$progressFile.' 2>&1 & echo $!';
                 // Make sure there isn't a lockfile for this audio file already
                 $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.lock';
@@ -418,8 +426,8 @@ class Transcode extends Component
             } else {
                 // Kick off the transcoding
                 $this->executeShellCommand($ffmpegCmd);
-                
-                if ($audioOptions['synchronous']) {
+
+                if ($synchronous) {
                     Craft::info($ffmpegCmd, __METHOD__);
                     $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
                     $result = Craft::getAlias($url).$destAudioFile;
