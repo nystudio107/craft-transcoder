@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.7 - 2019.11.12
+### Changed
+* Fixed issues with the `synchronous` and `stripMetadata` options
+
 ## 1.2.6 - 2019.11.11
 ### Added
 * Added trimming to audio transcoding
