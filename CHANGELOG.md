@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.8 - 2019.11.12
+### Changed
+* Fixed more issues with the `synchronous` option
+
 ## 1.2.7 - 2019.11.12
 ### Changed
 * Fixed issues with the `synchronous` and `stripMetadata` options
