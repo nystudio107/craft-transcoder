@@ -425,7 +425,7 @@ class Transcode extends Component
                 $result = Craft::getAlias($url).$destAudioFile;
             } else {
                 // Kick off the transcoding
-                $this->executeShellCommand($ffmpegCmd);
+                $pid = $this->executeShellCommand($ffmpegCmd);
 
                 if ($synchronous) {
                     Craft::info($ffmpegCmd, __METHOD__);
