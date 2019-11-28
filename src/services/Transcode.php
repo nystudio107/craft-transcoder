@@ -467,9 +467,12 @@ class Transcode extends Component
             Craft::info($ffprobeCmd, __METHOD__);
             $result = JsonHelper::decodeIfJson($shellOutput, true);
             Craft::info(print_r($result, true), __METHOD__);
-
+            // Handle the case it not being JSON
+            if (!is_array($result)) {
+                $result = null;
+            }
             // Trim down the arrays to just a summary
-            if ($summary && !empty($result) && is_array($result)) {
+            if ($summary && !empty($result)) {
                 $summaryResult = [];
                 foreach ($result as $topLevelKey => $topLevelValue) {
                     switch ($topLevelKey) {
