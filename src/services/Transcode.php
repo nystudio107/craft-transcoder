@@ -469,7 +469,7 @@ class Transcode extends Component
             Craft::info(print_r($result, true), __METHOD__);
             // Handle the case it not being JSON
             if (!is_array($result)) {
-                $result = null;
+                $result = [];
             }
             // Trim down the arrays to just a summary
             if ($summary && !empty($result)) {
