@@ -469,7 +469,7 @@ class Transcode extends Component
             Craft::info(print_r($result, true), __METHOD__);
 
             // Trim down the arrays to just a summary
-            if ($summary && !empty($result)) {
+            if ($summary && !empty($result) && is_array($result)) {
                 $summaryResult = [];
                 foreach ($result as $topLevelKey => $topLevelValue) {
                     switch ($topLevelKey) {
