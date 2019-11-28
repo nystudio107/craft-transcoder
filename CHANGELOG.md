@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.9 - 2019.12.02
+### Fixed
+* Fixed an issue if `ffprobe` isn't installed
+
 ## 1.2.8 - 2019.11.12
 ### Changed
 * Fixed more issues with the `synchronous` option
