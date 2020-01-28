@@ -1,8 +1,9 @@
 # Transcoder Changelog
 
-## 1.2.9 - 2019.12.02
+## 1.2.9 - 2020.01.27
 ### Fixed
 * Fixed an issue if `ffprobe` isn't installed
+* Handle the case of empty or malformed status data from `ffprobe` better
 
 ## 1.2.8 - 2019.11.12
 ### Changed
