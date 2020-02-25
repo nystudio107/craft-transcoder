@@ -349,7 +349,8 @@ class Transcode extends Component
                 .' -i '.escapeshellarg($filePath)
                 .' -acodec '.$thisEncoder['audioCodec']
                 .' '.$thisEncoder['audioCodecOptions']
-                .' -bufsize 1000k -vn'
+                .' -bufsize 1000k'
+                .' -vn'
                 .' -threads '.$thisEncoder['threads'];
 
             // Set the bitrate if desired
