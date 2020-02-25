@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.10 - 2020.02.25
+### Added
+* Added `-vn` flag for audio transcoding to remove video tracks on transcoded audio
+
 ## 1.2.9 - 2020.01.27
 ### Fixed
 * Fixed an issue if `ffprobe` isn't installed
