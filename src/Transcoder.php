@@ -92,7 +92,7 @@ class Transcoder extends Plugin
         $transcoderPaths = self::$plugin->getSettings()->transcoderPaths;
 
         foreach ($transcoderPaths as $key => $value) {
-            $dir = Craft::getAlias($value);
+            $dir = Craft::parseEnv($value);
             try {
                 FileHelper::clearDirectory($dir);
                 Craft::info(
@@ -156,7 +156,10 @@ class Transcoder extends Plugin
                 /** @var Asset $asset */
                 $asset = $event->asset;
                 if (AssetsHelper::getFileKindByExtension($asset->filename) === Asset::KIND_VIDEO) {
-                    $event->path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
+                    $path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
+                    if (!empty($path)) {
+                        $event->path = $path;
+                    }
                 }
             }
         );
