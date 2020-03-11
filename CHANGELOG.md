@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.2.11 - 2020.03.11
+### Added
+* Transcoder now requires Craft CMS 3.1.0 or later
+* Both aliases and environment variables are now supported where previously only aliases were
+
 ## 1.2.10 - 2020.02.25
 ### Added
 * Added `-vn` flag for audio transcoding to remove video tracks on transcoded audio
