@@ -366,6 +366,10 @@ class Transcode extends Component
             }
             $ffmpegCmd .= ' '.$thisEncoder['audioCodecOptions'];
 
+            if (!empty($audioOptions['seekInSecs'])) {
+                $ffmpegCmd .= ' -ss '.$audioOptions['seekInSecs'];
+            }
+
             if (!empty($audioOptions['timeInSecs'])) {
                 $ffmpegCmd .= ' -t '.$audioOptions['timeInSecs'];
             }
