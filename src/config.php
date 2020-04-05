@@ -149,12 +149,14 @@ return [
         'letterboxColor' => '',
     ],
 
-    // Default options for encoded videos
+    // Default options for encoded audio
     'defaultAudioOptions' => [
         'audioEncoder' => 'mp3',
         'audioBitRate' => '128k',
         'audioSampleRate' => '44100',
         'audioChannels' => '2',
+        'timeInSecs' => '',
+        'seekInSecs' => '',
         'synchronous' => false,
         'stripMetadata' => false
     ],
