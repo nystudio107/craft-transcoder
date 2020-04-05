@@ -1,6 +1,9 @@
 # Transcoder Changelog
 
 ## 1.2.12 - 2020.04.06
+### Added
+* Added `seekInSecs` option to audio encoding options
+
 ### Changed
 * Updated to latest npm dependencies via `npm audit fix` for both the primary app and the docs
 
