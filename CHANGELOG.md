@@ -1,6 +1,11 @@
 # Transcoder Changelog
 
-## 1.2.13 - UNRELEASED
+## 1.2.13 - UNRELEASED [CRITICAL]
+### Security
+* Added a `$enableDownloadFileEndpoint` settings/config option (set to `false` by default) to control whether the download files action is publicly accessible
+* The download files action now strips any relative paths from the incoming request
+* The download files action now restricts downloads to Craft's [allowedFileExtensions](https://craftcms.com/docs/3.x/config/config-settings.html#allowedfileextensions)
+
 ### Changed
 * Moved the CSS/JS buildchain over to webpack 5
 
