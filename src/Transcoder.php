@@ -55,6 +55,11 @@ class Transcoder extends Plugin
      */
     public static $plugin;
 
+    /**
+     * @var Settings
+     */
+    public static $settings;
+
     // Public Methods
     // =========================================================================
 
@@ -65,6 +70,8 @@ class Transcoder extends Plugin
     {
         parent::init();
         self::$plugin = $this;
+        // Initialize properties
+        self::$settings = self::$plugin->getSettings();
         // Handle console commands
         if (Craft::$app instanceof ConsoleApplication) {
             $this->controllerNamespace = 'nystudio107\transcoder\console\controllers';

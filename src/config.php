@@ -54,6 +54,9 @@ return [
         'gif' => '@web/transcoder/gif/',
     ],
 
+    // Determines whether the download file endpoint should be enabled for anonymous frontend access
+    'enableDownloadFileEndpoint' => false,
+
     // Use a md5 hash for the filenames instead of parameterized naming
     'useHashedNames' => false,
 

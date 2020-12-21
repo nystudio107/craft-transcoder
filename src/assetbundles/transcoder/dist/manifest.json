@@ -1,13 +1,11 @@
 {
-  "vendor.js": "js/vendor.js",
-  "vendor.js.map": "js/vendor.js.map",
-  "styles.css": "css/styles.css",
-  "styles.js": "js/styles.js",
-  "styles.js.map": "js/styles.js.map",
   "transcoder.js": "js/transcoder.js",
+  "transcoder.svg": "img/Transcoder-icon.svg",
   "transcoder.js.map": "js/transcoder.js.map",
   "welcome.js": "js/welcome.js",
   "welcome.js.map": "js/welcome.js.map",
-  "css/styles.css.map": "css/styles.css.map",
+  "runtime.js": "js/runtime.js",
+  "runtime.js.map": "js/runtime.js.map",
+  "styles.css": "css/styles.css",
   "img/Transcoder-icon.svg": "img/Transcoder-icon.svg"
 }

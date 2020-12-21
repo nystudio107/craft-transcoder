@@ -10,9 +10,14 @@
 
 namespace nystudio107\transcoder\controllers;
 
+use nystudio107\transcoder\Transcoder;
+
 use Craft;
+use craft\errors\AssetDisallowedExtensionException;
+use craft\helpers\Json as JsonHelper;
+use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
-use craft\helpers\Json;
+use yii\web\BadRequestHttpException;
 
 /**
  * @author    nystudio107
@@ -39,6 +44,18 @@ class DefaultController extends Controller
     // =========================================================================
 
     /**
+     * @inheritDoc
+     */
+    public function beforeAction($action)
+    {
+        if (!Transcoder::$settings->enableDownloadFileEndpoint) {
+            $this->allowAnonymous = false;
+        }
+
+        return parent::beforeAction($action);
+    }
+
+    /**
      * Force the download of a given $url.  We do it this way to prevent people
      * from downloading things that are outside of the server root.
      *
@@ -49,6 +66,17 @@ class DefaultController extends Controller
     public function actionDownloadFile($url)
     {
         $filePath = parse_url($url, PHP_URL_PATH);
+        // Remove any relative paths
+        if (!PathHelper::ensurePathIsContained($filePath)) {
+            throw new BadRequestHttpException('Invalid resource path: ' . $filePath);
+        }
+        // Only work for `allowedFileExtensions` file extensions
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $allowedExtensions = Craft::$app->getConfig()->getGeneral()->allowedFileExtensions;
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw new AssetDisallowedExtensionException("File “{$filePath}” cannot be downloaded because “{$extension}” is not allowed.");
+        }
+
         $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
@@ -141,6 +169,6 @@ class DefaultController extends Controller
             }
         }
 
-        return Json::encode($result);
+        return JsonHelper::encode($result);
     }
 }

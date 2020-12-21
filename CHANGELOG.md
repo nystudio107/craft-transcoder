@@ -1,5 +1,14 @@
 # Transcoder Changelog
 
+## 1.2.13 - 2020.12.21 [CRITICAL]
+### Security
+* Added a `$enableDownloadFileEndpoint` settings/config option (set to `false` by default) to control whether the download files action is publicly accessible
+* The download files action now strips any relative paths from the incoming request
+* The download files action now restricts downloads to Craft's [allowedFileExtensions](https://craftcms.com/docs/3.x/config/config-settings.html#allowedfileextensions)
+
+### Changed
+* Moved the CSS/JS buildchain over to webpack 5
+
 ## 1.2.12 - 2020.04.06
 ### Added
 * Added `seekInSecs` option to audio encoding options
