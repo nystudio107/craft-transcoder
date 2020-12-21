@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.13 - UNRELEASED
+### Changed
+* Moved the CSS/JS buildchain over to webpack 5
+
 ## 1.2.12 - 2020.04.06
 ### Added
 * Added `seekInSecs` option to audio encoding options
