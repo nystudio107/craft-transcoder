@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import Confetti from '../vue/Confetti.vue';
 
 // Create our vue instance
