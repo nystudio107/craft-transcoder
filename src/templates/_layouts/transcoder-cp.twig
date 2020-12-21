@@ -5,12 +5,14 @@
 {% block head %}
     {{ parent() }}
     {{ craft.transcoder.includeCssModule("styles.css", false) }}
+    {{ craft.transcoder.includeCssModule("vendors.css", false) }}
 {% endblock %}
 
 {% block foot %}
     {{ parent() }}
     {% set jsModules = [
         'runtime.js',
+        'vendors.js',
         'transcoder.js',
     ] %}
     {{ registerJsModules(jsModules) }}

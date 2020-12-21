@@ -1,7 +1,7 @@
 {# @var craft \craft\web\twig\variables\CraftVariable #}
 {% extends 'transcoder/_layouts/transcoder-cp.twig' %}
 
-{% from "transcoder/_includes/macros.twig" import includeJsModule %}
+{% from "transcoder/_includes/macros.twig" import registerJsModules %}
 
 {% set title = 'Welcome to Transcoder!' %}
 
@@ -38,7 +38,12 @@
             Brought to you by <a href="http://nystudio107.com" target="_blank" rel="noopener">nystudio107</a>
         </p>
     </div>
-    {# include our JavaScript modules #}
+{% endblock %}
+
+{% block foot %}
     {{ parent() }}
-    {{ craft.transcoder.includeJsModule("welcome.js", false) }}
+    {% set jsModules = [
+        'welcome.js',
+    ] %}
+    {{ registerJsModules(jsModules) }}
 {% endblock %}
