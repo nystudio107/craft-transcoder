@@ -1,9 +1,17 @@
 {% extends "_layouts/cp" %}
 
+{% from 'transcoder/_includes/macros.twig' import registerJsModules %}
+
 {% block head %}
     {{ parent() }}
-    {{ craft.transcoder.includeCssModule("styles.css") }}
-    {{ craft.transcoder.includeCssModule("vendor.css") }}
-    {{ craft.transcoder.includeJsModule("vendor.js", false) }}
-    {{ craft.transcoder.includeJsModule("transcoder.js", false) }}
+    {{ craft.transcoder.includeCssModule("styles.css", false) }}
+{% endblock %}
+
+{% block foot %}
+    {{ parent() }}
+    {% set jsModules = [
+        'runtime.js',
+        'transcoder.js',
+    ] %}
+    {{ registerJsModules(jsModules) }}
 {% endblock %}
