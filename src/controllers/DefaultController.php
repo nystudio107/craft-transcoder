@@ -10,6 +10,8 @@
 
 namespace nystudio107\transcoder\controllers;
 
+use nystudio107\transcoder\Transcoder;
+
 use Craft;
 use craft\web\Controller;
 use craft\helpers\Json;
@@ -37,6 +39,18 @@ class DefaultController extends Controller
 
     // Public Methods
     // =========================================================================
+
+    /**
+     * @inheritDoc
+     */
+    public function beforeAction($action)
+    {
+        if (!Transcoder::$settings->enableDownloadFileEndpoint) {
+            $this->allowAnonymous = false;
+        }
+
+        return parent::beforeAction($action);
+    }
 
     /**
      * Force the download of a given $url.  We do it this way to prevent people

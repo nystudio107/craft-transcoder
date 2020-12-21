@@ -22,7 +22,7 @@ use craft\validators\ArrayValidator;
  */
 class Settings extends Model
 {
-    // Static Methods
+    // Public Properties
     // =========================================================================
 
     /**
@@ -30,22 +30,23 @@ class Settings extends Model
      *
      * @var string
      */
+
     public $ffmpegPath = '/usr/bin/ffmpeg';
 
-    // Public Properties
-    // =========================================================================
     /**
      * The path to the ffprobe binary
      *
      * @var string
      */
     public $ffprobePath = '/usr/bin/ffprobe';
+
     /**
      * The options to use for ffprobe
      *
      * @var string
      */
     public $ffprobeOptions = '-v quiet -print_format json -show_format -show_streams';
+
     /**
      * The path where the transcoded videos are stored; must have a trailing /
      * Yii2 aliases are supported here
@@ -59,6 +60,7 @@ class Settings extends Model
         'thumbnail' => '@webroot/transcoder/',
         'gif' => '@webroot/transcoder/',
     ];
+
     /**
      * The URL where the transcoded videos are stored; must have a trailing /
      * Yii2 aliases are supported here
@@ -72,12 +74,19 @@ class Settings extends Model
         'thumbnail' => '@web/transcoder/',
         'gif' => '@web/transcoder/',
     ];
+
+    /**
+     * @var bool Determines whether the download file endpoint should be enabled for anonymous frontend access
+     */
+    public $enableDownloadFileEndpoint = false;
+
     /**
      * Use a md5 hash for the filenames instead of parameterized naming
      *
      * @var bool
      */
     public $useHashedNames = false;
+
     /**
      * if a upload location has a subfolder defined, add this to the transcoder
      * paths too
@@ -85,12 +94,14 @@ class Settings extends Model
      * @var bool
      */
     public $createSubfolders = true;
+
     /**
      * clear caches when somebody clears all caches from the CP?
      *
      * @var bool
      */
     public $clearCaches = false;
+
     /**
      * Preset video encoders
      *
@@ -123,6 +134,7 @@ class Settings extends Model
             'threads' => '0',
         ],
     ];
+
     /**
      * Preset audio encoders
      *
@@ -152,6 +164,7 @@ class Settings extends Model
             'threads' => '0',
         ],
     ];
+
     /**
      * Default options for encoded videos
      *
@@ -174,6 +187,7 @@ class Settings extends Model
         'aspectRatio' => 'letterbox',
         'letterboxColor' => '',
     ];
+
     /**
      * Default options for video thumbnails
      *
@@ -189,6 +203,7 @@ class Settings extends Model
         'aspectRatio' => 'letterbox',
         'letterboxColor' => '',
     ];
+
     /**
      * Default options for encoded videos
      *
@@ -202,6 +217,7 @@ class Settings extends Model
         'synchronous' => false,
         'stripMetadata' => false
     ];
+
     /**
      * Default options for encoded GIF
      *
@@ -263,6 +279,7 @@ class Settings extends Model
             ['transcoderPaths', ArrayValidator::class],
             ['transcoderPaths', 'required'],
             ['transcoderUrls', ArrayValidator::class],
+            ['enableDownloadFileEndpoint', 'boolean'],
             ['useHashedNames', 'boolean'],
             ['createSubfolders', 'boolean'],
             ['clearCaches', 'boolean'],
