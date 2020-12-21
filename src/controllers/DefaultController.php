@@ -14,8 +14,10 @@ use nystudio107\transcoder\Transcoder;
 
 use Craft;
 use craft\errors\AssetDisallowedExtensionException;
-use craft\helpers\Json;
+use craft\helpers\Json as JsonHelper;
+use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
+use yii\web\BadRequestHttpException;
 
 /**
  * @author    nystudio107
@@ -65,7 +67,10 @@ class DefaultController extends Controller
     {
         $filePath = parse_url($url, PHP_URL_PATH);
         // Remove any relative paths
-        $filePath = preg_replace('/\.\.\/+/', '', $filePath);
+        if (!PathHelper::ensurePathIsContained($filePath)) {
+            throw new BadRequestHttpException('Invalid resource path: ' . $filePath);
+        }
+        // Only work for `allowedFileExtensions` file extensions
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         $allowedExtensions = Craft::$app->getConfig()->getGeneral()->allowedFileExtensions;
         if (!in_array($extension, $allowedExtensions, true)) {
@@ -164,6 +169,6 @@ class DefaultController extends Controller
             }
         }
 
-        return Json::encode($result);
+        return JsonHelper::encode($result);
     }
 }
