@@ -13,8 +13,9 @@ namespace nystudio107\transcoder\controllers;
 use nystudio107\transcoder\Transcoder;
 
 use Craft;
-use craft\web\Controller;
+use craft\errors\AssetDisallowedExtensionException;
 use craft\helpers\Json;
+use craft\web\Controller;
 
 /**
  * @author    nystudio107
@@ -63,6 +64,14 @@ class DefaultController extends Controller
     public function actionDownloadFile($url)
     {
         $filePath = parse_url($url, PHP_URL_PATH);
+        // Remove any relative paths
+        $filePath = preg_replace('/\.\.\/+/', '', $filePath);
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $allowedExtensions = Craft::$app->getConfig()->getGeneral()->allowedFileExtensions;
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw new AssetDisallowedExtensionException("File “{$filePath}” cannot be downloaded because “{$extension}” is not allowed.");
+        }
+
         $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
