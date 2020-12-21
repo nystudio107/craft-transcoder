@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.13 - UNRELEASED [CRITICAL]
+## 1.2.13 - 2020.12.21 [CRITICAL]
 ### Security
 * Added a `$enableDownloadFileEndpoint` settings/config option (set to `false` by default) to control whether the download files action is publicly accessible
 * The download files action now strips any relative paths from the incoming request
