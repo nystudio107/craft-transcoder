@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.14 - 2021.01.03
+### Changed
+* Changed how we detect whether the transcoding processing is running, so it will work with Alpine Linux
+
 ## 1.2.13 - 2020.12.21 [CRITICAL]
 ### Security
 * Added a `$enableDownloadFileEndpoint` settings/config option (set to `false` by default) to control whether the download files action is publicly accessible
