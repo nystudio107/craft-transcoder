@@ -188,8 +188,10 @@ class Transcode extends Component
             $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.lock';
             $oldPid = @file_get_contents($lockFile);
             if ($oldPid !== false) {
-                exec("ps $oldPid", $ProcessState);
-                if (\count($ProcessState) >= 2) {
+                // See if the process is running, and empty result means the process is still running
+                // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                exec("kill -0 $oldPid 2>&1", $ProcessState);
+                if (\count($ProcessState) === 0) {
                     return $result;
                 }
                 // It's finished transcoding, so delete the lockfile and progress file
@@ -414,8 +416,10 @@ class Transcode extends Component
                 $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.lock';
                 $oldPid = @file_get_contents($lockFile);
                 if ($oldPid !== false) {
-                    exec("ps $oldPid", $ProcessState);
-                    if (\count($ProcessState) >= 2) {
+                    // See if the process is running, and empty result means the process is still running
+                    // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                    exec("kill -0 $oldPid 2>&1", $ProcessState);
+                    if (\count($ProcessState) === 0) {
                         return $result;
                     }
                     // It's finished transcoding, so delete the lockfile and progress file
@@ -675,8 +679,10 @@ class Transcode extends Component
             $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.lock';
             $oldPid = @file_get_contents($lockFile);
             if ($oldPid !== false) {
-                exec("ps $oldPid", $ProcessState);
-                if (\count($ProcessState) >= 2) {
+                // See if the process is running, and empty result means the process is still running
+                // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                exec("kill -0 $oldPid 2>&1", $ProcessState);
+                if (\count($ProcessState) === 0) {
                     return $result;
                 }
                 // It's finished transcoding, so delete the lockfile and progress file
