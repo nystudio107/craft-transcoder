@@ -3,7 +3,6 @@
 namespace nystudio107\transcoder\variables;
 
 use nystudio107\transcoder\helpers\Manifest as ManifestHelper;
-use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
 
 use Craft;
 use craft\helpers\Template;
