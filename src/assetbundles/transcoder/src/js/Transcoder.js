@@ -1,6 +1,6 @@
 // Import our CSS
-import '../css/app.pcss';
-import '../img/Transcoder-icon.svg';
+import '@css/app.pcss';
+import '@img/Transcoder-icon.svg';
 
 const main = async () => {
 };
