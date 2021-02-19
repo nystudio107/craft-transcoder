@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.15 - UNRELEASED
+### Changed
+* Updated build system infra
+
 ## 1.2.14 - 2021.01.03
 ### Changed
 * Changed how we detect whether the transcoding processing is running, so it will work with Alpine Linux
