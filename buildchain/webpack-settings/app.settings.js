@@ -7,15 +7,12 @@ const path = require('path');
 // settings
 module.exports = {
     alias: {
-        '@css': path.resolve('../src/assetbundles/transcoder/src/css'),
-        '@img': path.resolve('../src/assetbundles/transcoder/src/img'),
-        '@js': path.resolve('../src/assetbundles/transcoder/src/js'),
-        '@vue': path.resolve('../src/assetbundles/transcoder/src/vue'),
+        '@': path.resolve('../src/assetbundles/transcoder/src'),
     },
     copyright: '©2020 nystudio107.com',
     entry: {
-        'transcoder': '@js/Transcoder.js',
-        'welcome': '@js/Welcome.js',
+        'transcoder': '@/js/Transcoder.js',
+        'welcome': '@/js/Welcome.js',
     },
     extensions: ['.ts', '.js', '.vue', '.json'],
     name: 'transcoder',
