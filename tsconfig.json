@@ -14,7 +14,7 @@
     "outDir": "./src/assetbundles/transcoder/dist/",
     "paths": {
       "@/*": [
-        "./src/*"
+        "./src/assetbundles/transcoder/src/*"
       ]
     },
     "resolveJsonModule": true,
@@ -30,8 +30,8 @@
     ]
   },
   "include": [
-    "./src/**/*.ts",
-    "./src/**/*.vue"
+    "./src/assetbundles/transcoder/src/**/*.ts",
+    "./src/assetbundles/transcoder/src/**/*.vue"
   ],
   "exclude": [
     "./node_modules"
