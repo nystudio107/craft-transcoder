@@ -10,9 +10,12 @@
 
 namespace nystudio107\transcoder;
 
+use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
 use nystudio107\transcoder\services\Transcode;
 use nystudio107\transcoder\variables\TranscoderVariable;
 use nystudio107\transcoder\models\Settings;
+
+use nystudio107\pluginmanifest\services\ManifestService;
 
 use Craft;
 use craft\base\Plugin;
@@ -41,8 +44,9 @@ use yii\base\Event;
  * @package   Transcode
  * @since     1.0.0
  *
- * @property  Transcode $transcode
- * @property Settings   $settings
+ * @property Transcode          $transcode
+ * @property Settings           $settings
+ * @property ManifestService    $manifest
  * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
@@ -133,6 +137,14 @@ class Transcoder extends Plugin
      */
     protected function addComponents()
     {
+        // Register the manifest service
+        $this->set('manifest', [
+            'class' => ManifestService::class,
+            'assetClass' => TranscoderAsset::class,
+            'devServerManifestPath' => 'http://transcoder-buildchain:8080/',
+            'devServerPublicPath' => 'http://transcoder-buildchain:8080/',
+        ]);
+
         // Register our variables
         Event::on(
             CraftVariable::class,
@@ -140,7 +152,10 @@ class Transcoder extends Plugin
             function (Event $event) {
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
-                $variable->set('transcoder', TranscoderVariable::class);
+                $variable->set('transcoder', [
+                    'class' => TranscoderVariable::class,
+                    'manifestService' => $this->manifest,
+                ]);
             }
         );
     }

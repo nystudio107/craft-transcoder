@@ -1,4 +1,4 @@
-import Confetti from '../vue/Confetti.vue';
+import Confetti from '@/vue/Confetti.vue';
 
 // Create our vue instance
 const vm = new Vue({

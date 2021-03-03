@@ -1,8 +1,6 @@
 {# @var craft \craft\web\twig\variables\CraftVariable #}
 {% extends 'transcoder/_layouts/transcoder-cp.twig' %}
 
-{% from "transcoder/_includes/macros.twig" import registerJsModules %}
-
 {% set title = 'Welcome to Transcoder!' %}
 
 {% set docsUrl = "https://github.com/nystudio107/craft-transcoder/blob/v1/README.md" %}
@@ -42,8 +40,7 @@
 
 {% block foot %}
     {{ parent() }}
-    {% set jsModules = [
+    {{ craft.transcoder.registerJsModules([
         'welcome.js',
-    ] %}
-    {{ registerJsModules(jsModules) }}
+    ]) }}
 {% endblock %}
