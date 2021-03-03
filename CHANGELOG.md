@@ -2,7 +2,7 @@
 
 ## 1.2.15 - UNRELEASED
 ### Changed
-* Updated build system infra
+* Dockerized the buildchain, using `craft-plugin-manifest` for the webpack HMR bridge
 
 ## 1.2.14 - 2021.01.03
 ### Changed

@@ -12,6 +12,8 @@ namespace nystudio107\transcoder\variables;
 
 use nystudio107\transcoder\Transcoder;
 
+use nystudio107\pluginmanifest\variables\ManifestVariable;
+
 use craft\helpers\UrlHelper;
 
 /**
