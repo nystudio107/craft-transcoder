@@ -141,8 +141,8 @@ class Transcoder extends Plugin
         $this->set('manifest', [
             'class' => ManifestService::class,
             'assetClass' => TranscoderAsset::class,
-            'devServerManifestPath' => 'http://transcoder-buildchain:8080/',
-            'devServerPublicPath' => 'http://transcoder-buildchain:8080/',
+            'devServerManifestPath' => 'http://craft-transcoder-buildchain:8080/',
+            'devServerPublicPath' => 'http://craft-transcoder-buildchain:8080/',
         ]);
 
         // Register our variables
