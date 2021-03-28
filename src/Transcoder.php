@@ -64,6 +64,46 @@ class Transcoder extends Plugin
      */
     public static $settings;
 
+    // Static Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct($id, $parent = null, array $config = [])
+    {
+        $config['components'] = [
+            'transcode' => Transcode::class,
+            // Register the manifest service
+            'manifest' => [
+                'class' => ManifestService::class,
+                'assetClass' => TranscoderAsset::class,
+                'devServerManifestPath' => 'http://craft-transcoder-buildchain:8080/',
+                'devServerPublicPath' => 'http://craft-transcoder-buildchain:8080/',
+            ],
+        ];
+
+        parent::__construct($id, $parent, $config);
+    }
+
+    // Public Properties
+    // =========================================================================
+
+    /**
+     * @var string
+     */
+    public $schemaVersion = '1.0.0';
+
+    /**
+     * @var bool
+     */
+    public $hasCpSection = false;
+
+    /**
+     * @var bool
+     */
+    public $hasCpSettings = false;
+    
     // Public Methods
     // =========================================================================
 
@@ -137,14 +177,6 @@ class Transcoder extends Plugin
      */
     protected function addComponents()
     {
-        // Register the manifest service
-        $this->set('manifest', [
-            'class' => ManifestService::class,
-            'assetClass' => TranscoderAsset::class,
-            'devServerManifestPath' => 'http://craft-transcoder-buildchain:8080/',
-            'devServerPublicPath' => 'http://craft-transcoder-buildchain:8080/',
-        ]);
-
         // Register our variables
         Event::on(
             CraftVariable::class,
@@ -250,8 +282,6 @@ class Transcoder extends Plugin
     protected function customFrontendRoutes(): array
     {
         return [
-            // Make webpack async bundle loading work out of published AssetBundles
-            '/cpresources/transcoder/<resourceType:{handle}>/<fileName>' => 'transcoder/manifest/resource',
         ];
     }
 }
