@@ -4,6 +4,9 @@
 ### Changed
 * More consistent `makefile` build commands
 * Use Tailwind 2.x & `@tailwindcss/jit`
+* Move settings from the `composer.json` “extra” to the plugin main class
+* Move the manifest service registration to the constructor
+* Remove deprecated ManifestController
 
 ## 1.2.15 - 2021.03.03
 ### Changed
