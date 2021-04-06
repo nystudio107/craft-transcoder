@@ -1,9 +1,13 @@
 # Transcoder Changelog
 
 ## 1.2.16 - UNRELEASED
+### Added
+* Added `make update` to update NPM packages
+* Added `make update-clean` to completely remove `node_modules/`, then update NPM packages
+
 ### Changed
 * More consistent `makefile` build commands
-* Use Tailwind 2.x & `@tailwindcss/jit`
+* Use Tailwind CSS `^2.1.0` with JIT
 * Move settings from the `composer.json` “extra” to the plugin main class
 * Move the manifest service registration to the constructor
 * Remove deprecated ManifestController
