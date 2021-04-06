@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.16 - UNRELEASED
+## 1.2.16 - 2021.04.06
 ### Added
 * Added `make update` to update NPM packages
 * Added `make update-clean` to completely remove `node_modules/`, then update NPM packages
