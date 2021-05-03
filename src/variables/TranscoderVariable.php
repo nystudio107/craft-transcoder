@@ -12,7 +12,7 @@ namespace nystudio107\transcoder\variables;
 
 use nystudio107\transcoder\Transcoder;
 
-use nystudio107\pluginmanifest\variables\ManifestVariable;
+use nystudio107\pluginvite\variables\ViteVariable;
 
 use craft\helpers\UrlHelper;
 
@@ -21,7 +21,7 @@ use craft\helpers\UrlHelper;
  * @package   Transcode
  * @since     1.0.0
  */
-class TranscoderVariable extends ManifestVariable
+class TranscoderVariable extends ViteVariable
 {
     // Public Methods
     // =========================================================================

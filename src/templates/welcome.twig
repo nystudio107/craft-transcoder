@@ -16,8 +16,10 @@
 
 {% block content %}
     <div id="cp-nav-content" class="readable" style="text-align:center; margin:0 auto; padding: 5% 10%;">
-        <confetti>
-        </confetti>
+        <div id="app-container">
+            <confetti>
+            </confetti>
+        </div>
         <img src="{{ baseAssetsUrl ~ '/img/Transcoder-icon.svg' }}" width="30%" height="auto" />
         <h2>Thanks for using Transcoder!</h2>
         <p>The Transcoder plugin allows you to transcode any video (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.</p>
@@ -40,7 +42,5 @@
 
 {% block foot %}
     {{ parent() }}
-    {{ craft.transcoder.registerJsModules([
-        'welcome.js',
-    ]) }}
+    {{ craft.transcoder.register('/src/js/Welcome.js') }}
 {% endblock %}

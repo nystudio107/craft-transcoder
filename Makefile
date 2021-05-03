@@ -5,7 +5,7 @@ DOCKERRUN=docker container run \
 	--rm \
 	-t \
 	--network plugindev_default \
-	-p 8080:8080 \
+	-p 3000:3000 \
 	-v `pwd`:/app \
 	${CONTAINER}:${TAG}
 DOCSDEST?=../../sites/nystudio107/web/docs/transcoder

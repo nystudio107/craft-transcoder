@@ -1,10 +1,28 @@
 {
-  "transcoder.js": "js/transcoder.js",
-  "welcome.js": "js/welcome.js",
-  "runtime.js": "js/runtime.js",
-  "styles.css": "css/styles.css",
-  "img/Transcoder-icon.svg": "img/Transcoder-icon.svg",
-  "transcoder.js.map": "js/transcoder.js.map",
-  "welcome.js.map": "js/welcome.js.map",
-  "runtime.js.map": "js/runtime.js.map"
+  "src/js/Transcoder.js": {
+    "file": "assets/transcoder.6e69f848.js",
+    "src": "src/js/Transcoder.js",
+    "isEntry": true,
+    "imports": [
+      "_app.e35ce5bf.js"
+    ]
+  },
+  "src/js/Welcome.js": {
+    "file": "assets/welcome.1c9915e8.js",
+    "src": "src/js/Welcome.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor.f30ede7f.js",
+      "_app.e35ce5bf.js"
+    ]
+  },
+  "_vendor.f30ede7f.js": {
+    "file": "assets/vendor.f30ede7f.js"
+  },
+  "_app.e35ce5bf.js": {
+    "file": "assets/app.e35ce5bf.js",
+    "css": [
+      "assets/app.abc5ca10.css"
+    ]
+  }
 }

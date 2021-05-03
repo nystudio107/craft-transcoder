@@ -2,17 +2,9 @@
 
 {% block head %}
     {{ parent() }}
-    {{ craft.transcoder.registerCssModules([
-        'vendors.css',
-        'styles.css',
-    ]) }}
+    {{ craft.transcoder.register('/src/js/Transcoder.js') }}
 {% endblock %}
 
 {% block foot %}
     {{ parent() }}
-    {{ craft.transcoder.registerJsModules([
-        'runtime.js',
-        'vendors.js',
-        'transcoder.js',
-    ]) }}
 {% endblock %}
