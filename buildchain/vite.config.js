@@ -6,6 +6,7 @@ import ViteRestart from 'vite-plugin-restart';
 export default ({ command }) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
+    brotliSize: false,
     emptyOutDir: true,
     manifest: true,
     outDir: '../src/assetbundles/transcoder/dist',
