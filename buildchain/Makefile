@@ -29,7 +29,7 @@ install: docker
 update: docker
 	rm -f buildchain/package-lock.json
 	${DOCKERRUN} \
-		install
+		update
 update-clean: docker
 	rm -f buildchain/package-lock.json
 	rm -rf buildchain/node_modules/

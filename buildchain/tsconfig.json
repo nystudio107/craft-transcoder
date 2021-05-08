@@ -11,7 +11,7 @@
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": true,
-    "outDir": "./src/assetbundles/transcoder/dist/",
+    "outDir": "../src/web/assets/dist",
     "paths": {
       "@/*": [
         "./src/*"

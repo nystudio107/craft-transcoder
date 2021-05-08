@@ -9,7 +9,7 @@ export default ({ command }) => ({
     brotliSize: false,
     emptyOutDir: true,
     manifest: true,
-    outDir: '../src/assetbundles/transcoder/dist',
+    outDir: '../src/web/assets/dist',
     rollupOptions: {
       input: {
         app: '/src/js/app.ts',
