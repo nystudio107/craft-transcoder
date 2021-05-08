@@ -1,18 +1,17 @@
 TAG?=14-alpine
-CONTAINER?=$(shell basename $(CURDIR))-buildchain
+CONTAINER?=$(shell basename $(dir $(CURDIR)))-buildchain
 DOCKERRUN=docker container run \
 	--name ${CONTAINER} \
 	--rm \
 	-t \
 	--network plugindev_default \
 	-p 3000:3000 \
-	-v `pwd`:/app \
+	-v `pwd`/../:/app \
 	${CONTAINER}:${TAG}
-DOCSDEST?=../../sites/nystudio107/web/docs/transcoder
 
-.PHONY: build dev docker docs install npm
+.PHONY: build dev docker install update update-clean npm
 
-build: docker install
+build: docker install update
 	${DOCKERRUN} \
 		run build
 dev: docker install
@@ -24,11 +23,6 @@ docker:
 		-t ${CONTAINER}:${TAG} \
 		--build-arg TAG=${TAG} \
 		--no-cache
-docs: docker
-	${DOCKERRUN} \
-		run docs
-	rm -rf ${DOCSDEST}
-	mv ./docs/docs/.vuepress/dist ${DOCSDEST}
 install: docker
 	${DOCKERRUN} \
 		install
