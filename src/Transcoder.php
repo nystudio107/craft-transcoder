@@ -74,14 +74,15 @@ class Transcoder extends Plugin
     {
         $config['components'] = [
             'transcode' => Transcode::class,
-            // Register the manifest service
+            // Register the vite service
             'vite' => [
                 'class' => VitePluginService::class,
                 'assetClass' => TranscoderAsset::class,
                 'useDevServer' => true,
                 'devServerPublic' => 'http://localhost:3000',
-                'devServerInternal' => 'http://craft-transcoder-buildchain:3000',
                 'serverPublic' => 'http://localhost:8000',
+                'devServerInternal' => 'http://craft-transcoder-buildchain:3000',
+                'checkDevServer' => true,
             ],
         ];
 
