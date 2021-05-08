@@ -12,8 +12,8 @@ export default ({ command }) => ({
     outDir: '../src/assetbundles/transcoder/dist',
     rollupOptions: {
       input: {
-        'transcoder': '/src/js/Transcoder.js',
-        'welcome': '/src/js/Welcome.js',
+        app: '/src/js/app.ts',
+        welcome: '/src/js/welcome.ts',
       }
     },
   },
