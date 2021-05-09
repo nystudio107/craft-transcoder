@@ -1,0 +1,28 @@
+{
+  "src/js/app.ts": {
+    "file": "assets/app.12ac0918.js",
+    "src": "src/js/app.ts",
+    "isEntry": true,
+    "imports": [
+      "_dynamic-import-polyfill.09faaa08.js"
+    ],
+    "css": [
+      "assets/app.abc5ca10.css"
+    ]
+  },
+  "src/js/welcome.ts": {
+    "file": "assets/welcome.add852ac.js",
+    "src": "src/js/welcome.ts",
+    "isEntry": true,
+    "imports": [
+      "_vendor.f30ede7f.js",
+      "_dynamic-import-polyfill.09faaa08.js"
+    ]
+  },
+  "_vendor.f30ede7f.js": {
+    "file": "assets/vendor.f30ede7f.js"
+  },
+  "_dynamic-import-polyfill.09faaa08.js": {
+    "file": "assets/dynamic-import-polyfill.09faaa08.js"
+  }
+}
