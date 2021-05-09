@@ -79,10 +79,8 @@ class Transcoder extends Plugin
                 'class' => VitePluginService::class,
                 'assetClass' => TranscoderAsset::class,
                 'useDevServer' => true,
-                'devServerPublic' => 'http://localhost:3000',
+                'devServerPublic' => 'http://localhost:3001',
                 'serverPublic' => 'http://localhost:8000',
-                'devServerInternal' => 'http://craft-transcoder-buildchain:3000',
-                'checkDevServer' => true,
             ],
         ];
 

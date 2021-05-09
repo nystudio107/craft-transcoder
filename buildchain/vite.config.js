@@ -30,4 +30,8 @@ export default ({ command }) => ({
       '@': path.resolve('/src/'),
     },
   },
+  server: {
+    port: 3001,
+    strictPort: true,
+  }
 });
