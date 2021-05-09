@@ -6,16 +6,16 @@ import ViteRestart from 'vite-plugin-restart';
 export default ({ command }) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
-    brotliSize: false,
-    emptyOutDir: true,
     manifest: true,
-    outDir: '../src/web/assets/dist',
     rollupOptions: {
       input: {
         app: '/src/js/app.ts',
         welcome: '/src/js/welcome.ts',
-      }
-    },
+      },
+      output: {
+        sourcemap: true
+      },
+    }
   },
   plugins: [
     ViteRestart({

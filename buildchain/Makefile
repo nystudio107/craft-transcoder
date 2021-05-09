@@ -9,9 +9,9 @@ DOCKERRUN=docker container run \
 	-v `pwd`/../:/app \
 	${CONTAINER}:${TAG}
 
-.PHONY: build dev docker install update update-clean npm
+.PHONY: build dev docker install npm
 
-build: docker install update
+build: docker install
 	${DOCKERRUN} \
 		run build
 dev: docker install
@@ -24,15 +24,6 @@ docker:
 		--build-arg TAG=${TAG} \
 		--no-cache
 install: docker
-	${DOCKERRUN} \
-		install
-update: docker
-	rm -f buildchain/package-lock.json
-	${DOCKERRUN} \
-		update
-update-clean: docker
-	rm -f buildchain/package-lock.json
-	rm -rf buildchain/node_modules/
 	${DOCKERRUN} \
 		install
 npm: docker
