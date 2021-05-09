@@ -1,5 +1,11 @@
 {
   "name": "buildchain",
+  "description": "A drop-in buildchain for using Vite in your Craft CMS plugins or modules",
+  "author": {
+    "email": "info@nystudio107.com",
+    "name": "nystudio107",
+    "url": "https://nystudio107.com"
+  },
   "dependencies": {
     "vue": "^3.0.5",
     "vue-confetti": "^2.0.8"
@@ -15,7 +21,6 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "build": "vite build"
   }
 }
