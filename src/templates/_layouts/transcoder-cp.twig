@@ -3,7 +3,9 @@
 {% block head %}
     {{ parent() }}
     {% set scriptTagOptions = {
-        'depends': 'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset',
+        'depends': [
+            'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset'
+        ],
     } %}
     {{ craft.transcoder.register('/src/js/app.ts', false, scriptTagOptions) }}
 {% endblock %}

@@ -33,7 +33,7 @@
     </div>
     <div style="text-align:center; margin:0 auto; padding: 0;">
         <p class="instructions">
-            Brought to you by <a href="http://nystudio107.com" target="_blank" rel="noopener">nystudio107</a>
+            Brought to you by <a href="https://nystudio107.com" target="_blank" rel="noopener">nystudio107</a>
         </p>
     </div>
 {% endblock %}
@@ -41,7 +41,9 @@
 {% block foot %}
     {{ parent() }}
     {% set scriptTagOptions = {
-        'depends': 'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset',
+        'depends': [
+            'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset'
+        ],
     } %}
     {{ craft.transcoder.register('/src/js/welcome.ts', false, scriptTagOptions) }}
 {% endblock %}
