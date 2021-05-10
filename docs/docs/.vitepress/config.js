@@ -1,7 +1,7 @@
 module.exports = {
     title: 'Transcoder Documentation',
     description: 'Documentation for the Transcoder plugin',
-    base: '/docs/vite/',
+    base: '/docs/transcoder/',
     lang: 'en-US',
     themeConfig: {
         repo: 'nystudio107/craft-transcoder',
@@ -14,7 +14,7 @@ module.exports = {
         editLinkText: 'Edit this page on GitHub',
         lastUpdated: 'Last Updated',
         sidebar: [
-            { text: 'Transcoder Plugin', link: '/index' },
+            { text: 'Transcoder Plugin', link: '/' },
             { text: 'Transcoder Overview', link: '/overview' },
             { text: 'Configuring Transcoder', link: '/configuring' },
             { text: 'Using Transcoder', link: '/using' },
