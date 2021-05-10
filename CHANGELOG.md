@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.2.17 - 2021.05.09
+### Changed
+* Switched buildchain to Vite & `craft-vite-plugin`
+* Switched documentation system to VitePress
+
 ## 1.2.16 - 2021.04.06
 ### Added
 * Added `make update` to update NPM packages
