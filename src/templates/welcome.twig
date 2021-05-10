@@ -14,6 +14,16 @@
     { label: "Welcome"|t, url: url('transcoder/welcome') },
 ] %}
 
+{% block head %}
+    {{ parent() }}
+    {% set scriptTagOptions = {
+        'depends': [
+            'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset'
+        ],
+    } %}
+    {{ craft.transcoder.register('/src/js/welcome.ts', false, scriptTagOptions) }}
+{% endblock %}
+
 {% block content %}
     <div id="cp-nav-content" class="readable" style="text-align:center; margin:0 auto; padding: 5% 10%;">
         <div id="app-container">
@@ -36,14 +46,4 @@
             Brought to you by <a href="https://nystudio107.com" target="_blank" rel="noopener">nystudio107</a>
         </p>
     </div>
-{% endblock %}
-
-{% block foot %}
-    {{ parent() }}
-    {% set scriptTagOptions = {
-        'depends': [
-            'nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset'
-        ],
-    } %}
-    {{ craft.transcoder.register('/src/js/welcome.ts', false, scriptTagOptions) }}
 {% endblock %}
