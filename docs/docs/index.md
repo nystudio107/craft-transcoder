@@ -34,8 +34,10 @@ Transcoder works on Craft 3.x.
 
 You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to work. On Ubuntu 16.04, you can do just:
 
+```bash
     sudo apt-get update
     sudo apt-get install ffmpeg
+```
 
 To install `ffmpeg` on Centos 6/7, you can follow the guide [How to Install FFmpeg on CentOS](https://www.vultr.com/docs/how-to-install-ffmpeg-on-centos)
 
