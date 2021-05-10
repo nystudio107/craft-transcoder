@@ -15,7 +15,7 @@ use nystudio107\transcoder\services\Transcode;
 use nystudio107\transcoder\variables\TranscoderVariable;
 use nystudio107\transcoder\models\Settings;
 
-use nystudio107\pluginmanifest\services\ManifestService;
+use nystudio107\pluginvite\services\VitePluginService;
 
 use Craft;
 use craft\base\Plugin;
@@ -46,7 +46,7 @@ use yii\base\Event;
  *
  * @property Transcode          $transcode
  * @property Settings           $settings
- * @property ManifestService    $manifest
+ * @property VitePluginService  $vite
  * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
@@ -74,12 +74,15 @@ class Transcoder extends Plugin
     {
         $config['components'] = [
             'transcode' => Transcode::class,
-            // Register the manifest service
-            'manifest' => [
-                'class' => ManifestService::class,
+            // Register the vite service
+            'vite' => [
+                'class' => VitePluginService::class,
                 'assetClass' => TranscoderAsset::class,
-                'devServerManifestPath' => 'http://craft-transcoder-buildchain:8080/',
-                'devServerPublicPath' => 'http://craft-transcoder-buildchain:8080/',
+                'useDevServer' => true,
+                'devServerPublic' => 'http://localhost:3001',
+                'serverPublic' => 'http://localhost:8000',
+                'devServerInternal' => 'http://craft-transcoder-buildchain:3001',
+                'checkDevServer' => true,
             ],
         ];
 
@@ -186,7 +189,7 @@ class Transcoder extends Plugin
                 $variable = $event->sender;
                 $variable->set('transcoder', [
                     'class' => TranscoderVariable::class,
-                    'manifestService' => $this->manifest,
+                    'viteService' => $this->vite,
                 ]);
             }
         );

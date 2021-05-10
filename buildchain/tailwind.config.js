@@ -4,7 +4,7 @@ module.exports = {
   purge: {
     content: [
       '../src/templates/**/*.{twig,html}',
-      '../src/assetbundles/transcoder/src/vue/**/*.{vue,html}',
+      './src/vue/**/*.{vue,html}',
     ],
     layers: [
       'base',
@@ -14,7 +14,7 @@ module.exports = {
     mode: 'layers',
     options: {
       whitelist: [
-        '../src/assetbundles/transcoder/src/css/components/*.css',
+        './src/css/components/*.css',
       ],
     }
   },

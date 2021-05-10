@@ -12,7 +12,6 @@ namespace nystudio107\transcoder\assetbundles\transcoder;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
-use craft\web\assets\vue\VueAsset;
 
 /**
  * @author    nystudio107
@@ -29,11 +28,10 @@ class TranscoderAsset extends AssetBundle
      */
     public function init()
     {
-        $this->sourcePath = '@nystudio107/transcoder/assetbundles/transcoder/dist';
+        $this->sourcePath = '@nystudio107/transcoder/../buildchain/dist';
 
         $this->depends = [
             CpAsset::class,
-            VueAsset::class,
         ];
 
         parent::init();
