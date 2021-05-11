@@ -1,6 +1,5 @@
 import App from '@/vue/App.vue';
 import { createApp } from 'vue';
-import "vite/dynamic-import-polyfill";
 
 // App main
 const main = async () => {
