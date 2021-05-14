@@ -12,7 +12,8 @@ namespace nystudio107\transcoder\variables;
 
 use nystudio107\transcoder\Transcoder;
 
-use nystudio107\pluginvite\variables\ViteVariable;
+use nystudio107\pluginvite\variables\ViteVariableInterface;
+use nystudio107\pluginvite\variables\ViteVariableTrait;
 
 use craft\helpers\UrlHelper;
 
@@ -21,8 +22,10 @@ use craft\helpers\UrlHelper;
  * @package   Transcode
  * @since     1.0.0
  */
-class TranscoderVariable extends ViteVariable
+class TranscoderVariable implements ViteVariableInterface
 {
+    use ViteVariableTrait;
+
     // Public Methods
     // =========================================================================
 

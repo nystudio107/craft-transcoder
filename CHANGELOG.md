@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 1.2.18 - 2021.05.14
+### Changed
+* Updated to work with `craft-vite-plugin` version `^1.0.4`
+
 ## 1.2.17 - 2021.05.09
 ### Changed
 * Switched buildchain to Vite & `craft-vite-plugin`
