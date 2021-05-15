@@ -36,9 +36,9 @@ You can also pass in an `Asset`:
 }) %}
 ```
 
-It will return to you a URL to the transcoded video if it already exists, or if it doesn't exist, it will return `""` and kick off the transcoding process (which can be quite lengthy for long videos).
+It will return to you a URL to the transcoded video if it already exists, or if it doesn’t exist, it will return `""` and kick off the transcoding process (which can be quite lengthy for long videos).
 
-In the array you pass in, the default values are used if the key/value pair does not exist:
+In the array you pass in, the default values are used if the key-value pair does not exist:
 
 ```
 {
@@ -52,7 +52,7 @@ In the array you pass in, the default values are used if the key/value pair does
 
 These default values come from the `config.php` file.
 
-If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
+To have the Transcoder not change a parameter, pass in an empty value in the key-value pair, for example:
 
 ```twig
 {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
@@ -69,7 +69,7 @@ The `aspectRatio` parameter lets you control how the video aspect ratio is maint
 
 ![Screenshot](./resources/screenshots/oceans_20s_300w_200h_none.jpg)
 
-`crop` scales the video up to maintain the original aspect ratio, and then crops it so that it's full-frame:
+`crop` scales the video up to maintain the original aspect ratio, and then crops it so that it’s full-frame:
 
 ![Screenshot](./resources/screenshots/oceans_20s_300w_200h_crop.jpg)
 
@@ -77,11 +77,11 @@ The `aspectRatio` parameter lets you control how the video aspect ratio is maint
 
 ![Screenshot](./resources/screenshots/oceans_20s_300w_200h_letterbox.jpg)
 
-You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
+You can control the color of the letterboxed area (it’s `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, for example: `0xC0C0C0`
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled video.
 
-The file format setting `videoEncoder` is preset to what you'll need to generate `h264` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
+The file format setting `videoEncoder` is preset to what you’ll need to generate `h264` videos, but it can also generate `webm` videos, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
 ![Screenshot](./resources/screenshots/admin-cp-video-thumbnails.png)
 
@@ -120,9 +120,9 @@ You can also pass in an `Asset`:
 }) %}
 ```
 
-It will return to you a URL to the transcoded audio file if it already exists, or if it doesn't exist, it will return `""` and kick off the transcoding process (which can be somewhat lengthy for long audio files).
+It will return to you a URL to the transcoded audio file if it already exists, or if it doesn’t exist, it will return `""` and kick off the transcoding process (which can be somewhat lengthy for long audio files).
 
-In the array you pass in, the default values are used if the key/value pair does not exist:
+In the array you pass in, the default values are used if the key-value pair does not exist:
 
 ```
 {
@@ -137,7 +137,7 @@ In the array you pass in, the default values are used if the key/value pair does
 
 These default values come from the `config.php` file.
 
-If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
+To have the Transcoder not change a parameter, pass in an empty value in the key-value pair, for example:
 
 ```twig
 {% set transVideoUrl = craft.transcoder.getVideoUrl('/home/vagrant/sites/nystudio107/public/trimurti.mp4', {
@@ -149,7 +149,7 @@ If you want to have the Transcoder not change a parameter, pass in an empty valu
 
 The above example would cause it to not change the audio of the source audio file at all (not recommended for client-proofing purposes).
 
-The file format setting `audioEncoder` is preset to what you'll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
+The file format setting `audioEncoder` is preset to what you’ll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
 ## Getting Transcoding Progress
 
@@ -219,9 +219,9 @@ You can also pass in an `Asset`:
 }) %}
 ```
 
-It will return to you a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video.  It creates this thumbnail immediately if it doesn't already exist.
+It will return to you a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video.  It creates this thumbnail immediately if it doesn’t already exist.
 
-In the array you pass in, the default values are used if the key/value pair does not exist:
+In the array you pass in, the default values are used if the key-value pair does not exist:
 
 ```
 {
@@ -233,7 +233,7 @@ In the array you pass in, the default values are used if the key/value pair does
 }
 ```
 
-If you want to have the Transcoder not change a parameter, pass in an empty value in the key/value pair, e.g.:
+To have the Transcoder not change a parameter, pass in an empty value in the key-value pair, for example:
 
 ```twig
 {% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('/home/vagrant/sites/nystudio107/public/oceans.mp4', {
@@ -259,7 +259,7 @@ The `aspectRatio` parameter lets you control how the video aspect ratio is maint
 
 ![Screenshot](./resources/screenshots/oceans_20s_300w_200h_letterbox.jpg)
 
-You can control the color of the letterboxed area (it's `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, e.g.: `0xC0C0C0`
+You can control the color of the letterboxed area (it’s `black` by default) via the `letterboxColor` option. It can be either a semantic color name, or a hexcode color, for example: `0xC0C0C0`
 
 The `sharpen` option determines whether an unsharp mask filter should be applied to the scaled thumbnail image.
 
@@ -308,7 +308,7 @@ If you instead pass in `false` as the second parameter (or omit it), then `craft
 * `format` - information about the container file format
 * `streams` - information about each stream in the container; many videos have multiple streams, for instance, one for the video streams, and another for the audio stream. There can even be multiple video or audio streams in a container.
 
-Here's example output from `craft.transcoder.getFileInfo()`:
+Here’s example output from `craft.transcoder.getFileInfo()`:
 
 ```
 [
@@ -437,7 +437,7 @@ To generate a download URL for a file, do the following:
 {% set downloadUrl = craft.transcoder.getDownloadUrl('/some/url') %}
 ```
 
-When the user clicks on the URL, it will download the file to their local computer.  If the file doesn't exist, `""` is returned.
+When the user clicks on the URL, it will download the file to their local computer.  If the file doesn’t exist, `""` is returned.
 
 The file must reside in the webroot (thus a URL or URI must be passed in as a parameter, not a path), for security reasons.
 
