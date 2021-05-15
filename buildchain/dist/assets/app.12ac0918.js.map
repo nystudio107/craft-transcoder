@@ -1,1 +1,0 @@
-{"version":3,"file":"app.12ac0918.js","sources":["../../src/js/app.ts"],"sourcesContent":["// Dynamic import polyfills for Vite\nimport \"vite/dynamic-import-polyfill\";\n// Import our CSS\nimport '@/css/app.pcss';\n\nconst main = async () => {\n};\n\nmain().then( (root) => {\n});\n"],"names":["async","main","then","root"],"mappings":"8CAKaA,aAGbC,GAAOC,MAAOC"}

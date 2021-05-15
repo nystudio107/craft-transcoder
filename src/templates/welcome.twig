@@ -7,7 +7,7 @@
 {% set linkGetStarted = "https://github.com/nystudio107/craft-transcoder" %}
 
 {% do view.registerAssetBundle("nystudio107\\transcoder\\assetbundles\\transcoder\\TranscoderAsset") %}
-{% set baseAssetsUrl = view.getAssetManager().getPublishedUrl('@nystudio107/transcoder/../buildchain/dist', true) %}
+{% set baseAssetsUrl = view.getAssetManager().getPublishedUrl('@nystudio107/transcoder/web/assets/dist', true) %}
 
 {% set crumbs = [
     { label: "Transcoder", url: url('transcoder') },

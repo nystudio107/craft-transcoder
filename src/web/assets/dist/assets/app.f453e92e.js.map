@@ -1,0 +1,1 @@
+{"version":3,"file":"app.f453e92e.js","sources":["../../../../../buildchain/src/js/app.ts"],"sourcesContent":["// Import our CSS\nimport '@/css/app.pcss';\n\nconst main = async () => {\n};\n\nmain().then( (root) => {\n});\n"],"names":["async","main","then","root"],"mappings":"AAGaA,aAGbC,GAAOC,MAAOC"}

@@ -28,7 +28,7 @@ class TranscoderAsset extends AssetBundle
      */
     public function init()
     {
-        $this->sourcePath = '@nystudio107/transcoder/../buildchain/dist';
+        $this->sourcePath = '@nystudio107/transcoder/web/assets/dist';
 
         $this->depends = [
             CpAsset::class,
