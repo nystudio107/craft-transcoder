@@ -1,6 +1,6 @@
 # Transcoder Overview
 
-The Transcoder plugin allows you to transcode any video or animated gif (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
+The Transcoder plugin allows you to transcode any video or animated GIF (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.
 
 It can also transcode audio files to any bitrate & sample rate, to a variety of file formats. It can even extract audio tracks from video files.
 

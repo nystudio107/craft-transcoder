@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.2.19 - 2021.05.16
+### Changed
+* Refactor to better directory structure
+* Use Textlint for the documentation
+
 ## 1.2.18 - 2021.05.14
 ### Changed
 * Updated to work with `craft-vite-plugin` version `^1.0.4`
