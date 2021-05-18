@@ -8,8 +8,8 @@ module.exports = {
         docsDir: 'docs/docs',
         docsBranch: 'v1',
         algolia: {
-            apiKey: '',
-            indexName: 'craft-transcoder'
+            apiKey: '14f28d1e87ded365acc21d0e921732e6',
+            indexName: 'transcoder'
         },
         editLinks: true,
         editLinkText: 'Edit this page on GitHub',
