@@ -9,8 +9,6 @@ const siteMapRoutes = VitePressConfig.themeConfig.sidebar.map(element => ({
   name: element.text
 }))
 
-console.log(siteMapRoutes)
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
