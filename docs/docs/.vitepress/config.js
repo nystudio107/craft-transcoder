@@ -21,9 +21,9 @@ module.exports = {
         lastUpdated: 'Last Updated',
         sidebar: [
             { text: 'Transcoder Plugin', link: '/' },
-            { text: 'Transcoder Overview', link: '/overview' },
-            { text: 'Configuring Transcoder', link: '/configuring' },
-            { text: 'Using Transcoder', link: '/using' },
+            { text: 'Transcoder Overview', link: '/overview.html' },
+            { text: 'Configuring Transcoder', link: '/configuring.html' },
+            { text: 'Using Transcoder', link: '/using.html' },
         ],
     },
 };
