@@ -1,4 +1,4 @@
-TAG?=14-alpine
+TAG?=16-alpine
 CONTAINER?=$(shell basename $(dir $(CURDIR)))-buildchain
 DOCKERRUN=docker container run \
 	--name ${CONTAINER} \
