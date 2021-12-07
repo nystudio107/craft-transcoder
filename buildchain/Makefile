@@ -25,7 +25,7 @@ docker:
 		--no-cache
 install: docker
 	${DOCKERRUN} \
-		install
+		install --legacy-peer-deps
 npm: docker
 	${DOCKERRUN} \
 		$(filter-out $@,$(MAKECMDGOALS))
