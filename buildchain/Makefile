@@ -6,7 +6,7 @@ DOCKERRUN=docker container run \
 	-t \
 	--network plugindev_default \
 	-p 3001:3001 \
-	-v `pwd`/../:/app \
+	-v "${CURDIR}"/../:/app \
 	${CONTAINER}:${TAG}
 
 .PHONY: build dev docker install npm
