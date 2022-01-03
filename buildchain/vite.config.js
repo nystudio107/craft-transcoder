@@ -12,8 +12,8 @@ export default ({ command }) => ({
     outDir: '../src/web/assets/dist',
     rollupOptions: {
       input: {
-        app: './src/js/app.ts',
-        welcome: './src/js/welcome.ts',
+        app: 'src/js/app.ts',
+        welcome: 'src/js/welcome.ts',
       },
       output: {
         sourcemap: true
