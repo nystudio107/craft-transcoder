@@ -11,7 +11,7 @@ module.exports = {
     themeConfig: {
         repo: 'nystudio107/craft-transcoder',
         docsDir: 'docs/docs',
-        docsBranch: 'v1',
+        docsBranch: 'develop',
         algolia: {
             apiKey: '14f28d1e87ded365acc21d0e921732e6',
             indexName: 'transcoder'
