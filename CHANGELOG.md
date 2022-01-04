@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.20 - UNRELEASED
+## 1.2.20 - 2022.01.04
 ### Changed
 * Switch to Node 16 via `16-alpine` Docker tag by default
 * Update to Tailwind CSS `^3.0.0`
