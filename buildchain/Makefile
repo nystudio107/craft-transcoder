@@ -1,4 +1,4 @@
-TAG?=14-alpine
+TAG?=16-alpine
 CONTAINER?=$(shell basename $(dir $(CURDIR)))-buildchain
 DOCKERRUN=docker container run \
 	--name ${CONTAINER} \
@@ -6,12 +6,12 @@ DOCKERRUN=docker container run \
 	-t \
 	--network plugindev_default \
 	-p 3001:3001 \
-	-v `pwd`/../:/app \
+	-v "${CURDIR}"/../:/app \
 	${CONTAINER}:${TAG}
 
-.PHONY: build dev docker install npm
+.PHONY: build dev docker install clean npm
 
-build: docker install
+build: clean docker install
 	${DOCKERRUN} \
 		run build
 dev: docker install
@@ -26,6 +26,9 @@ docker:
 install: docker
 	${DOCKERRUN} \
 		install
+clean:
+	rm -rf node_modules/
+	rm -f package-lock.json
 npm: docker
 	${DOCKERRUN} \
 		$(filter-out $@,$(MAKECMDGOALS))

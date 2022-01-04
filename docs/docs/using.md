@@ -1,3 +1,7 @@
+---
+title: Using Transcoder
+description: Using transcoder documentation for the Transcoder plugin. The Transcoder plugin allows you to transcode video & audio files to various formats, and provide video thumbnails
+---
 # Using Transcoder
 
 ## Generating a Transcoded Video

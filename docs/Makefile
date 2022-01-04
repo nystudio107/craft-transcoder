@@ -5,11 +5,11 @@ DOCKERRUN=docker container run \
 	--rm \
 	-p 3002:3002 \
 	-t \
-	-v `pwd`:/app \
+	-v "${CURDIR}":/app \
 	${CONTAINER}:${TAG}
 DOCSDEST?=../../../sites/nystudio107/web/docs/transcoder
 
-.PHONY: docker build dev fix install lint update npm
+.PHONY: docker build dev fix install lint clean npm
 
 docker:
 	docker build \
@@ -17,7 +17,7 @@ docker:
 		-t ${CONTAINER}:${TAG} \
 		--build-arg TAG=${TAG} \
 		--no-cache
-build: docker install update
+build: clean docker install
 	${DOCKERRUN} \
 		run docs:build
 	rm -rf ${DOCSDEST}
@@ -34,9 +34,9 @@ install: docker
 lint: docker install
 	${DOCKERRUN} \
 		run docs:lint
-update: docker
-	${DOCKERRUN} \
-		update
+clean:
+	rm -rf node_modules/
+	rm -f package-lock.json
 npm: docker
 	${DOCKERRUN} \
 		$(filter-out $@,$(MAKECMDGOALS))

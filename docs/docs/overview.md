@@ -1,3 +1,7 @@
+---
+title: Transcoder Overview
+description: Transcoder overview documentation for the Transcoder plugin. The Transcoder plugin allows you to transcode video & audio files to various formats, and provide video thumbnails
+---
 # Transcoder Overview
 
 The Transcoder plugin allows you to transcode any video or animated GIF (local or remote) to any size, bitrate, framerate, and save it out as a web-ready video in a variety of file formats.

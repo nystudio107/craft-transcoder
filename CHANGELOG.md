@@ -1,5 +1,14 @@
 # Transcoder Changelog
 
+## 1.2.20 - 2022.01.04
+### Changed
+* Switch to Node 16 via `16-alpine` Docker tag by default
+* Update to Tailwind CSS `^3.0.0`
+* Changed buildchain to Vite from webpack 5
+
+### Fixed
+* Use `${CURDIR}` instead of `pwd` to be cross-platform compatible with Windows WSL2
+
 ## 1.2.19 - 2021.05.16
 ### Changed
 * Refactor to better directory structure

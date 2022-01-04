@@ -7,12 +7,13 @@ import path from 'path';
 export default ({ command }) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
+    emptyOutDir: true,
     manifest: true,
     outDir: '../src/web/assets/dist',
     rollupOptions: {
       input: {
-        app: '/src/js/app.ts',
-        welcome: '/src/js/welcome.ts',
+        app: 'src/js/app.ts',
+        welcome: 'src/js/welcome.ts',
       },
       output: {
         sourcemap: true
@@ -27,7 +28,7 @@ export default ({ command }) => ({
     }),
     ViteRestart({
       reload: [
-          '../src/templates/**/*',
+          './src/templates/**/*',
       ],
     }),
     vue(),
@@ -35,11 +36,16 @@ export default ({ command }) => ({
   publicDir: '../src/web/assets/public',
   resolve: {
     alias: {
-      '@': '/src',
+      '@': path.resolve(__dirname, './src')
     },
+    preserveSymlinks: true,
   },
   server: {
+    fs: {
+      strict: false
+    },
     host: '0.0.0.0',
+    origin: 'http://localhost:3001/',
     port: 3001,
     strictPort: true,
   }
