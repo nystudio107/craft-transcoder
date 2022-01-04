@@ -4,6 +4,7 @@
 ### Changed
 * Switch to Node 16 via `16-alpine` Docker tag by default
 * Update to Tailwind CSS `^3.0.0`
+* Changed buildchain to Vite from webpack 5
 
 ### Fixed
 * Use `${CURDIR}` instead of `pwd` to be cross-platform compatible with Windows WSL2
