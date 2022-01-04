@@ -8,14 +8,14 @@
     ]
   },
   "src/js/welcome.ts": {
-    "file": "assets/welcome.91ac9f6e.js",
+    "file": "assets/welcome.b0ba0882.js",
     "src": "src/js/welcome.ts",
     "isEntry": true,
     "imports": [
-      "_vendor.ea8c72e9.js"
+      "_vendor.ac4fbd46.js"
     ]
   },
-  "_vendor.ea8c72e9.js": {
-    "file": "assets/vendor.ea8c72e9.js"
+  "_vendor.ac4fbd46.js": {
+    "file": "assets/vendor.ac4fbd46.js"
   }
 }
