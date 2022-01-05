@@ -81,7 +81,7 @@ class Transcoder extends Plugin
                 'useDevServer' => true,
                 'devServerPublic' => 'http://localhost:3001',
                 'serverPublic' => 'http://localhost:8000',
-                'errorEntry' => '/src/js/app.ts',
+                'errorEntry' => 'src/js/app.ts',
                 'devServerInternal' => 'http://craft-transcoder-buildchain:3001',
                 'checkDevServer' => true,
             ],
