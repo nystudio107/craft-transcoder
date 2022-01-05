@@ -15,8 +15,8 @@
         },
         mounted() {
             const config : Partial<ConfettiConfig> = {
-                defaultType: 'heart',
-                defaultSize: 30,
+                defaultType: 'rect',
+                defaultSize: 15,
                 defaultColors: ['DodgerBlue', 'OliveDrab', 'Gold', 'pink', 'SlateBlue', 'lightblue', 'Violet', 'PaleGreen', 'SteelBlue', 'SandyBrown', 'Chocolate', 'Crimson'],
             };
 
