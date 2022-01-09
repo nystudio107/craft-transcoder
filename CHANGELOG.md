@@ -1,5 +1,12 @@
 # Transcoder Changelog
 
+## 1.2.21 - UNRELEASED
+### Added
+* Add `.gitattributes` & `CODEOWNERS`
+* Add linting to build
+* Add compression of assets
+* Add bundle visualizer
+
 ## 1.2.20 - 2022.01.04
 ### Changed
 * Switch to Node 16 via `16-alpine` Docker tag by default
