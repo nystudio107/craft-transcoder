@@ -1,5 +1,11 @@
 declare module "vue-confetti/src/confetti.js";
 
+interface ConfettiInterface {
+    start(opts: Partial<ConfettiConfig>): void,
+    update(opts: Partial<ConfettiConfig>): void,
+    stop(): void,
+}
+
 enum ParticlesType {
     circle = "circle",
     rect = "rect",
