@@ -1,5 +1,8 @@
 import vue from '@vitejs/plugin-vue'
 import ViteRestart from 'vite-plugin-restart';
+import viteCompression from 'vite-plugin-compression';
+import { visualizer } from 'rollup-plugin-visualizer';
+import eslintPlugin from 'vite-plugin-eslint';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import path from 'path';
 
@@ -32,6 +35,15 @@ export default ({ command }) => ({
       ],
     }),
     vue(),
+    viteCompression({
+      filter: /\.(js|mjs|json|css|map)$/i
+    }),
+    visualizer({
+      filename: '../src/web/assets/dist/stats.html',
+      template: 'treemap',
+      sourcemap: true,
+    }),
+    eslintPlugin(),
   ],
   publicDir: '../src/web/assets/public',
   resolve: {
