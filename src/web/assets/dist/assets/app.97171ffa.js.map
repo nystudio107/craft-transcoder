@@ -1,1 +1,0 @@
-{"version":3,"file":"app.97171ffa.js","sources":["../../../../../buildchain/src/js/app.ts"],"sourcesContent":["// Import our CSS\nimport '@/css/app.pcss';\n\nconst main = async () => {\n};\n\nmain().then( (root) => {\n});\n"],"names":[],"mappings":"AAGA,KAAM,GAAO,SAAY,GAGzB,IAAO,KAAM,AAAC,GAAS"}
