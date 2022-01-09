@@ -12,6 +12,7 @@
  * You can see the styles here:
  * https://github.com/tailwindcss/tailwindcss/blob/master/css/preflight.css
  */
+
 /**
  * We don't want these in the Control Panel
  * @import "tailwindcss/preflight";
@@ -21,7 +22,7 @@
  * This injects any component classes registered by plugins.
  *
  */
-@import 'tailwindcss/components';
+@import "tailwindcss/components";
 
 /**
  * Here we add custom component classes; stuff we want loaded
@@ -29,25 +30,26 @@
  * override them.
  *
  */
-@import './components/webfonts.pcss';
-@import './components/typography.pcss';
-@import './components/global.pcss';
+@import "./components/webfonts.css";
+@import "./components/typography.css";
+@import "./components/global.css";
 
 /**
  * This injects all of Tailwind's utility classes, generated based on your
  * config file.
  *
  */
-@import 'tailwindcss/utilities';
+@import "tailwindcss/utilities";
 
 /**
  * Include styles for individual pages
  *
  */
- @import './pages/welcome.pcss';
+@import "./pages/settings.css";
+@import "./pages/welcome.css";
 
 /**
  * Include vendor css.
  *
  */
- @import 'vendor.pcss';
+@import "vendor.css";
