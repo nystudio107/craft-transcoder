@@ -12,5 +12,6 @@ const main = async () => {
 };
 
 // Execute async function
-main().then( (root) => {
+main().then( () => {
+    console.log();
 });
