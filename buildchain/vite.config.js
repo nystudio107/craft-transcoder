@@ -1,13 +1,13 @@
 import vue from '@vitejs/plugin-vue'
 import ViteRestart from 'vite-plugin-restart';
 import viteCompression from 'vite-plugin-compression';
-import { visualizer } from 'rollup-plugin-visualizer';
+import {visualizer} from 'rollup-plugin-visualizer';
 import eslintPlugin from 'vite-plugin-eslint';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
 import path from 'path';
 
 // https://vitejs.dev/config/
-export default ({ command }) => ({
+export default ({command}) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
     emptyOutDir: true,
@@ -26,12 +26,12 @@ export default ({ command }) => ({
   plugins: [
     nodeResolve({
       moduleDirectories: [
-         path.resolve('./node_modules'),
+        path.resolve('./node_modules'),
       ],
     }),
     ViteRestart({
       reload: [
-          './src/templates/**/*',
+        './src/templates/**/*',
       ],
     }),
     vue(),
@@ -43,7 +43,9 @@ export default ({ command }) => ({
       template: 'treemap',
       sourcemap: true,
     }),
-    eslintPlugin(),
+    eslintPlugin({
+      cache: false,
+    }),
   ],
   publicDir: '../src/web/assets/public',
   resolve: {
