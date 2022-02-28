@@ -1,5 +1,11 @@
 # Transcoder Changelog
 
+## 4.0.0-beta.1 - 2022.02.27
+
+### Added
+
+* Initial Craft CMS 4 compatibility
+
 ## 1.2.21 - 2022.01.12
 
 ### Added
