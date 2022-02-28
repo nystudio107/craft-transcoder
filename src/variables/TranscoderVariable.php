@@ -10,12 +10,11 @@
 
 namespace nystudio107\transcoder\variables;
 
-use nystudio107\transcoder\Transcoder;
-
+use craft\helpers\UrlHelper;
 use nystudio107\pluginvite\variables\ViteVariableInterface;
 use nystudio107\pluginvite\variables\ViteVariableTrait;
-
-use craft\helpers\UrlHelper;
+use nystudio107\transcoder\Transcoder;
+use yii\base\InvalidConfigException;
 
 /**
  * @author    nystudio107
@@ -35,11 +34,13 @@ class TranscoderVariable implements ViteVariableInterface
      *
      * @param $filePath
      * @param $videoOptions
+     * @param bool $generate
+     * @return string
+     * @throws InvalidConfigException
      * @bool $generate
      *
-     * @return string
      */
-    public function getVideoUrl($filePath, $videoOptions, $generate = true): string
+    public function getVideoUrl($filePath, $videoOptions, bool $generate = true): string
     {
         return Transcoder::$plugin->transcode->getVideoUrl($filePath, $videoOptions, $generate);
     }
@@ -51,8 +52,9 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $thumbnailOptions
      *
      * @return string|false|null URL or path of the video thumbnail
+     * @throws InvalidConfigException
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions)
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string|false|null
     {
         return Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
     }
@@ -65,6 +67,7 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $audioOptions
      *
      * @return string
+     * @throws InvalidConfigException
      */
     public function getAudioUrl($filePath, $audioOptions): string
     {
@@ -78,8 +81,9 @@ class TranscoderVariable implements ViteVariableInterface
      * @param bool $summary
      *
      * @return array
+     * @throws InvalidConfigException
      */
-    public function getFileInfo($filePath, $summary = false): array
+    public function getFileInfo($filePath, bool $summary = false): array
     {
         return Transcoder::$plugin->transcode->getFileInfo($filePath, $summary);
     }
@@ -91,6 +95,7 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $videoOptions
      *
      * @return string
+     * @throws InvalidConfigException
      */
     public function getVideoProgressUrl($filePath, $videoOptions): string
     {
@@ -113,6 +118,7 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $audioOptions
      *
      * @return string
+     * @throws InvalidConfigException
      */
     public function getAudioProgressUrl($filePath, $audioOptions): string
     {
@@ -135,6 +141,7 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $gifOptions
      *
      * @return string
+     * @throws InvalidConfigException
      */
     public function getGifProgressUrl($filePath, $gifOptions): string
     {
@@ -161,7 +168,7 @@ class TranscoderVariable implements ViteVariableInterface
     {
         $result = '';
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         if (file_exists($filePath)) {
             $urlParams = [
                 'url' => $url,
@@ -179,6 +186,7 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $gifOptions
      *
      * @return string
+     * @throws InvalidConfigException
      */
     public function getGifUrl($filePath, $gifOptions): string
     {

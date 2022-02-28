@@ -10,21 +10,15 @@
 
 namespace nystudio107\transcoder;
 
-use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
-use nystudio107\transcoder\services\Transcode;
-use nystudio107\transcoder\variables\TranscoderVariable;
-use nystudio107\transcoder\models\Settings;
-
-use nystudio107\pluginvite\services\VitePluginService;
-
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
 use craft\events\AssetThumbEvent;
 use craft\events\PluginEvent;
-use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterCacheOptionsEvent;
+use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\UrlHelper;
@@ -33,7 +27,11 @@ use craft\services\Plugins;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
-
+use nystudio107\pluginvite\services\VitePluginService;
+use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
+use nystudio107\transcoder\models\Settings;
+use nystudio107\transcoder\services\Transcode;
+use nystudio107\transcoder\variables\TranscoderVariable;
 use yii\base\ErrorException;
 use yii\base\Event;
 
@@ -44,9 +42,9 @@ use yii\base\Event;
  * @package   Transcode
  * @since     1.0.0
  *
- * @property Transcode          $transcode
- * @property Settings           $settings
- * @property VitePluginService  $vite
+ * @property Transcode $transcode
+ * @property Settings $settings
+ * @property VitePluginService $vite
  * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
@@ -55,17 +53,32 @@ class Transcoder extends Plugin
     // =========================================================================
 
     /**
-     * @var Transcoder
+     * @var null|Transcoder
      */
-    public static $plugin;
+    public static ?Transcoder $plugin;
 
     /**
-     * @var Settings
+     * @var null|Settings
      */
-    public static $settings;
+    public static ?Settings $settings;
 
     // Static Methods
     // =========================================================================
+    /**
+     * @var string
+     */
+    public string $schemaVersion = '1.0.0';
+
+    // Public Properties
+    // =========================================================================
+    /**
+     * @var bool
+     */
+    public bool $hasCpSection = false;
+    /**
+     * @var bool
+     */
+    public bool $hasCpSettings = false;
 
     /**
      * @inheritdoc
@@ -90,31 +103,13 @@ class Transcoder extends Plugin
         parent::__construct($id, $parent, $config);
     }
 
-    // Public Properties
-    // =========================================================================
-
-    /**
-     * @var string
-     */
-    public $schemaVersion = '1.0.0';
-
-    /**
-     * @var bool
-     */
-    public $hasCpSection = false;
-
-    /**
-     * @var bool
-     */
-    public $hasCpSettings = false;
-
     // Public Methods
     // =========================================================================
 
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
         self::$plugin = $this;
@@ -142,7 +137,7 @@ class Transcoder extends Plugin
     /**
      * Clear all the caches!
      */
-    public function clearAllCaches()
+    public function clearAllCaches(): void
     {
         $transcoderPaths = self::$plugin->getSettings()->transcoderPaths;
 
@@ -171,7 +166,7 @@ class Transcoder extends Plugin
     /**
      * @inheritdoc
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
@@ -179,7 +174,7 @@ class Transcoder extends Plugin
     /**
      * Add in our Craft components
      */
-    protected function addComponents()
+    protected function addComponents(): void
     {
         // Register our variables
         Event::on(
@@ -199,19 +194,18 @@ class Transcoder extends Plugin
     /**
      * Install our event handlers
      */
-    protected function installEventHandlers()
+    protected function installEventHandlers(): void
     {
         $settings = $this->getSettings();
         // Handler: Assets::EVENT_GET_THUMB_PATH
         Event::on(
             Assets::class,
-            Assets::EVENT_GET_THUMB_PATH,
-            function (AssetThumbEvent $event) {
+            Assets::EVENT_DEFINE_THUMB_PATH,
+            static function (AssetThumbEvent $event) {
                 Craft::debug(
                     'Assets::EVENT_GET_THUMB_PATH',
                     __METHOD__
                 );
-                /** @var Asset $asset */
                 $asset = $event->asset;
                 if (AssetsHelper::getFileKindByExtension($asset->filename) === Asset::KIND_VIDEO) {
                     $path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
@@ -222,7 +216,7 @@ class Transcoder extends Plugin
             }
         );
         if ($settings->clearCaches) {
-            // Add the Transcode path to the list of things the Clear Caches tool can delete.
+            // Add the Transcoded path to the list of things the Clear Caches tool can delete.
             Event::on(
                 ClearCaches::class,
                 ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
@@ -258,7 +252,7 @@ class Transcoder extends Plugin
     /**
      * Install site event listeners for site requests only
      */
-    protected function installSiteEventListeners()
+    protected function installSiteEventListeners(): void
     {
         // Handler: UrlManager::EVENT_REGISTER_SITE_URL_RULES
         Event::on(

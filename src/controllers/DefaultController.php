@@ -10,14 +10,16 @@
 
 namespace nystudio107\transcoder\controllers;
 
-use nystudio107\transcoder\Transcoder;
-
 use Craft;
 use craft\errors\AssetDisallowedExtensionException;
 use craft\helpers\Json as JsonHelper;
 use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
+use nystudio107\transcoder\Transcoder;
+use yii\base\ExitException;
 use yii\web\BadRequestHttpException;
+use function count;
+use function is_array;
 
 /**
  * @author    nystudio107
@@ -46,7 +48,7 @@ class DefaultController extends Controller
     /**
      * @inheritDoc
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         if (!Transcoder::$settings->enableDownloadFileEndpoint) {
             $this->allowAnonymous = false;
@@ -61,9 +63,11 @@ class DefaultController extends Controller
      *
      * @param $url
      *
-     * @throws \yii\base\ExitException
+     * @throws AssetDisallowedExtensionException
+     * @throws BadRequestHttpException
+     * @throws ExitException
      */
-    public function actionDownloadFile($url)
+    public function actionDownloadFile($url): void
     {
         $filePath = parse_url($url, PHP_URL_PATH);
         // Remove any relative paths
@@ -77,7 +81,7 @@ class DefaultController extends Controller
             throw new AssetDisallowedExtensionException("File “{$filePath}” cannot be downloaded because “{$extension}” is not allowed.");
         }
 
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
             null,
@@ -96,18 +100,18 @@ class DefaultController extends Controller
      *
      * @param $filename
      *
-     * @return mixed
+     * @return string
      */
-    public function actionProgress($filename)
+    public function actionProgress($filename): string
     {
         $result = [];
-        $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$filename.'.progress';
+        $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.progress';
         if (file_exists($progressFile)) {
             $content = @file_get_contents($progressFile);
             if ($content) {
                 // get duration of source
                 preg_match('/Duration: (.*?), start:/', $content, $matches);
-                if (\count($matches) > 0) {
+                if (count($matches) > 0) {
                     $rawDuration = $matches[1];
 
                     // rawDuration is in 00:00:00.00 format. This converts it to seconds.
@@ -128,7 +132,7 @@ class DefaultController extends Controller
                 $rawTime = array_pop($matches);
 
                 // this is needed if there is more than one match
-                if (\is_array($rawTime)) {
+                if (is_array($rawTime)) {
                     $rawTime = array_pop($rawTime);
                 }
 

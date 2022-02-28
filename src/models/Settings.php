@@ -31,21 +31,21 @@ class Settings extends Model
      * @var string
      */
 
-    public $ffmpegPath = '/usr/bin/ffmpeg';
+    public string $ffmpegPath = '/usr/bin/ffmpeg';
 
     /**
      * The path to the ffprobe binary
      *
      * @var string
      */
-    public $ffprobePath = '/usr/bin/ffprobe';
+    public string $ffprobePath = '/usr/bin/ffprobe';
 
     /**
      * The options to use for ffprobe
      *
      * @var string
      */
-    public $ffprobeOptions = '-v quiet -print_format json -show_format -show_streams';
+    public string $ffprobeOptions = '-v quiet -print_format json -show_format -show_streams';
 
     /**
      * The path where the transcoded videos are stored; must have a trailing /
@@ -53,7 +53,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $transcoderPaths = [
+    public array $transcoderPaths = [
         'default' => '@webroot/transcoder/',
         'video' => '@webroot/transcoder/',
         'audio' => '@webroot/transcoder/',
@@ -67,7 +67,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $transcoderUrls = [
+    public array $transcoderUrls = [
         'default' => '@web/transcoder/',
         'video' => '@web/transcoder/',
         'audio' => '@web/transcoder/',
@@ -78,14 +78,14 @@ class Settings extends Model
     /**
      * @var bool Determines whether the download file endpoint should be enabled for anonymous frontend access
      */
-    public $enableDownloadFileEndpoint = false;
+    public bool $enableDownloadFileEndpoint = false;
 
     /**
      * Use a md5 hash for the filenames instead of parameterized naming
      *
      * @var bool
      */
-    public $useHashedNames = false;
+    public bool $useHashedNames = false;
 
     /**
      * if a upload location has a subfolder defined, add this to the transcoder
@@ -93,21 +93,21 @@ class Settings extends Model
      *
      * @var bool
      */
-    public $createSubfolders = true;
+    public bool $createSubfolders = true;
 
     /**
      * clear caches when somebody clears all caches from the CP?
      *
      * @var bool
      */
-    public $clearCaches = false;
+    public bool $clearCaches = false;
 
     /**
      * Preset video encoders
      *
      * @var array
      */
-    public $videoEncoders = [
+    public array $videoEncoders = [
         'h264' => [
             'fileSuffix' => '.mp4',
             'fileFormat' => 'mp4',
@@ -140,7 +140,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $audioEncoders = [
+    public array $audioEncoders = [
         'mp3' => [
             'fileSuffix' => '.mp3',
             'fileFormat' => 'mp3',
@@ -170,7 +170,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $defaultVideoOptions = [
+    public array $defaultVideoOptions = [
         // Video settings
         'videoEncoder' => 'h264',
         'videoBitRate' => '800k',
@@ -193,7 +193,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $defaultThumbnailOptions = [
+    public array $defaultThumbnailOptions = [
         'fileSuffix' => '.jpg',
         'timeInSecs' => 10,
         'width' => '',
@@ -209,7 +209,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $defaultAudioOptions = [
+    public array $defaultAudioOptions = [
         'audioEncoder' => 'mp3',
         'audioBitRate' => '128k',
         'audioSampleRate' => '44100',
@@ -223,7 +223,7 @@ class Settings extends Model
      *
      * @var array
      */
-    public $defaultGifOptions = [
+    public array $defaultGifOptions = [
         'videoEncoder' => 'gif',
         'fileSuffix' => '',
         'fileFormat' => '',
@@ -257,15 +257,7 @@ class Settings extends Model
     /**
      * @inheritdoc
      */
-    public function init()
-    {
-        parent::init();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['ffmpegPath', 'string'],
