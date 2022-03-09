@@ -37,7 +37,7 @@ class DefaultController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = [
+    protected array|bool|int $allowAnonymous = [
         'download-file',
         'progress',
     ];
