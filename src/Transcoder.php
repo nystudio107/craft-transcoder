@@ -15,7 +15,7 @@ use craft\base\Model;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
-use craft\events\AssetThumbEvent;
+use craft\events\DefineAssetThumbUrlEvent;
 use craft\events\PluginEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -200,8 +200,8 @@ class Transcoder extends Plugin
         // Handler: Assets::EVENT_GET_THUMB_PATH
         Event::on(
             Assets::class,
-            Assets::EVENT_DEFINE_THUMB_PATH,
-            static function (AssetThumbEvent $event) {
+            Assets::EVENT_DEFINE_THUMB_URL,
+            static function (DefineAssetThumbUrlEvent $event) {
                 Craft::debug(
                     'Assets::EVENT_GET_THUMB_PATH',
                     __METHOD__

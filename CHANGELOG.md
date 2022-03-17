@@ -1,5 +1,11 @@
 # Transcoder Changelog
 
+## 4.0.0-beta.3 - 2022.03.17
+
+### Changed
+
+* Refactored to use `Assets::EVENT_DEFINE_THUMB_URL` now available in Craft `4.0.0-beta.2`
+
 ## 4.0.0-beta.2 - 2022.03.04
 
 ### Fixed
