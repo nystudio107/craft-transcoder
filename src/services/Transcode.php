@@ -13,7 +13,7 @@ namespace nystudio107\transcoder\services;
 use Craft;
 use craft\base\Component;
 use craft\elements\Asset;
-use craft\events\AssetThumbEvent;
+use craft\events\DefineAssetThumbUrlEvent;
 use craft\fs\Local;
 use craft\helpers\App;
 use craft\helpers\FileHelper;
@@ -602,12 +602,12 @@ class Transcode extends Component
     /**
      * Handle generated a thumbnail for the Control Panel
      *
-     * @param AssetThumbEvent $event
+     * @param DefineAssetThumbUrlEvent $event
      *
      * @return null|false|string
      * @throws InvalidConfigException
      */
-    public function handleGetAssetThumbPath(AssetThumbEvent $event): null|false|string
+    public function handleGetAssetThumbPath(DefineAssetThumbUrlEvent $event): null|false|string
     {
         $options = [
             'width' => $event->width,
