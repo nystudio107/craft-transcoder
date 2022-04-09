@@ -80,10 +80,10 @@ class TranscoderVariable implements ViteVariableInterface
      * @param      $filePath
      * @param bool $summary
      *
-     * @return array
+     * @return ?array
      * @throws InvalidConfigException
      */
-    public function getFileInfo($filePath, bool $summary = false): array
+    public function getFileInfo($filePath, bool $summary = false): ?array
     {
         return Transcoder::$plugin->transcode->getFileInfo($filePath, $summary);
     }
@@ -185,10 +185,10 @@ class TranscoderVariable implements ViteVariableInterface
      * @param $filePath
      * @param $gifOptions
      *
-     * @return string
+     * @return string|false|null
      * @throws InvalidConfigException
      */
-    public function getGifUrl($filePath, $gifOptions): string
+    public function getGifUrl($filePath, $gifOptions): string|false|null
     {
         return Transcoder::$plugin->transcode->getGifUrl($filePath, $gifOptions);
     }
