@@ -2,7 +2,7 @@
 
 ## 1.2.22 - UNRELEASED
 ### Changed
-* Added `nosynchronous` & `nostripMetadata` to the parameters that should be excluded from the generated file name
+* Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name
 
 ## 1.2.21 - 2022.01.12
 
