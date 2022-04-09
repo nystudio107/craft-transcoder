@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 4.0.0-beta.4 - 2022.04.08
+### Fixed
+* Fixed incorrect return types in `TranscoderVariable` that could cause exceptions to be thrown
+
 ## 4.0.0-beta.3 - 2022.03.17
 
 ### Changed
