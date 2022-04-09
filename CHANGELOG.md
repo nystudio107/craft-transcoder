@@ -1,8 +1,8 @@
 # Transcoder Changelog
 
-## 4.0.0-beta.5 - UNRELEASED
+## 4.0.0-beta.5 - 2022.04.09
 ### Changed
-* Added `nosynchronous` & `nostripMetadata` to the parameters that should be excluded from the generated file name
+* Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name
 
 ## 4.0.0-beta.4 - 2022.04.08
 ### Fixed
