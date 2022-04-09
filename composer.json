@@ -1,46 +1,46 @@
 {
-    "name": "nystudio107/craft-transcoder",
-    "description": "Transcode video & audio files to various formats, and provide video thumbnails",
-    "type": "craft-plugin",
-    "version": "1.2.21",
-    "keywords": [
-        "craft",
-        "cms",
-        "craftcms",
-        "craft-plugin",
-        "transcoder",
-        "transcode",
-        "video",
-        "audio",
-        "gif",
-        "convert",
-        "format"
-    ],
-    "support": {
-        "docs": "https://nystudio107.com/plugins/transcoder/documentation",
-        "issues": "https://nystudio107.com/plugins/transcoder/support"
-    },
-    "license": "proprietary",
-    "authors": [
-        {
-            "name": "nystudio107",
-            "homepage": "https://nystudio107.com"
-        }
-    ],
-    "require": {
-        "craftcms/cms": "^3.1.0",
-        "nystudio107/craft-plugin-vite": "^1.0.4",
-        "mikehaertl/php-shellcommand": "~1.2"
-    },
-    "autoload": {
-        "psr-4": {
-          "nystudio107\\transcoder\\": "src/"
-        }
-    },
-    "extra": {
-        "name": "Transcoder",
-        "handle": "transcoder",
-        "changelogUrl": "https://raw.githubusercontent.com/nystudio107/craft-transcoder/v1/CHANGELOG.md",
-        "class": "nystudio107\\transcoder\\Transcoder"
+  "name": "nystudio107/craft-transcoder",
+  "description": "Transcode video & audio files to various formats, and provide video thumbnails",
+  "type": "craft-plugin",
+  "version": "1.2.22",
+  "keywords": [
+    "craft",
+    "cms",
+    "craftcms",
+    "craft-plugin",
+    "transcoder",
+    "transcode",
+    "video",
+    "audio",
+    "gif",
+    "convert",
+    "format"
+  ],
+  "support": {
+    "docs": "https://nystudio107.com/plugins/transcoder/documentation",
+    "issues": "https://nystudio107.com/plugins/transcoder/support"
+  },
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "nystudio107",
+      "homepage": "https://nystudio107.com"
     }
+  ],
+  "require": {
+    "craftcms/cms": "^3.1.0",
+    "nystudio107/craft-plugin-vite": "^1.0.4",
+    "mikehaertl/php-shellcommand": "~1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "nystudio107\\transcoder\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "Transcoder",
+    "handle": "transcoder",
+    "changelogUrl": "https://raw.githubusercontent.com/nystudio107/craft-transcoder/v1/CHANGELOG.md",
+    "class": "nystudio107\\transcoder\\Transcoder"
+  }
 }
