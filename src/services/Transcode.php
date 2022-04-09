@@ -10,8 +10,6 @@
 
 namespace nystudio107\transcoder\services;
 
-use nystudio107\transcoder\Transcoder;
-
 use Craft;
 use craft\base\Component;
 use craft\elements\Asset;
@@ -19,12 +17,16 @@ use craft\events\AssetThumbEvent;
 use craft\helpers\FileHelper;
 use craft\helpers\Json as JsonHelper;
 use craft\volumes\Local;
-
-use yii\base\Exception;
-use yii\validators\UrlValidator;
-
 use mikehaertl\shellcommand\Command as ShellCommand;
+use nystudio107\transcoder\Transcoder;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\validators\UrlValidator;
+use function count;
+use function function_exists;
+use function in_array;
+use function is_bool;
+use function is_object;
 
 /**
  * @author    nystudio107
@@ -53,6 +55,8 @@ class Transcode extends Component
         'audioEncoder',
         'fileSuffix',
         'sharpen',
+        'nosynchronous',
+        'nostripMetadata',
     ];
 
     // Mappings for getFileInfo() summary values
@@ -88,7 +92,7 @@ class Transcode extends Component
      * @param      $filePath     string  path to the original video -OR- an
      *                           Asset
      * @param      $videoOptions array   of options for the video
-     * @param bool $generate     whether the video should be encoded
+     * @param bool $generate whether the video should be encoded
      *
      * @return string       URL of the transcoded video or ""
      */
@@ -99,7 +103,7 @@ class Transcode extends Component
         $subfolder = '';
 
         // sub folder check
-        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+        if (is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
             $subfolder = $filePath->folderPath;
         }
 
@@ -107,7 +111,7 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destVideoPath = $settings['transcoderPaths']['video'].$subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = $settings['transcoderPaths']['video'] . $subfolder ?? $settings['transcoderPaths']['default'];
             $destVideoPath = Craft::parseEnv($destVideoPath);
             $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
 
@@ -119,20 +123,20 @@ class Transcode extends Component
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
-                .' -i '.escapeshellarg($filePath)
-                .' -vcodec '.$thisEncoder['videoCodec']
-                .' '.$thisEncoder['videoCodecOptions']
-                .' -bufsize 1000k'
-                .' -threads '.$thisEncoder['threads'];
+                . ' -i ' . escapeshellarg($filePath)
+                . ' -vcodec ' . $thisEncoder['videoCodec']
+                . ' ' . $thisEncoder['videoCodecOptions']
+                . ' -bufsize 1000k'
+                . ' -threads ' . $thisEncoder['threads'];
 
             // Set the framerate if desired
             if (!empty($videoOptions['videoFrameRate'])) {
-                $ffmpegCmd .= ' -r '.$videoOptions['videoFrameRate'];
+                $ffmpegCmd .= ' -r ' . $videoOptions['videoFrameRate'];
             }
 
             // Set the bitrate if desired
             if (!empty($videoOptions['videoBitRate'])) {
-                $ffmpegCmd .= ' -b:v '.$videoOptions['videoBitRate'].' -maxrate '.$videoOptions['videoBitRate'];
+                $ffmpegCmd .= ' -b:v ' . $videoOptions['videoBitRate'] . ' -maxrate ' . $videoOptions['videoBitRate'];
             }
 
             // Adjust the scaling if desired
@@ -150,17 +154,17 @@ class Transcode extends Component
                 $ffmpegCmd .= ' -c:a copy';
             } else {
                 // Do audio transcoding based on the settings
-                $ffmpegCmd .= ' -acodec '.$thisEncoder['audioCodec'];
+                $ffmpegCmd .= ' -acodec ' . $thisEncoder['audioCodec'];
                 if (!empty($videoOptions['audioBitRate'])) {
-                    $ffmpegCmd .= ' -b:a '.$videoOptions['audioBitRate'];
+                    $ffmpegCmd .= ' -b:a ' . $videoOptions['audioBitRate'];
                 }
                 if (!empty($videoOptions['audioSampleRate'])) {
-                    $ffmpegCmd .= ' -ar '.$videoOptions['audioSampleRate'];
+                    $ffmpegCmd .= ' -ar ' . $videoOptions['audioSampleRate'];
                 }
                 if (!empty($videoOptions['audioChannels'])) {
-                    $ffmpegCmd .= ' -ac '.$videoOptions['audioChannels'];
+                    $ffmpegCmd .= ' -ac ' . $videoOptions['audioChannels'];
                 }
-                $ffmpegCmd .= ' '.$thisEncoder['audioCodecOptions'];
+                $ffmpegCmd .= ' ' . $thisEncoder['audioCodecOptions'];
             }
 
             // Create the directory if it isn't there already
@@ -175,23 +179,23 @@ class Transcode extends Component
             $destVideoFile = $this->getFilename($filePath, $videoOptions);
 
             // File to store the video encoding progress in
-            $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.progress';
+            $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.progress';
 
             // Assemble the destination path and final ffmpeg command
             $destVideoPath .= $destVideoFile;
             $ffmpegCmd .= ' -f '
-                .$thisEncoder['fileFormat']
-                .' -y '.escapeshellarg($destVideoPath)
-                .' 1> '.$progressFile.' 2>&1 & echo $!';
+                . $thisEncoder['fileFormat']
+                . ' -y ' . escapeshellarg($destVideoPath)
+                . ' 1> ' . $progressFile . ' 2>&1 & echo $!';
 
             // Make sure there isn't a lockfile for this video already
-            $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.lock';
+            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
             $oldPid = @file_get_contents($lockFile);
             if ($oldPid !== false) {
                 // See if the process is running, and empty result means the process is still running
                 // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
                 exec("kill -0 $oldPid 2>&1", $ProcessState);
-                if (\count($ProcessState) === 0) {
+                if (count($ProcessState) === 0) {
                     return $result;
                 }
                 // It's finished transcoding, so delete the lockfile and progress file
@@ -201,15 +205,15 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['video'].$subfolder ?? $settings['transcoderUrls']['default'];
-                $result = Craft::parseEnv($url).$destVideoFile;
+                $url = $settings['transcoderUrls']['video'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $result = Craft::parseEnv($url) . $destVideoFile;
                 // skip encoding
             } elseif (!$generate) {
                 $result = "";
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
+                Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
 
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
@@ -222,11 +226,11 @@ class Transcode extends Component
     /**
      * Returns a URL to a video thumbnail
      *
-     * @param string $filePath         path to the original video or an Asset
-     * @param array  $thumbnailOptions of options for the thumbnail
-     * @param bool   $generate         whether the thumbnail should be
+     * @param string $filePath path to the original video or an Asset
+     * @param array $thumbnailOptions of options for the thumbnail
+     * @param bool $generate whether the thumbnail should be
      *                                 generated if it doesn't exists
-     * @param bool   $asPath           Whether we should return a path or not
+     * @param bool $asPath Whether we should return a path or not
      *
      * @return string|false|null URL or path of the video thumbnail
      */
@@ -237,23 +241,23 @@ class Transcode extends Component
         $subfolder = '';
 
         // sub folder check
-        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+        if (is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
             $subfolder = $filePath->folderPath;
         }
 
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'].$subfolder ?? $settings['transcoderPaths']['default'];
+            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] . $subfolder ?? $settings['transcoderPaths']['default'];
             $destThumbnailPath = Craft::parseEnv($destThumbnailPath);
 
             $thumbnailOptions = $this->coalesceOptions('defaultThumbnailOptions', $thumbnailOptions);
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
-                .' -i '.escapeshellarg($filePath)
-                .' -vcodec mjpeg'
-                .' -vframes 1';
+                . ' -i ' . escapeshellarg($filePath)
+                . ' -vcodec mjpeg'
+                . ' -vframes 1';
 
             // Adjust the scaling if desired
             $ffmpegCmd = $this->addScalingFfmpegArgs(
@@ -264,7 +268,7 @@ class Transcode extends Component
             // Set the timecode to get the thumbnail from if desired
             if (!empty($thumbnailOptions['timeInSecs'])) {
                 $timeCode = gmdate('H:i:s', $thumbnailOptions['timeInSecs']);
-                $ffmpegCmd .= ' -ss '.$timeCode.'.00';
+                $ffmpegCmd .= ' -ss ' . $timeCode . '.00';
             }
 
             // Create the directory if it isn't there already
@@ -280,7 +284,7 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destThumbnailPath .= $destThumbnailFile;
-            $ffmpegCmd .= ' -f image2 -y '.escapeshellarg($destThumbnailPath).' >/dev/null 2>/dev/null &';
+            $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null &';
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
@@ -294,7 +298,7 @@ class Transcode extends Component
 
                     return false;
                 } else {
-                    Craft::info('Thumbnail does not exist, but not asked to generate it: '.$filePath, __METHOD__);
+                    Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
 
                     // The file doesn't exist, and we weren't asked to generate it
                     return false;
@@ -304,8 +308,8 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $url = $settings['transcoderUrls']['thumbnail'].$subfolder ?? $settings['transcoderUrls']['default'];
-                $result = Craft::parseEnv($url).$destThumbnailFile;
+                $url = $settings['transcoderUrls']['thumbnail'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $result = Craft::parseEnv($url) . $destThumbnailFile;
             }
         }
 
@@ -328,14 +332,14 @@ class Transcode extends Component
         $subfolder = '';
 
         // sub folder check
-        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+        if (is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
             $subfolder = $filePath->folderPath;
         }
 
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destAudioPath = $settings['transcoderPaths']['audio'].$subfolder ?? $settings['transcoderPaths']['default'];
+            $destAudioPath = $settings['transcoderPaths']['audio'] . $subfolder ?? $settings['transcoderPaths']['default'];
             $destAudioPath = Craft::parseEnv($destAudioPath);
 
             $audioOptions = $this->coalesceOptions('defaultAudioOptions', $audioOptions);
@@ -348,33 +352,33 @@ class Transcode extends Component
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
-                .' -i '.escapeshellarg($filePath)
-                .' -acodec '.$thisEncoder['audioCodec']
-                .' '.$thisEncoder['audioCodecOptions']
-                .' -bufsize 1000k'
-                .' -vn'
-                .' -threads '.$thisEncoder['threads'];
+                . ' -i ' . escapeshellarg($filePath)
+                . ' -acodec ' . $thisEncoder['audioCodec']
+                . ' ' . $thisEncoder['audioCodecOptions']
+                . ' -bufsize 1000k'
+                . ' -vn'
+                . ' -threads ' . $thisEncoder['threads'];
 
             // Set the bitrate if desired
             if (!empty($audioOptions['audioBitRate'])) {
-                $ffmpegCmd .= ' -b:a '.$audioOptions['audioBitRate'];
+                $ffmpegCmd .= ' -b:a ' . $audioOptions['audioBitRate'];
             }
             // Set the sample rate if desired
             if (!empty($audioOptions['audioSampleRate'])) {
-                $ffmpegCmd .= ' -ar '.$audioOptions['audioSampleRate'];
+                $ffmpegCmd .= ' -ar ' . $audioOptions['audioSampleRate'];
             }
             // Set the audio channels if desired
             if (!empty($audioOptions['audioChannels'])) {
-                $ffmpegCmd .= ' -ac '.$audioOptions['audioChannels'];
+                $ffmpegCmd .= ' -ac ' . $audioOptions['audioChannels'];
             }
-            $ffmpegCmd .= ' '.$thisEncoder['audioCodecOptions'];
+            $ffmpegCmd .= ' ' . $thisEncoder['audioCodecOptions'];
 
             if (!empty($audioOptions['seekInSecs'])) {
-                $ffmpegCmd .= ' -ss '.$audioOptions['seekInSecs'];
+                $ffmpegCmd .= ' -ss ' . $audioOptions['seekInSecs'];
             }
 
             if (!empty($audioOptions['timeInSecs'])) {
-                $ffmpegCmd .= ' -t '.$audioOptions['timeInSecs'];
+                $ffmpegCmd .= ' -t ' . $audioOptions['timeInSecs'];
             }
 
             // Create the directory if it isn't there already
@@ -389,7 +393,7 @@ class Transcode extends Component
             $destAudioFile = $this->getFilename($filePath, $audioOptions);
 
             // File to store the audio encoding progress in
-            $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.progress';
+            $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destAudioFile . '.progress';
 
             // Assemble the destination path and final ffmpeg command
             $destAudioPath .= $destAudioFile;
@@ -403,23 +407,23 @@ class Transcode extends Component
             }
             // Add the file format
             $ffmpegCmd .= ' -f '
-                .$thisEncoder['fileFormat']
-                .' -y '.escapeshellarg($destAudioPath);
+                . $thisEncoder['fileFormat']
+                . ' -y ' . escapeshellarg($destAudioPath);
             // Handle the `synchronous` setting
             $synchronous = false;
             if (!empty($audioOptions['synchronous'])) {
                 $synchronous = $audioOptions['synchronous'];
             }
             if (!$synchronous) {
-                $ffmpegCmd .=' 1> '.$progressFile.' 2>&1 & echo $!';
+                $ffmpegCmd .= ' 1> ' . $progressFile . ' 2>&1 & echo $!';
                 // Make sure there isn't a lockfile for this audio file already
-                $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destAudioFile.'.lock';
+                $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destAudioFile . '.lock';
                 $oldPid = @file_get_contents($lockFile);
                 if ($oldPid !== false) {
                     // See if the process is running, and empty result means the process is still running
                     // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
                     exec("kill -0 $oldPid 2>&1", $ProcessState);
-                    if (\count($ProcessState) === 0) {
+                    if (count($ProcessState) === 0) {
                         return $result;
                     }
                     // It's finished transcoding, so delete the lockfile and progress file
@@ -430,8 +434,8 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (@filemtime($destAudioPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['audio'].$subfolder ?? $settings['transcoderUrls']['default'];
-                $result = Craft::parseEnv($url).$destAudioFile;
+                $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $result = Craft::parseEnv($url) . $destAudioFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
@@ -439,9 +443,9 @@ class Transcode extends Component
                 if ($synchronous) {
                     Craft::info($ffmpegCmd, __METHOD__);
                     $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
-                    $result = Craft::parseEnv($url).$destAudioFile;
+                    $result = Craft::parseEnv($url) . $destAudioFile;
                 } else {
-                    Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
+                    Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
                     // Create a lockfile in tmp
                     file_put_contents($lockFile, $pid);
                 }
@@ -469,8 +473,8 @@ class Transcode extends Component
             // Build the basic command for ffprobe
             $ffprobeOptions = $settings['ffprobeOptions'];
             $ffprobeCmd = $settings['ffprobePath']
-                .' '.$ffprobeOptions
-                .' '.escapeshellarg($filePath);
+                . ' ' . $ffprobeOptions
+                . ' ' . escapeshellarg($filePath);
 
             $shellOutput = $this->executeShellCommand($ffprobeCmd);
             Craft::info($ffprobeCmd, __METHOD__);
@@ -615,8 +619,8 @@ class Transcode extends Component
     /**
      * Returns a URL to a encoded GIF file (mp4)
      *
-     * @param string $filePath   path to the original video or an Asset
-     * @param array  $gifOptions of options for the GIF file
+     * @param string $filePath path to the original video or an Asset
+     * @param array $gifOptions of options for the GIF file
      *
      * @return string|false|null URL or path of the GIF file
      */
@@ -628,7 +632,7 @@ class Transcode extends Component
         $subfolder = '';
 
         // sub folder check
-        if (\is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
+        if (is_object($filePath) && ($filePath instanceof Asset) && $settings['createSubfolders']) {
             $subfolder = $filePath->folderPath;
         }
 
@@ -636,7 +640,7 @@ class Transcode extends Component
 
         if (!empty($filePath)) {
             // Dest path
-            $destVideoPath = $settings['transcoderPaths']['gif'].$subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = $settings['transcoderPaths']['gif'] . $subfolder ?? $settings['transcoderPaths']['default'];
             $destVideoPath = Craft::parseEnv($destVideoPath);
 
             // Options
@@ -649,10 +653,10 @@ class Transcode extends Component
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
-                .' -f gif'
-                .' -i '.escapeshellarg($filePath)
-                .' -vcodec '.$thisEncoder['videoCodec']
-                .' '.$thisEncoder['videoCodecOptions'];
+                . ' -f gif'
+                . ' -i ' . escapeshellarg($filePath)
+                . ' -vcodec ' . $thisEncoder['videoCodec']
+                . ' ' . $thisEncoder['videoCodecOptions'];
 
 
             // Create the directory if it isn't there already
@@ -667,22 +671,22 @@ class Transcode extends Component
             $destVideoFile = $this->getFilename($filePath, $gifOptions);
 
             // File to store the video encoding progress in
-            $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.progress';
+            $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.progress';
 
             // Assemble the destination path and final ffmpeg command
             $destVideoPath .= $destVideoFile;
             $ffmpegCmd .= ' '
-                .' -y '.escapeshellarg($destVideoPath)
-                .' 1> '.$progressFile.' 2>&1 & echo $!';
+                . ' -y ' . escapeshellarg($destVideoPath)
+                . ' 1> ' . $progressFile . ' 2>&1 & echo $!';
 
             // Make sure there isn't a lockfile for this video already
-            $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$destVideoFile.'.lock';
+            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
             $oldPid = @file_get_contents($lockFile);
             if ($oldPid !== false) {
                 // See if the process is running, and empty result means the process is still running
                 // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
                 exec("kill -0 $oldPid 2>&1", $ProcessState);
-                if (\count($ProcessState) === 0) {
+                if (count($ProcessState) === 0) {
                     return $result;
                 }
                 // It's finished transcoding, so delete the lockfile and progress file
@@ -692,12 +696,12 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['gif'].$subfolder ?? $settings['transcoderUrls']['default'];
-                $result = Craft::parseEnv($url).$destVideoFile;
+                $url = $settings['transcoderUrls']['gif'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $result = Craft::parseEnv($url) . $destVideoFile;
             } else {
                 // Kick off the transcoding
                 $pid = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd."\nffmpeg PID: ".$pid, __METHOD__);
+                Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
 
                 // Create a lockfile in tmp
                 file_put_contents($lockFile, $pid);
@@ -737,17 +741,17 @@ class Transcode extends Component
                 if (!empty(self::SUFFIX_MAP[$key])) {
                     $suffix = self::SUFFIX_MAP[$key];
                 }
-                if (\is_bool($value)) {
-                    $value = $value ? $key : 'no'.$key;
+                if (is_bool($value)) {
+                    $value = $value ? $key : 'no' . $key;
                 }
-                if (!\in_array($key, self::EXCLUDE_PARAMS, true)) {
-                    $fileName .= '_'.$value.$suffix;
+                if (!in_array($key, self::EXCLUDE_PARAMS, true)) {
+                    $fileName .= '_' . $value . $suffix;
                 }
             }
         }
         // See if we should use a hash instead
         if ($settings['useHashedNames']) {
-            $fileName = $pathParts['filename'].md5($fileName);
+            $fileName = $pathParts['filename'] . md5($fileName);
         }
         $fileName .= $options['fileSuffix'];
 
@@ -764,7 +768,7 @@ class Transcode extends Component
     protected function getAssetPath($filePath): string
     {
         // If we're passed an Asset, extract the path from it
-        if (\is_object($filePath) && ($filePath instanceof Asset)) {
+        if (is_object($filePath) && ($filePath instanceof Asset)) {
             /** @var Asset $asset */
             $asset = $filePath;
             $assetVolume = null;
@@ -787,7 +791,7 @@ class Transcode extends Component
                     }
                     $folderPath .= '' === $folderPath ? '' : DIRECTORY_SEPARATOR;
 
-                    $filePath = $sourcePath.$folderPath.$asset->filename;
+                    $filePath = $sourcePath . $folderPath . $asset->filename;
                 } else {
                     // Otherwise, get a URL
                     $filePath = $asset->getUrl();
@@ -829,16 +833,16 @@ class Transcode extends Component
                     case 'letterbox':
                         $letterboxColor = '';
                         if (!empty($options['letterboxColor'])) {
-                            $letterboxColor = ':color='.$options['letterboxColor'];
+                            $letterboxColor = ':color=' . $options['letterboxColor'];
                         }
                         $aspectRatio = ':force_original_aspect_ratio=decrease'
-                            .',pad='.$options['width'].':'.$options['height'].':(ow-iw)/2:(oh-ih)/2'
-                            .$letterboxColor;
+                            . ',pad=' . $options['width'] . ':' . $options['height'] . ':(ow-iw)/2:(oh-ih)/2'
+                            . $letterboxColor;
                         break;
                     // Scale to the appropriate aspect ratio, cropping
                     case 'crop':
                         $aspectRatio = ':force_original_aspect_ratio=increase'
-                            .',crop='.$options['width'].':'.$options['height'];
+                            . ',crop=' . $options['width'] . ':' . $options['height'];
                         break;
                     // No aspect ratio scaling at all
                     default:
@@ -852,10 +856,10 @@ class Transcode extends Component
                 $sharpen = ',unsharp=5:5:1.0:5:5:0.0';
             }
             $ffmpegCmd .= ' -vf "scale='
-                .$options['width'].':'.$options['height']
-                .$aspectRatio
-                .$sharpen
-                .'"';
+                . $options['width'] . ':' . $options['height']
+                . $aspectRatio
+                . $sharpen
+                . '"';
         }
 
         return $ffmpegCmd;
@@ -898,7 +902,7 @@ class Transcode extends Component
         $shellCommand->setCommand($command);
 
         // If we don't have proc_open, maybe we've got exec
-        if (!\function_exists('proc_open') && \function_exists('exec')) {
+        if (!function_exists('proc_open') && function_exists('exec')) {
             $shellCommand->useExec = true;
         }
 
