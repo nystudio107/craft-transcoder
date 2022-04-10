@@ -55,6 +55,8 @@ class Transcode extends Component
         'audioEncoder',
         'fileSuffix',
         'sharpen',
+        'synchronous',
+        'stripMetadata',
     ];
 
     // Mappings for getFileInfo() summary values

@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 4.0.0-beta.5 - 2022.04.09
+### Changed
+* Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name
+
 ## 4.0.0-beta.4 - 2022.04.08
 ### Fixed
 * Fixed incorrect return types in `TranscoderVariable` that could cause exceptions to be thrown
