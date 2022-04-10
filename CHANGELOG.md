@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.22 - UNRELEASED
+## 1.2.22 - 2022.04.09
 ### Changed
 * Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name
 
