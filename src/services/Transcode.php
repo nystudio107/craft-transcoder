@@ -460,13 +460,13 @@ class Transcode extends Component
     /**
      * Extract information from a video/audio file
      *
-     * @param string $filePath
+     * @param Asset|string $filePath
      * @param bool $summary
      *
      * @return null|array
      * @throws InvalidConfigException
      */
-    public function getFileInfo(string $filePath, bool $summary = false): ?array
+    public function getFileInfo(Asset|string $filePath, bool $summary = false): ?array
     {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
