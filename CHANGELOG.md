@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 4.0.0-beta.6 - 2022.04.11
+### Fixed
+* Fixed method signature for `Transcode::getFileInfo()` so that an Asset object can be passed into it
+
 ## 4.0.0-beta.5 - 2022.04.09
 ### Changed
 * Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name

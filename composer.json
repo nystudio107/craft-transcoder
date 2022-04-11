@@ -2,7 +2,7 @@
   "name": "nystudio107/craft-transcoder",
   "description": "Transcode video & audio files to various formats, and provide video thumbnails",
   "type": "craft-plugin",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.6",
   "keywords": [
     "craft",
     "cms",
