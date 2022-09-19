@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 4.0.0 - UNRELEASED
+### Fixed
+* Remove reference to now missing `DefineAssetThumbUrlEvent::generate` property 
+
 ## 4.0.0-beta.6 - 2022.04.11
 ### Fixed
 * Fixed method signature for `Transcode::getFileInfo()` so that an Asset object can be passed into it
