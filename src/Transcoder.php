@@ -27,10 +27,8 @@ use craft\services\Plugins;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
-use nystudio107\pluginvite\services\VitePluginService;
-use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
 use nystudio107\transcoder\models\Settings;
-use nystudio107\transcoder\services\Transcode;
+use nystudio107\transcoder\services\ServicesTrait;
 use nystudio107\transcoder\variables\TranscoderVariable;
 use yii\base\ErrorException;
 use yii\base\Event;
@@ -41,14 +39,14 @@ use yii\base\Event;
  * @author    nystudio107
  * @package   Transcode
  * @since     1.0.0
- *
- * @property Transcode $transcode
- * @property Settings $settings
- * @property VitePluginService $vite
- * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
 {
+    // Traits
+    // =========================================================================
+
+    use ServicesTrait;
+
     // Static Properties
     // =========================================================================
 
@@ -62,46 +60,23 @@ class Transcoder extends Plugin
      */
     public static ?Settings $settings;
 
-    // Static Methods
-    // =========================================================================
-    /**
-     * @var string
-     */
-    public string $schemaVersion = '1.0.0';
-
     // Public Properties
     // =========================================================================
+
     /**
      * @var bool
      */
     public bool $hasCpSection = false;
+
     /**
      * @var bool
      */
     public bool $hasCpSettings = false;
 
     /**
-     * @inheritdoc
+     * @var string
      */
-    public function __construct($id, $parent = null, array $config = [])
-    {
-        $config['components'] = [
-            'transcode' => Transcode::class,
-            // Register the vite service
-            'vite' => [
-                'class' => VitePluginService::class,
-                'assetClass' => TranscoderAsset::class,
-                'useDevServer' => true,
-                'devServerPublic' => 'http://localhost:3001',
-                'serverPublic' => 'http://localhost:8000',
-                'errorEntry' => 'src/js/app.ts',
-                'devServerInternal' => 'http://craft-transcoder-buildchain:3001',
-                'checkDevServer' => true,
-            ],
-        ];
-
-        parent::__construct($id, $parent, $config);
-    }
+    public string $schemaVersion = '1.0.0';
 
     // Public Methods
     // =========================================================================
