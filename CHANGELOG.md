@@ -1,5 +1,13 @@
 # Transcoder Changelog
 
+## 1.2.23 - 2022.09.20
+### Changed
+* Move to using `ServicesTrait` and add getter methods for services
+* Pinned `vitepress` to `^0.22.4` pending official `1.0.0` release
+* Add comments to `Makefile`s for Fig
+* Use Vite `^3.1.0` & rebuild assets
+* Add `allow-plugins` to `composer.json` to allow CI tests to function
+
 ## 1.2.22 - 2022.04.09
 ### Changed
 * Added `synchronous` & `stripMetadata` to the parameters that should be excluded from the generated file name

@@ -1,6 +1,6 @@
 <?php
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS
  *
  * Transcode videos to various formats, and provide thumbnails of the video
  *
@@ -10,12 +10,10 @@
 
 namespace nystudio107\transcoder\variables;
 
-use nystudio107\transcoder\Transcoder;
-
+use craft\helpers\UrlHelper;
 use nystudio107\pluginvite\variables\ViteVariableInterface;
 use nystudio107\pluginvite\variables\ViteVariableTrait;
-
-use craft\helpers\UrlHelper;
+use nystudio107\transcoder\Transcoder;
 
 /**
  * @author    nystudio107
@@ -161,7 +159,7 @@ class TranscoderVariable implements ViteVariableInterface
     {
         $result = '';
         $filePath = parse_url($url, PHP_URL_PATH);
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         if (file_exists($filePath)) {
             $urlParams = [
                 'url' => $url,

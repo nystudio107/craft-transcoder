@@ -1,6 +1,6 @@
 <?php
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS
  *
  * Transcode videos to various formats, and provide thumbnails of the video
  *
@@ -10,13 +10,12 @@
 
 namespace nystudio107\transcoder\controllers;
 
-use nystudio107\transcoder\Transcoder;
-
 use Craft;
 use craft\errors\AssetDisallowedExtensionException;
 use craft\helpers\Json as JsonHelper;
 use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
+use nystudio107\transcoder\Transcoder;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -77,7 +76,7 @@ class DefaultController extends Controller
             throw new AssetDisallowedExtensionException("File “{$filePath}” cannot be downloaded because “{$extension}” is not allowed.");
         }
 
-        $filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
         Craft::$app->getResponse()->sendFile(
             $filePath,
             null,
@@ -101,7 +100,7 @@ class DefaultController extends Controller
     public function actionProgress($filename)
     {
         $result = [];
-        $progressFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.$filename.'.progress';
+        $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.progress';
         if (file_exists($progressFile)) {
             $content = @file_get_contents($progressFile);
             if ($content) {
