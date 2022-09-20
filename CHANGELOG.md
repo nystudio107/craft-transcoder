@@ -1,8 +1,15 @@
 # Transcoder Changelog
 
-## 4.0.0 - UNRELEASED
+## 4.0.0 - 2022.09.20
+### Changed
+* Pinned `vitepress` to `^0.22.4` pending official `1.0.0` release
+* Add comments to `Makefile`s for Fig
+* Use Vite `^3.1.0` & rebuild assets
+* Add `allow-plugins` to `composer.json` to allow CI tests to function
+
 ### Fixed
 * Remove reference to now missing `DefineAssetThumbUrlEvent::generate` property 
+* Change reference to now renamed `DefineAssetThumbUrlEvent::path` property
 
 ## 4.0.0-beta.6 - 2022.04.11
 ### Fixed
