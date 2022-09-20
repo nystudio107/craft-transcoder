@@ -1,6 +1,6 @@
 <?php
 /**
- * Transcode plugin for Craft CMS 3.x
+ * Transcode plugin for Craft CMS
  *
  * Transcode
  *
@@ -10,11 +10,7 @@
 
 namespace nystudio107\transcoder\console\controllers;
 
-use nystudio107\transcoder\Transcoder;
-
-use Craft;
 use yii\console\Controller;
-use yii\helpers\Console;
 
 /**
  * Default Command

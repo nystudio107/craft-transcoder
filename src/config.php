@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS
  *
  * Transcode videos to various formats, and provide thumbnails of the video
  *

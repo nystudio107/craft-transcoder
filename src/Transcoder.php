@@ -1,6 +1,6 @@
 <?php
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS
  *
  * Transcode videos to various formats, and provide thumbnails of the video
  *
@@ -10,21 +10,14 @@
 
 namespace nystudio107\transcoder;
 
-use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
-use nystudio107\transcoder\services\Transcode;
-use nystudio107\transcoder\variables\TranscoderVariable;
-use nystudio107\transcoder\models\Settings;
-
-use nystudio107\pluginvite\services\VitePluginService;
-
 use Craft;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
 use craft\events\AssetThumbEvent;
 use craft\events\PluginEvent;
-use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterCacheOptionsEvent;
+use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\UrlHelper;
@@ -33,7 +26,11 @@ use craft\services\Plugins;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
-
+use nystudio107\pluginvite\services\VitePluginService;
+use nystudio107\transcoder\assetbundles\transcoder\TranscoderAsset;
+use nystudio107\transcoder\models\Settings;
+use nystudio107\transcoder\services\Transcode;
+use nystudio107\transcoder\variables\TranscoderVariable;
 use yii\base\ErrorException;
 use yii\base\Event;
 
@@ -44,9 +41,9 @@ use yii\base\Event;
  * @package   Transcode
  * @since     1.0.0
  *
- * @property Transcode          $transcode
- * @property Settings           $settings
- * @property VitePluginService  $vite
+ * @property Transcode $transcode
+ * @property Settings $settings
+ * @property VitePluginService $vite
  * @method   Settings   getSettings()
  */
 class Transcoder extends Plugin
