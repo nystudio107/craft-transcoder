@@ -1,24 +1,19 @@
 {
   "../src/web/assets/src/js/app.ts": {
-    "file": "assets/app.9353cce9.js",
+    "file": "assets/app.7c3c19f8.js",
     "src": "../src/web/assets/src/js/app.ts",
     "isEntry": true,
     "css": [
-      "assets/app.f1fcf373.css"
-    ],
-    "integrity": "sha384-UC2hbo5SD2DrtRwnxbMm6gDl1MFh2CEJJCth9+BmEbh5fO3LX98rTHrDzo90kQX9"
+      "assets/app.5b295f2f.css"
+    ]
   },
   "../src/web/assets/src/js/welcome.ts": {
-    "file": "assets/welcome.1298cd45.js",
+    "file": "assets/welcome.e0e23a99.js",
     "src": "../src/web/assets/src/js/welcome.ts",
-    "isEntry": true,
-    "imports": [
-      "_vendor.5a585035.js"
-    ],
-    "integrity": "sha384-vvaAa+PJCMslRDa+lJNHMn99zj608e5io/c6zwGF7GRYk6NxjMuC+HRTcE8+UHzc"
+    "isEntry": true
   },
-  "_vendor.5a585035.js": {
-    "file": "assets/vendor.5a585035.js",
-    "integrity": "sha384-ab+uCoignZ4vMSyeNPyL8mKiNh5Dqm8JlGFvLDZ0FqjSBsVzjv0HMUMqpLZ15IZx"
+  "../src/web/assets/src/js/app.css": {
+    "file": "assets/app.5b295f2f.css",
+    "src": "../src/web/assets/src/js/app.css"
   }
 }

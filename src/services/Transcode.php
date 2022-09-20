@@ -1,6 +1,6 @@
 <?php
 /**
- * Transcoder plugin for Craft CMS 3.x
+ * Transcoder plugin for Craft CMS
  *
  * Transcode videos to various formats, and provide thumbnails of the video
  *
@@ -615,7 +615,7 @@ class Transcode extends Component
             'width' => $event->width,
             'height' => $event->height,
         ];
-        return $this->getVideoThumbnailUrl($event->asset, $options, $event->generate, true);
+        return $this->getVideoThumbnailUrl($event->asset, $options, true, true);
     }
 
     // Protected Methods
