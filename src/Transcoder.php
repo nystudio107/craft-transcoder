@@ -185,7 +185,7 @@ class Transcoder extends Plugin
                 if (AssetsHelper::getFileKindByExtension($asset->filename) === Asset::KIND_VIDEO) {
                     $path = Transcoder::$plugin->transcode->handleGetAssetThumbPath($event);
                     if (!empty($path)) {
-                        $event->path = $path;
+                        $event->url = $path;
                     }
                 }
             }
