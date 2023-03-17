@@ -787,8 +787,9 @@ class Transcode extends Component
 
             if ($assetVolume) {
                 // If it's local, get a path to the file
-                if ($assetVolume instanceof Local) {
-                    $sourcePath = rtrim($assetVolume->path, DIRECTORY_SEPARATOR);
+                $fs = $assetVolume->getFs();
+                if ($fs instanceof Local) {
+                    $sourcePath = rtrim($fs->path, DIRECTORY_SEPARATOR);
                     $sourcePath .= '' === $sourcePath ? '' : DIRECTORY_SEPARATOR;
                     $folderPath = '';
                     try {
