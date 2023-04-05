@@ -615,7 +615,7 @@ class Transcode extends Component
             'width' => $event->width,
             'height' => $event->height,
         ];
-        return $this->getVideoThumbnailUrl($event->asset, $options, true, true);
+        return $this->getVideoThumbnailUrl($event->asset, $options);
     }
 
     // Protected Methods
