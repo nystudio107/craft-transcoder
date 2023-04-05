@@ -57,6 +57,7 @@ class Transcode extends Component
         'sharpen',
         'synchronous',
         'stripMetadata',
+        'videoCodecOptions',
     ];
 
     // Mappings for getFileInfo() summary values
