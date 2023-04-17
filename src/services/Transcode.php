@@ -536,13 +536,13 @@ class Transcode extends Component
     /**
      * Get the name of a video file from a path and options
      *
-     * @param string $filePath
+     * @param Asset|string $filePath
      * @param array $videoOptions
      *
      * @return string
      * @throws InvalidConfigException
      */
-    public function getVideoFilename(string $filePath, array $videoOptions): string
+    public function getVideoFilename(Asset|string $filePath, array $videoOptions): string
     {
         $settings = Transcoder::$plugin->getSettings();
         $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
@@ -559,13 +559,13 @@ class Transcode extends Component
     /**
      * Get the name of an audio file from a path and options
      *
-     * @param string $filePath
+     * @param Asset|string $filePath
      * @param array $audioOptions
      *
      * @return string
      * @throws InvalidConfigException
      */
-    public function getAudioFilename(string $filePath, array $audioOptions): string
+    public function getAudioFilename(Asset|string $filePath, array $audioOptions): string
     {
         $settings = Transcoder::$plugin->getSettings();
         $audioOptions = $this->coalesceOptions('defaultAudioOptions', $audioOptions);
@@ -582,13 +582,13 @@ class Transcode extends Component
     /**
      * Get the name of a gif video file from a path and options
      *
-     * @param string $filePath
+     * @param Asset|string $filePath
      * @param array $gifOptions
      *
      * @return string
      * @throws InvalidConfigException
      */
-    public function getGifFilename(string $filePath, array $gifOptions): string
+    public function getGifFilename(Asset|string $filePath, array $gifOptions): string
     {
         $settings = Transcoder::$plugin->getSettings();
         $gifOptions = $this->coalesceOptions('defaultGifOptions', $gifOptions);
@@ -721,13 +721,13 @@ class Transcode extends Component
     /**
      * Get the name of a file from a path and options
      *
-     * @param string $filePath
+     * @param Asset|string $filePath
      * @param array $options
      *
      * @return string
      * @throws InvalidConfigException
      */
-    protected function getFilename(string $filePath, array $options): string
+    protected function getFilename(Asset|string $filePath, array $options): string
     {
         $settings = Transcoder::$plugin->getSettings();
         $filePath = $this->getAssetPath($filePath);
