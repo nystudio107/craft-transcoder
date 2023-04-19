@@ -1,6 +1,10 @@
 # Transcoder Changelog
 
 ## 4.0.1 - UNRELEASED
+### Changed
+* Updated the docs to use VitePress `^1.0.0-alpha.29`
+* Allow for versioning of the docs
+
 ### Fixed
 * Fix Asset Volume file system access for Craft 4 ([#67](https://github.com/nystudio107/craft-transcoder/pull/67/files))
 * Fix progress URLs and send application/json response ([#68](https://github.com/nystudio107/craft-transcoder/pull/68))
