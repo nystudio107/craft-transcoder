@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 4.0.1 - UNRELEASED
+## 4.0.1 - 2023.04.20
 ### Changed
 * Updated the docs to use VitePress `^1.0.0-alpha.29`
 * Allow for versioning of the docs
