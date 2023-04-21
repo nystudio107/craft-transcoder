@@ -1,5 +1,16 @@
 # Transcoder Changelog
 
+## 4.0.1 - 2023.04.20
+### Changed
+* Updated the docs to use VitePress `^1.0.0-alpha.29`
+* Allow for versioning of the docs
+
+### Fixed
+* Fix Asset Volume file system access for Craft 4 ([#67](https://github.com/nystudio107/craft-transcoder/pull/67/files))
+* Fix progress URLs and send application/json response ([#68](https://github.com/nystudio107/craft-transcoder/pull/68))
+* Fix asset thumbnails ([#69](https://github.com/nystudio107/craft-transcoder/pull/69))
+* Fix GIF filename generation ([#70](https://github.com/nystudio107/craft-transcoder/pull/70))
+
 ## 4.0.0 - 2022.09.20
 ### Changed
 * Pinned `vitepress` to `^0.22.4` pending official `1.0.0` release

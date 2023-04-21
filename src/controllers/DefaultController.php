@@ -12,12 +12,13 @@ namespace nystudio107\transcoder\controllers;
 
 use Craft;
 use craft\errors\AssetDisallowedExtensionException;
-use craft\helpers\Json as JsonHelper;
 use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
+use craft\web\Response;
 use nystudio107\transcoder\Transcoder;
 use yii\base\ExitException;
 use yii\web\BadRequestHttpException;
+
 use function count;
 use function is_array;
 
@@ -28,7 +29,6 @@ use function is_array;
  */
 class DefaultController extends Controller
 {
-
     // Protected Properties
     // =========================================================================
 
@@ -100,9 +100,9 @@ class DefaultController extends Controller
      *
      * @param $filename
      *
-     * @return string
+     * @return Response
      */
-    public function actionProgress($filename): string
+    public function actionProgress($filename): Response
     {
         $result = [];
         $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.progress';
@@ -173,6 +173,6 @@ class DefaultController extends Controller
             }
         }
 
-        return JsonHelper::encode($result);
+        return $this->asJson($result);
     }
 }
