@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.2.24 - 2023.04.20
+### Changed
+* Updated the docs to use VitePress `^1.0.0-alpha.29`
+* Allow for versioning of the docs
+
 ## 1.2.23 - 2022.09.20
 ### Changed
 * Move to using `ServicesTrait` and add getter methods for services
