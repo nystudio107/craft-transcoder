@@ -38,6 +38,7 @@ use yii\base\Event;
  * @author    nystudio107
  * @package   Transcode
  * @since     1.0.0
+ * @method Settings getSettings()
  */
 class Transcoder extends Plugin
 {
