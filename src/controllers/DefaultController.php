@@ -25,7 +25,6 @@ use yii\web\BadRequestHttpException;
  */
 class DefaultController extends Controller
 {
-
     // Protected Properties
     // =========================================================================
 
