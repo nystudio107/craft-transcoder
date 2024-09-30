@@ -155,7 +155,7 @@ class Transcoder extends Plugin
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
-            function (Event $event) {
+            function(Event $event) {
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('transcoder', [
@@ -176,7 +176,7 @@ class Transcoder extends Plugin
         Event::on(
             Assets::class,
             Assets::EVENT_DEFINE_THUMB_URL,
-            static function (DefineAssetThumbUrlEvent $event) {
+            static function(DefineAssetThumbUrlEvent $event) {
                 Craft::debug(
                     'Assets::EVENT_GET_THUMB_PATH',
                     __METHOD__
@@ -195,7 +195,7 @@ class Transcoder extends Plugin
             Event::on(
                 ClearCaches::class,
                 ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
-                function (RegisterCacheOptionsEvent $event) {
+                function(RegisterCacheOptionsEvent $event) {
                     $event->options[] = [
                         'key' => 'transcoder',
                         'label' => Craft::t('transcoder', 'Transcoder caches'),
@@ -208,7 +208,7 @@ class Transcoder extends Plugin
         Event::on(
             Plugins::class,
             Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-            function (PluginEvent $event) {
+            function(PluginEvent $event) {
                 if ($event->plugin === $this) {
                     $request = Craft::$app->getRequest();
                     if ($request->isCpRequest) {
@@ -233,7 +233,7 @@ class Transcoder extends Plugin
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
+            function(RegisterUrlRulesEvent $event) {
                 Craft::debug(
                     'UrlManager::EVENT_REGISTER_SITE_URL_RULES',
                     __METHOD__

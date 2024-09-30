@@ -46,7 +46,7 @@ trait ServicesTrait
                     'devServerInternal' => 'http://craft-transcoder-buildchain:3001',
                     'checkDevServer' => true,
                 ],
-            ]
+            ],
         ];
     }
 

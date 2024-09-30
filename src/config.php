@@ -161,7 +161,7 @@ return [
         'timeInSecs' => '',
         'seekInSecs' => '',
         'synchronous' => false,
-        'stripMetadata' => false
+        'stripMetadata' => false,
     ],
 
     // Default options for Gif encoding
