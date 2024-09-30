@@ -14,11 +14,10 @@ use Craft;
 use craft\errors\AssetDisallowedExtensionException;
 use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
-use craft\web\Response;
 use nystudio107\transcoder\Transcoder;
 use yii\base\ExitException;
 use yii\web\BadRequestHttpException;
-
+use yii\web\Response;
 use function count;
 use function is_array;
 
@@ -32,11 +31,6 @@ class DefaultController extends Controller
     // Protected Properties
     // =========================================================================
 
-    /**
-     * @var    bool|array Allows anonymous access to this controller's actions.
-     *         The actions must be in 'kebab-case'
-     * @access protected
-     */
     protected array|bool|int $allowAnonymous = [
         'download-file',
         'progress',
