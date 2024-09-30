@@ -1,9 +1,10 @@
 import {defineConfig} from 'vite';
-import vue from '@vitejs/plugin-vue'
-import ViteRestart from 'vite-plugin-restart';
-import viteCompression from 'vite-plugin-compression';
+import createVuePlugin from '@vitejs/plugin-vue';
+import viteCompressionPlugin from 'vite-plugin-compression';
+import viteEslintPlugin from 'vite-plugin-eslint';
+import viteStylelintPlugin from 'vite-plugin-stylelint';
+import viteRestartPlugin from 'vite-plugin-restart';
 import {visualizer} from 'rollup-plugin-visualizer';
-import {nodeResolve} from '@rollup/plugin-node-resolve';
 import * as path from 'path';
 
 // https://vitejs.dev/config/
@@ -11,7 +12,7 @@ export default defineConfig(({command}) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
     emptyOutDir: true,
-    manifest: true,
+    manifest: 'manifest.json',
     outDir: '../src/web/assets/dist',
     rollupOptions: {
       input: {
@@ -24,18 +25,13 @@ export default defineConfig(({command}) => ({
     }
   },
   plugins: [
-    nodeResolve({
-      moduleDirectories: [
-        path.resolve('./node_modules'),
-      ],
-    }),
-    ViteRestart({
+    viteRestartPlugin({
       reload: [
-        './src/templates/**/*',
+        '../src/templates/**/*',
       ],
     }),
-    vue(),
-    viteCompression({
+    createVuePlugin(),
+    viteCompressionPlugin({
       filter: /\.(js|mjs|json|css|map)$/i
     }),
     visualizer({
@@ -43,12 +39,19 @@ export default defineConfig(({command}) => ({
       template: 'treemap',
       sourcemap: true,
     }),
+    viteEslintPlugin({
+      cache: false,
+      fix: true,
+    }),
+    viteStylelintPlugin({
+      fix: true,
+      lintInWorker: true
+    })
   ],
-  publicDir: '../src/web/assets/public',
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    },
+    alias: [
+      {find: '@', replacement: path.resolve(__dirname, './src')},
+    ],
     preserveSymlinks: true,
   },
   server: {
@@ -56,8 +59,8 @@ export default defineConfig(({command}) => ({
       strict: false
     },
     host: '0.0.0.0',
-    origin: 'http://localhost:3001',
-    port: 3001,
+    origin: 'http://localhost:' + process.env.DEV_PORT,
+    port: parseInt(process.env.DEV_PORT),
     strictPort: true,
   }
 }));
