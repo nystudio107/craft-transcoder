@@ -7,6 +7,7 @@ PROJECT_PATH?=${VENDOR}/$(shell basename $(CURDIR))
 
 # Start up the buildchain dev server
 dev:
+	${MAKE} -C buildchain/ dev
 # Start up the docs dev server
 docs:
 	${MAKE} -C docs/ dev
@@ -14,6 +15,9 @@ docs:
 release: --code-quality --code-tests --buildchain-clean-build --docs-clean-build
 # The internal targets used by the dev & release targets
 --buildchain-clean-build:
+	${MAKE} -C buildchain/ clean
+	${MAKE} -C buildchain/ image-build
+	${MAKE} -C buildchain/ build
 --code-quality:
 	${MAKE} -C ${PLUGINDEV_PROJECT_DIR} -- ecs check vendor/${PROJECT_PATH}/src --fix
 	${MAKE} -C ${PLUGINDEV_PROJECT_DIR} -- phpstan analyze -c vendor/${PROJECT_PATH}/phpstan.neon
