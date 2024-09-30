@@ -215,7 +215,7 @@ class Settings extends Model
         'audioSampleRate' => '44100',
         'audioChannels' => '2',
         'synchronous' => false,
-        'stripMetadata' => false
+        'stripMetadata' => false,
     ];
 
     /**
