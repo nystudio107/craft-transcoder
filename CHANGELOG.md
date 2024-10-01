@@ -1,6 +1,6 @@
 # Transcoder Changelog
 
-## 1.2.25 - UNRELEASED
+## 1.2.25 - 2024.09.30
 ## Added
 * Add `phpstan` and `ecs` code linting
 * Add `code-analysis.yaml` GitHub action
