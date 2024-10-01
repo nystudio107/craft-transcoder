@@ -1,4 +1,4 @@
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1) [![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v1) [![Build Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/build.png?b=v1)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/build-status/v1) [![Code Intelligence Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/code-intelligence.svg?b=v1)](https://scrutinizer-ci.com/code-intelligence)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v5) [![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v5) [![Build Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/build.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/build-status/v5) [![Code Intelligence Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/code-intelligence.svg?b=v5)](https://scrutinizer-ci.com/code-intelligence)
 
 # Transcoder plugin for Craft CMS 4.x
 
@@ -10,7 +10,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 
 ## Requirements
 
-This plugin requires Craft CMS 4.0.0 or later.
+This plugin requires Craft CMS 5.0.0 or later.
 
 ## Installation
 

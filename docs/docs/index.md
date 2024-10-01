@@ -1,10 +1,10 @@
 ---
-title: Transcoder plugin for Craft CMS 4.x
+title: Transcoder plugin for Craft CMS
 description: Documentation for the Transcoder plugin. The Transcoder plugin allows you to transcode video & audio files to various formats, and provide video thumbnails
 ---
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v4)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v4) [![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v4)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v4) [![Build Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/build.png?b=v4)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/build-status/v4) [![Code Intelligence Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/code-intelligence.svg?b=v4)](https://scrutinizer-ci.com/code-intelligence)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/quality-score.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v5) [![Code Coverage](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/coverage.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/?branch=v5) [![Build Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/build.png?b=v5)](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/build-status/v5) [![Code Intelligence Status](https://scrutinizer-ci.com/g/nystudio107/craft-transcoder/badges/code-intelligence.svg?b=v5)](https://scrutinizer-ci.com/code-intelligence)
 
-# Transcoder plugin for Craft CMS 4.x
+# Transcoder plugin for Craft CMS 5.x
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
@@ -14,7 +14,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 
 ## Requirements
 
-This plugin requires Craft CMS 4.0.0 or later.
+This plugin requires Craft CMS 5.0.0 or later.
 
 ## Installation
 
