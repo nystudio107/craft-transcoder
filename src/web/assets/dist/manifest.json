@@ -1,19 +1,17 @@
 {
-  "../src/web/assets/src/js/app.ts": {
-    "file": "assets/app.7c3c19f8.js",
-    "src": "../src/web/assets/src/js/app.ts",
+  "src/js/app.ts": {
+    "file": "assets/app--MQxI0fB.js",
+    "name": "app",
+    "src": "src/js/app.ts",
     "isEntry": true,
     "css": [
-      "assets/app.5b295f2f.css"
+      "assets/app-BgTVgbp1.css"
     ]
   },
-  "../src/web/assets/src/js/welcome.ts": {
-    "file": "assets/welcome.e0e23a99.js",
-    "src": "../src/web/assets/src/js/welcome.ts",
+  "src/js/welcome.ts": {
+    "file": "assets/welcome-CZx5RddQ.js",
+    "name": "welcome",
+    "src": "src/js/welcome.ts",
     "isEntry": true
-  },
-  "../src/web/assets/src/js/app.css": {
-    "file": "assets/app.5b295f2f.css",
-    "src": "../src/web/assets/src/js/app.css"
   }
 }

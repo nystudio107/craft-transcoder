@@ -113,7 +113,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destVideoPath = $settings['transcoderPaths']['video'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = $settings['transcoderPaths']['video'] ?? $settings['transcoderPaths']['default'];
+            $destVideoPath .= $subfolder;
             $destVideoPath = App::parseEnv($destVideoPath);
             $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
 
@@ -207,9 +208,10 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['video'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
+                $url .= $subfolder;
                 $result = App::parseEnv($url) . $destVideoFile;
-                // skip encoding
+            // skip encoding
             } elseif (!$generate) {
                 $result = '';
             } else {
@@ -251,7 +253,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] ?? $settings['transcoderPaths']['default'];
+            $destThumbnailPath .= $subfolder;
             $destThumbnailPath = App::parseEnv($destThumbnailPath);
 
             $thumbnailOptions = $this->coalesceOptions('defaultThumbnailOptions', $thumbnailOptions);
@@ -296,9 +299,8 @@ class Transcode extends Component
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
 
-                    // if ffmpeg fails which we can't check because the process is ran in the background
+                // if ffmpeg fails which we can't check because the process is ran in the background
                     // don't return the future path of the image or else we can't check this in the front end
-
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
 
@@ -310,7 +312,8 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $url = $settings['transcoderUrls']['thumbnail'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
+                $url .= $subfolder;
                 $result = App::parseEnv($url) . $destThumbnailFile;
             }
         }
@@ -342,7 +345,8 @@ class Transcode extends Component
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destAudioPath = $settings['transcoderPaths']['audio'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destAudioPath = $settings['transcoderPaths']['audio'] ?? $settings['transcoderPaths']['default'];
+            $destAudioPath .= $subfolder;
             $destAudioPath = App::parseEnv($destAudioPath);
 
             $audioOptions = $this->coalesceOptions('defaultAudioOptions', $audioOptions);
@@ -437,7 +441,8 @@ class Transcode extends Component
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destAudioPath) && (@filemtime($destAudioPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
+                $url .= $subfolder;
                 $result = App::parseEnv($url) . $destAudioFile;
             } else {
                 // Kick off the transcoding
@@ -445,7 +450,8 @@ class Transcode extends Component
 
                 if ($synchronous) {
                     Craft::info($ffmpegCmd, __METHOD__);
-                    $url = $settings['transcoderUrls']['audio'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                    $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
+                    $url .= $subfolder;
                     $result = App::parseEnv($url) . $destAudioFile;
                 } else {
                     Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
@@ -647,7 +653,8 @@ class Transcode extends Component
 
         if (!empty($filePath)) {
             // Dest path
-            $destVideoPath = $settings['transcoderPaths']['gif'] . $subfolder ?? $settings['transcoderPaths']['default'];
+            $destVideoPath = $settings['transcoderPaths']['gif'] ?? $settings['transcoderPaths']['default'];
+            $destVideoPath .= $subfolder;
             $destVideoPath = App::parseEnv($destVideoPath);
 
             // Options
@@ -703,7 +710,8 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['gif'] . $subfolder ?? $settings['transcoderUrls']['default'];
+                $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
+                $url .= $subfolder;
                 $result = App::parseEnv($url) . $destVideoFile;
             } else {
                 // Kick off the transcoding
