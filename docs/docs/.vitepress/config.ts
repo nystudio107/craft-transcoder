@@ -3,7 +3,7 @@ import {defineConfig} from 'vitepress'
 export default defineConfig({
   title: 'Transcoder Plugin',
   description: 'Documentation for the Transcoder plugin',
-  base: '/docs/transcoder/',
+  base: '/docs/transcoder/v4/',
   lang: 'en-US',
   head: [
     ['meta', {content: 'https://github.com/nystudio107', property: 'og:see_also',}],
@@ -18,7 +18,7 @@ export default defineConfig({
     ],
     logo: '/img/plugin-logo.svg',
     editLink: {
-      pattern: 'https://github.com/nystudio107/craft-transcoder/edit/develop/docs/docs/:path',
+      pattern: 'https://github.com/nystudio107/craft-transcoder/edit/develop-v4/docs/docs/:path',
       text: 'Edit this page on GitHub'
     },
     algolia: {
@@ -45,7 +45,8 @@ export default defineConfig({
       {text: 'Issues', link: 'https://github.com/nystudio107/craft-transcoder/issues'},
       {
         text: 'v4', items: [
-          {text: 'v4', link: '/'},
+          {text: 'v5', link: '/'},
+          {text: 'v4', link: 'https://nystudio107.com/docs/transcoder/v4/'},
           {text: 'v3', link: 'https://nystudio107.com/docs/transcoder/v3/'},
         ],
       },
