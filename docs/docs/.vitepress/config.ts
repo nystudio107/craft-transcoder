@@ -45,7 +45,8 @@ export default defineConfig({
       {text: 'Issues', link: 'https://github.com/nystudio107/craft-transcoder/issues'},
       {
         text: 'v3', items: [
-          {text: 'v4', link: 'https://nystudio107.com/docs/transcoder/'},
+          {text: 'v5', link: 'https://nystudio107.com/docs/transcoder/'},
+          {text: 'v4', link: 'https://nystudio107.com/docs/transcoder/v4/'},
           {text: 'v3', link: '/'},
         ],
       },

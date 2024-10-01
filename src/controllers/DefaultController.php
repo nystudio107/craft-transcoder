@@ -16,7 +16,10 @@ use craft\helpers\Json as JsonHelper;
 use craft\helpers\Path as PathHelper;
 use craft\web\Controller;
 use nystudio107\transcoder\Transcoder;
+use yii\base\ExitException;
 use yii\web\BadRequestHttpException;
+use function count;
+use function is_array;
 
 /**
  * @author    nystudio107
@@ -25,15 +28,9 @@ use yii\web\BadRequestHttpException;
  */
 class DefaultController extends Controller
 {
-
     // Protected Properties
     // =========================================================================
 
-    /**
-     * @var    bool|array Allows anonymous access to this controller's actions.
-     *         The actions must be in 'kebab-case'
-     * @access protected
-     */
     protected $allowAnonymous = [
         'download-file',
         'progress',
@@ -60,7 +57,7 @@ class DefaultController extends Controller
      *
      * @param $url
      *
-     * @throws \yii\base\ExitException
+     * @throws ExitException
      */
     public function actionDownloadFile($url)
     {
@@ -106,7 +103,7 @@ class DefaultController extends Controller
             if ($content) {
                 // get duration of source
                 preg_match('/Duration: (.*?), start:/', $content, $matches);
-                if (\count($matches) > 0) {
+                if (count($matches) > 0) {
                     $rawDuration = $matches[1];
 
                     // rawDuration is in 00:00:00.00 format. This converts it to seconds.
@@ -127,7 +124,7 @@ class DefaultController extends Controller
                 $rawTime = array_pop($matches);
 
                 // this is needed if there is more than one match
-                if (\is_array($rawTime)) {
+                if (is_array($rawTime)) {
                     $rawTime = array_pop($rawTime);
                 }
 

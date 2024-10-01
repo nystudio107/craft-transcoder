@@ -1,5 +1,10 @@
 # Transcoder Changelog
 
+## 1.2.25 - 2024.09.30
+## Added
+* Add `phpstan` and `ecs` code linting
+* Add `code-analysis.yaml` GitHub action
+
 ## 1.2.24 - 2023.04.20
 ### Changed
 * Updated the docs to use VitePress `^1.0.0-alpha.29`

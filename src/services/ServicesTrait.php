@@ -33,6 +33,11 @@ trait ServicesTrait
      */
     public function __construct($id, $parent = null, array $config = [])
     {
+        // Constants aren't allowed in traits until PHP >= 8.2
+        $majorVersion = '3';
+        // Dev server container name & port are based on the major version of this plugin
+        $devPort = 3000 + (int)$majorVersion;
+        $versionName = 'v' . $majorVersion;
         // Merge in the passed config, so it our config can be overridden by Plugins::pluginConfigs['vite']
         // ref: https://github.com/craftcms/cms/issues/1989
         $config = ArrayHelper::merge([
@@ -43,13 +48,12 @@ trait ServicesTrait
                     'class' => VitePluginService::class,
                     'assetClass' => TranscoderAsset::class,
                     'useDevServer' => true,
-                    'devServerPublic' => 'http://localhost:3001',
-                    'serverPublic' => 'http://localhost:8000',
+                    'devServerInternal' => 'http://craft-transcoder-' . $versionName . '-buildchain-dev:' . $devPort,
+                    'devServerPublic' => 'http://localhost:' . $devPort,
                     'errorEntry' => 'src/js/app.ts',
-                    'devServerInternal' => 'http://craft-transcoder-buildchain:3001',
                     'checkDevServer' => true,
                 ],
-            ]
+            ],
         ], $config);
 
         parent::__construct($id, $parent, $config);
