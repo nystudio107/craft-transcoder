@@ -211,7 +211,7 @@ class Transcode extends Component
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
                 $result = App::parseEnv($url) . $destVideoFile;
-            // skip encoding
+                // skip encoding
             } elseif (!$generate) {
                 $result = '';
             } else {
@@ -299,7 +299,7 @@ class Transcode extends Component
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
 
-                // if ffmpeg fails which we can't check because the process is ran in the background
+                    // if ffmpeg fails which we can't check because the process is ran in the background
                     // don't return the future path of the image or else we can't check this in the front end
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
@@ -798,6 +798,10 @@ class Transcode extends Component
                 // If it's local, get a path to the file
                 $fs = $assetVolume->getFs();
                 if ($fs instanceof Local) {
+                    $subPath = $assetVolume->getSubPath();
+                    if (!empty($subPath)) {
+                        $subPath = rtrim($subPath, DIRECTORY_SEPARATOR);
+                    }
                     $sourcePath = rtrim($fs->path, DIRECTORY_SEPARATOR);
                     $sourcePath .= '' === $sourcePath ? '' : DIRECTORY_SEPARATOR;
                     $folderPath = '';
@@ -808,7 +812,7 @@ class Transcode extends Component
                     }
                     $folderPath .= '' === $folderPath ? '' : DIRECTORY_SEPARATOR;
 
-                    $filePath = $sourcePath . $folderPath . $asset->filename;
+                    $filePath = $sourcePath . $subPath . $folderPath . $asset->filename;
                 } else {
                     // Otherwise, get a URL
                     $filePath = $asset->getUrl() ?? '';
