@@ -102,6 +102,18 @@ class Settings extends Model
      */
     public bool $clearCaches = false;
 
+    /** @var bool Queue video encoding when a new video asset is uploaded. */
+    public bool $queueVideosOnAssetUpload = false;
+
+    /** @var int Seconds to wait before an uploaded video starts encoding. */
+    public int $videoQueueDelaySeconds = 0;
+
+    /** @var array Options passed to queued video encodes. */
+    public array $queuedVideoOptions = [];
+
+    /** @var string How encoded video filenames are generated: options or source. */
+    public string $videoFilenameStrategy = 'options';
+
     /**
      * Preset video encoders
      *
@@ -275,6 +287,10 @@ class Settings extends Model
             ['useHashedNames', 'boolean'],
             ['createSubfolders', 'boolean'],
             ['clearCaches', 'boolean'],
+            ['queueVideosOnAssetUpload', 'boolean'],
+            ['videoQueueDelaySeconds', 'integer', 'min' => 0],
+            ['queuedVideoOptions', ArrayValidator::class],
+            ['videoFilenameStrategy', 'in', 'range' => ['options', 'source']],
             ['videoEncoders', 'required'],
             ['audioEncoders', 'required'],
             ['defaultVideoOptions', 'required'],

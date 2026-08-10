@@ -98,7 +98,12 @@ class Transcode extends Component
      * @return string       URL of the transcoded video or ""
      * @throws InvalidConfigException
      */
-    public function getVideoUrl(string|Asset $filePath, array $videoOptions, bool $generate = true): string
+    public function getVideoUrl(
+        string|Asset $filePath,
+        array $videoOptions,
+        bool $generate = true,
+        bool $synchronous = false
+    ): string
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
@@ -178,7 +183,11 @@ class Transcode extends Component
                 }
             }
 
-            $destVideoFile = $this->getFilename($filePath, $videoOptions);
+            $destVideoFile = $this->getFilename(
+                $filePath,
+                $videoOptions,
+                $this->getVideoFilenameExcludeParams($videoOptions)
+            );
 
             // File to store the video encoding progress in
             $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.progress';
@@ -187,8 +196,11 @@ class Transcode extends Component
             $destVideoPath .= $destVideoFile;
             $ffmpegCmd .= ' -f '
                 . $thisEncoder['fileFormat']
-                . ' -y ' . escapeshellarg($destVideoPath)
-                . ' 1> ' . $progressFile . ' 2>&1 & echo $!';
+                . ' -y ' . escapeshellarg($destVideoPath);
+
+            if (!$synchronous) {
+                $ffmpegCmd .= ' 1> ' . $progressFile . ' 2>&1 & echo $!';
+            }
 
             // Make sure there isn't a lockfile for this video already
             $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
@@ -215,6 +227,23 @@ class Transcode extends Component
                 $result = '';
             } else {
                 // Kick off the transcoding
+                if ($synchronous) {
+                    file_put_contents($lockFile, (string)getmypid());
+                    $output = $this->executeShellCommand($ffmpegCmd);
+                    @unlink($lockFile);
+                    @unlink($progressFile);
+
+                    if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
+                        $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
+                        $url .= $subfolder;
+                        $result = App::parseEnv($url) . $destVideoFile;
+                    } else {
+                        Craft::error("Video encoding failed: $output", __METHOD__);
+                    }
+
+                    return $result;
+                }
+
                 $pid = $this->executeShellCommand($ffmpegCmd);
                 Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
 
@@ -557,7 +586,11 @@ class Transcode extends Component
 
         $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
 
-        return $this->getFilename($filePath, $videoOptions);
+        return $this->getFilename(
+            $filePath,
+            $videoOptions,
+            $this->getVideoFilenameExcludeParams($videoOptions)
+        );
     }
 
     /**
@@ -733,9 +766,10 @@ class Transcode extends Component
      * @return string
      * @throws InvalidConfigException
      */
-    protected function getFilename(Asset|string $filePath, array $options): string
+    protected function getFilename(Asset|string $filePath, array $options, ?array $excludeParams = null): string
     {
         $settings = Transcoder::$plugin->getSettings();
+        $excludeParams ??= self::EXCLUDE_PARAMS;
         $filePath = $this->getAssetPath($filePath);
 
         $validator = new UrlValidator();
@@ -758,7 +792,7 @@ class Transcode extends Component
                 if (is_bool($value)) {
                     $value = $value ? $key : 'no' . $key;
                 }
-                if (!in_array($key, self::EXCLUDE_PARAMS, true)) {
+                if (!in_array($key, $excludeParams, true)) {
                     $fileName .= '_' . $value . $suffix;
                 }
             }
@@ -770,6 +804,18 @@ class Transcode extends Component
         $fileName .= $options['fileSuffix'];
 
         return $fileName;
+    }
+
+    /**
+     * Return filename options excluded by the selected video filename strategy.
+     */
+    protected function getVideoFilenameExcludeParams(array $videoOptions): array
+    {
+        if (Transcoder::$plugin->getSettings()->videoFilenameStrategy === 'source') {
+            return array_values(array_unique(array_merge(self::EXCLUDE_PARAMS, array_keys($videoOptions))));
+        }
+
+        return self::EXCLUDE_PARAMS;
     }
 
     /**

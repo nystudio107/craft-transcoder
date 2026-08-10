@@ -1,0 +1,34 @@
+{% import '_includes/forms' as forms %}
+
+<h2>{{ 'Video queue'|t('transcoder') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Queue videos on asset upload'|t('transcoder'),
+    instructions: 'Add newly uploaded video assets to Craft’s queue for background encoding.'|t('transcoder'),
+    id: 'queueVideosOnAssetUpload',
+    name: 'queueVideosOnAssetUpload',
+    on: settings.queueVideosOnAssetUpload,
+}) }}
+
+{{ forms.textField({
+    label: 'Video queue delay'|t('transcoder'),
+    instructions: 'Seconds to wait before an uploaded video starts encoding.'|t('transcoder'),
+    id: 'videoQueueDelaySeconds',
+    name: 'videoQueueDelaySeconds',
+    value: settings.videoQueueDelaySeconds,
+    type: 'number',
+    min: 0,
+    size: 5,
+}) }}
+
+{{ forms.selectField({
+    label: 'Video filename strategy'|t('transcoder'),
+    instructions: 'Use the original option-based filename, or keep one stable filename per source asset.'|t('transcoder'),
+    id: 'videoFilenameStrategy',
+    name: 'videoFilenameStrategy',
+    value: settings.videoFilenameStrategy,
+    options: [
+        { label: 'Encoding options'|t('transcoder'), value: 'options' },
+        { label: 'Source asset'|t('transcoder'), value: 'source' },
+    ],
+}) }}

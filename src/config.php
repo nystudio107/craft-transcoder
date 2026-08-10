@@ -66,6 +66,18 @@ return [
     // Add the Clear Caches utility to the CP?
     'clearCaches' => false,
 
+    // Queue video encoding when a new video asset is uploaded
+    'queueVideosOnAssetUpload' => false,
+
+    // Seconds to wait before an uploaded video starts encoding
+    'videoQueueDelaySeconds' => 0,
+
+    // Options passed to the queued video encode
+    'queuedVideoOptions' => [],
+
+    // How encoded video filenames are generated: options or source
+    'videoFilenameStrategy' => 'options',
+
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [

@@ -16,6 +16,7 @@ use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
 use craft\events\DefineAssetThumbUrlEvent;
+use craft\events\ModelEvent;
 use craft\events\PluginEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -28,6 +29,7 @@ use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use nystudio107\transcoder\models\Settings;
+use nystudio107\transcoder\jobs\EncodeVideo;
 use nystudio107\transcoder\services\ServicesTrait;
 use nystudio107\transcoder\variables\TranscoderVariable;
 use yii\base\ErrorException;
@@ -72,7 +74,7 @@ class Transcoder extends Plugin
     /**
      * @var bool
      */
-    public bool $hasCpSettings = false;
+    public bool $hasCpSettings = true;
 
     /**
      * @var string
@@ -148,6 +150,16 @@ class Transcoder extends Plugin
     }
 
     /**
+     * @inheritdoc
+     */
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->getView()->renderTemplate('transcoder/settings', [
+            'settings' => $this->getSettings(),
+        ]);
+    }
+
+    /**
      * Add in our Craft components
      */
     protected function addComponents(): void
@@ -202,6 +214,32 @@ class Transcoder extends Plugin
                         'label' => Craft::t('transcoder', 'Transcoder caches'),
                         'action' => [$this, 'clearAllCaches'],
                     ];
+                }
+            );
+        }
+        if ($settings->queueVideosOnAssetUpload) {
+            Event::on(
+                Asset::class,
+                Asset::EVENT_AFTER_SAVE,
+                function(ModelEvent $event) use ($settings) {
+                    $asset = $event->sender;
+                    if (!$event->isNew || !$asset instanceof Asset) {
+                        return;
+                    }
+
+                    if (AssetsHelper::getFileKindByExtension($asset->filename) !== Asset::KIND_VIDEO) {
+                        return;
+                    }
+
+                    $queue = Craft::$app->getQueue();
+                    if ($settings->videoQueueDelaySeconds > 0) {
+                        $queue = $queue->delay($settings->videoQueueDelaySeconds);
+                    }
+
+                    $queue->push(new EncodeVideo([
+                        'assetId' => $asset->id,
+                        'videoOptions' => $settings->queuedVideoOptions,
+                    ]));
                 }
             );
         }
