@@ -91,6 +91,18 @@ The file format setting `videoEncoder` is preset to what you’ll need to genera
 
 Transcoder will also automatically add video thumbnails in the Control Panel Asset index.
 
+## Reading Generated Video Posters
+
+Queued poster generation does not need to be started from a template. Read a configured poster by its format handle:
+
+```twig
+{% set video = entry.video.one() %}
+{% set posterUrl = craft.transcoder.getVideoPosterUrl(video, '16_9') %}
+{% set posterUrls = craft.transcoder.getVideoPosterUrls(video) %}
+```
+
+`getVideoPosterUrl()` returns an empty string until the poster exists. Passing `true` as its third argument keeps the original on-demand behavior and starts poster generation when needed.
+
 ## Generating a Transcoded Audio File
 
 To generate a transcoded audio File, do the following:

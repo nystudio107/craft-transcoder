@@ -4,6 +4,17 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
+## Video workflow features
+
+- Queue newly uploaded video assets through Craft’s queue.
+- Delay queued encodes when other asset-save handlers need time to finish.
+- Keep the original option-based filenames, including bitrate, or opt into stable source-asset filenames.
+- Overlay a configurable watermark on encoded videos.
+- Generate named poster formats after queued encodes.
+- Replace poster letterboxing with a blurred cover background.
+
+All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen or `config/transcoder.php`.
+
 ![Screenshot](./docs/docs/resources/img/plugin-banner.jpg)
 
 **Note**: _The license fee for this plugin is $59.00 via the Craft Plugin Store._
