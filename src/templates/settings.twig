@@ -32,3 +32,68 @@
         { label: 'Source asset'|t('transcoder'), value: 'source' },
     ],
 }) }}
+
+<hr>
+<h2>{{ 'Video watermark'|t('transcoder') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Enable video watermark'|t('transcoder'),
+    instructions: 'Overlay the configured image on newly encoded videos.'|t('transcoder'),
+    id: 'enableVideoWatermark',
+    name: 'enableVideoWatermark',
+    on: settings.enableVideoWatermark,
+}) }}
+
+{{ forms.textField({
+    label: 'Watermark path or URL'|t('transcoder'),
+    instructions: 'Use a local path, Yii alias, environment value, or public image URL.'|t('transcoder'),
+    id: 'videoWatermarkPath',
+    name: 'videoWatermarkPath',
+    value: settings.videoWatermarkPath,
+}) }}
+
+{{ forms.textField({
+    label: 'Watermark width'|t('transcoder'),
+    instructions: 'Optional width in pixels. Leave empty to keep the original size.'|t('transcoder'),
+    id: 'videoWatermarkWidth',
+    name: 'videoWatermarkWidth',
+    value: settings.videoWatermarkWidth,
+    type: 'number',
+    min: 1,
+    size: 6,
+}) }}
+
+{{ forms.selectField({
+    label: 'Watermark position'|t('transcoder'),
+    id: 'videoWatermarkPosition',
+    name: 'videoWatermarkPosition',
+    value: settings.videoWatermarkPosition,
+    options: [
+        { label: 'Top left'|t('transcoder'), value: 'top-left' },
+        { label: 'Top right'|t('transcoder'), value: 'top-right' },
+        { label: 'Bottom left'|t('transcoder'), value: 'bottom-left' },
+        { label: 'Bottom right'|t('transcoder'), value: 'bottom-right' },
+    ],
+}) }}
+
+{{ forms.textField({
+    label: 'Watermark padding'|t('transcoder'),
+    id: 'videoWatermarkPadding',
+    name: 'videoWatermarkPadding',
+    value: settings.videoWatermarkPadding,
+    type: 'number',
+    min: 0,
+    size: 6,
+}) }}
+
+{{ forms.textField({
+    label: 'Watermark opacity'|t('transcoder'),
+    instructions: 'Percentage from 0 to 100.'|t('transcoder'),
+    id: 'videoWatermarkOpacity',
+    name: 'videoWatermarkOpacity',
+    value: settings.videoWatermarkOpacity,
+    type: 'number',
+    min: 0,
+    max: 100,
+    size: 6,
+}) }}

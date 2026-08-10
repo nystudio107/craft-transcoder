@@ -114,6 +114,24 @@ class Settings extends Model
     /** @var string How encoded video filenames are generated: options or source. */
     public string $videoFilenameStrategy = 'options';
 
+    /** @var bool Overlay a watermark on encoded videos. */
+    public bool $enableVideoWatermark = false;
+
+    /** @var string Local path, alias, environment value, or URL for the watermark image. */
+    public string $videoWatermarkPath = '';
+
+    /** @var int|string Optional watermark width in pixels. */
+    public int|string $videoWatermarkWidth = '';
+
+    /** @var string Watermark position. */
+    public string $videoWatermarkPosition = 'bottom-right';
+
+    /** @var int Watermark distance from the selected edges in pixels. */
+    public int $videoWatermarkPadding = 24;
+
+    /** @var int Watermark opacity percentage. */
+    public int $videoWatermarkOpacity = 100;
+
     /**
      * Preset video encoders
      *
@@ -291,6 +309,12 @@ class Settings extends Model
             ['videoQueueDelaySeconds', 'integer', 'min' => 0],
             ['queuedVideoOptions', ArrayValidator::class],
             ['videoFilenameStrategy', 'in', 'range' => ['options', 'source']],
+            ['enableVideoWatermark', 'boolean'],
+            ['videoWatermarkPath', 'string'],
+            ['videoWatermarkWidth', 'safe'],
+            ['videoWatermarkPosition', 'in', 'range' => ['top-left', 'top-right', 'bottom-left', 'bottom-right']],
+            ['videoWatermarkPadding', 'integer', 'min' => 0],
+            ['videoWatermarkOpacity', 'integer', 'min' => 0, 'max' => 100],
             ['videoEncoders', 'required'],
             ['audioEncoders', 'required'],
             ['defaultVideoOptions', 'required'],

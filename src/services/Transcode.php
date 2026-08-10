@@ -128,11 +128,20 @@ class Transcode extends Component
             $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
 
             $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
+            $watermarkPath = $this->getVideoWatermarkPath();
+            if ($watermarkPath !== null) {
+                $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
+            }
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
-                . ' -i ' . escapeshellarg($filePath)
-                . ' -vcodec ' . $thisEncoder['videoCodec']
+                . ' -i ' . escapeshellarg($filePath);
+
+            if ($watermarkPath !== null) {
+                $ffmpegCmd .= ' -loop 1 -i ' . escapeshellarg($watermarkPath);
+            }
+
+            $ffmpegCmd .= ' -vcodec ' . $thisEncoder['videoCodec']
                 . ' ' . $thisEncoder['videoCodecOptions']
                 . ' -threads ' . $thisEncoder['threads'];
 
@@ -146,11 +155,17 @@ class Transcode extends Component
                 $ffmpegCmd .= ' -b:v ' . $videoOptions['videoBitRate'] . ' -maxrate ' . $videoOptions['videoBitRate'];
             }
 
-            // Adjust the scaling if desired
-            $ffmpegCmd = $this->addScalingFfmpegArgs(
-                $videoOptions,
-                $ffmpegCmd
-            );
+            if ($watermarkPath !== null) {
+                $ffmpegCmd .= ' -filter_complex ' . escapeshellarg($this->getVideoWatermarkFilter($videoOptions))
+                    . ' -map ' . escapeshellarg('[transcoded]')
+                    . ' -map ' . escapeshellarg('0:a?');
+            } else {
+                // Adjust the scaling if desired
+                $ffmpegCmd = $this->addScalingFfmpegArgs(
+                    $videoOptions,
+                    $ffmpegCmd
+                );
+            }
 
             // Handle any audio transcoding
             if (empty($videoOptions['audioBitRate'])
@@ -585,6 +600,10 @@ class Transcode extends Component
         $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
 
         $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
+        $watermarkPath = $this->getVideoWatermarkPath();
+        if ($watermarkPath !== null) {
+            $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
+        }
 
         return $this->getFilename(
             $filePath,
@@ -819,6 +838,89 @@ class Transcode extends Component
     }
 
     /**
+     * Resolve the configured watermark input.
+     */
+    protected function getVideoWatermarkPath(): ?string
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        if (!$settings->enableVideoWatermark || $settings->videoWatermarkPath === '') {
+            return null;
+        }
+
+        $path = (string)App::parseEnv($settings->videoWatermarkPath);
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        $validator = new UrlValidator();
+        $error = '';
+        if ($validator->validate($path, $error)) {
+            return $path;
+        }
+
+        Craft::warning("Video watermark could not be found: $path", __METHOD__);
+        return null;
+    }
+
+    /**
+     * Return a stable fingerprint for output-affecting watermark settings.
+     */
+    protected function getVideoWatermarkFingerprint(string $path): string
+    {
+        $settings = Transcoder::$plugin->getSettings();
+
+        return substr(sha1(JsonHelper::encode([
+            $path,
+            $settings->videoWatermarkWidth,
+            $settings->videoWatermarkPosition,
+            $settings->videoWatermarkPadding,
+            $settings->videoWatermarkOpacity,
+        ])), 0, 10);
+    }
+
+    /**
+     * Build the ffmpeg graph that composes scaling and watermarking.
+     */
+    protected function getVideoWatermarkFilter(array $videoOptions): string
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $baseFilter = $this->getScalingFilter($videoOptions) ?? 'null';
+        $watermarkFilters = ['format=rgba'];
+
+        $width = (int)$settings->videoWatermarkWidth;
+        if ($width > 0) {
+            $watermarkFilters[] = "scale=$width:-1";
+        }
+
+        if ($settings->videoWatermarkOpacity < 100) {
+            $opacity = max(0, $settings->videoWatermarkOpacity) / 100;
+            $watermarkFilters[] = 'colorchannelmixer=aa=' . rtrim(rtrim(number_format($opacity, 2, '.', ''), '0'), '.');
+        }
+
+        [$x, $y] = $this->getVideoWatermarkPosition();
+
+        return '[0:v]' . $baseFilter . '[base];'
+            . '[1:v]' . implode(',', $watermarkFilters) . '[watermark];'
+            . "[base][watermark]overlay=$x:$y:shortest=1[transcoded]";
+    }
+
+    /**
+     * Return ffmpeg overlay coordinates for the configured watermark position.
+     */
+    protected function getVideoWatermarkPosition(): array
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $padding = max(0, $settings->videoWatermarkPadding);
+
+        return match ($settings->videoWatermarkPosition) {
+            'top-left' => [(string)$padding, (string)$padding],
+            'top-right' => ["W-w-$padding", (string)$padding],
+            'bottom-left' => [(string)$padding, "H-h-$padding"],
+            default => ["W-w-$padding", "H-h-$padding"],
+        };
+    }
+
+    /**
      * Extract a file system path if $filePath is an Asset object
      *
      * @param Asset|string $filePath
@@ -885,6 +987,19 @@ class Transcode extends Component
      */
     protected function addScalingFfmpegArgs(array $options, string $ffmpegCmd): string
     {
+        $filter = $this->getScalingFilter($options);
+        if ($filter !== null) {
+            $ffmpegCmd .= ' -vf ' . escapeshellarg($filter);
+        }
+
+        return $ffmpegCmd;
+    }
+
+    /**
+     * Return the original scaling filter without command-line arguments.
+     */
+    protected function getScalingFilter(array $options): ?string
+    {
         if (!empty($options['width']) && !empty($options['height'])) {
             // Handle "none", "crop", and "letterbox" aspectRatios
             $aspectRatio = '';
@@ -916,14 +1031,12 @@ class Transcode extends Component
             if (!empty($options['sharpen']) && ($options['sharpen'] !== false)) {
                 $sharpen = ',unsharp=5:5:1.0:5:5:0.0';
             }
-            $ffmpegCmd .= ' -vf "scale='
-                . $options['width'] . ':' . $options['height']
+            return 'scale=' . $options['width'] . ':' . $options['height']
                 . $aspectRatio
-                . $sharpen
-                . '"';
+                . $sharpen;
         }
 
-        return $ffmpegCmd;
+        return null;
     }
 
     // Protected Methods

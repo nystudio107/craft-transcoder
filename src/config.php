@@ -78,6 +78,24 @@ return [
     // How encoded video filenames are generated: options or source
     'videoFilenameStrategy' => 'options',
 
+    // Overlay a watermark on encoded videos
+    'enableVideoWatermark' => false,
+
+    // Local path, Yii alias, environment value, or URL for the watermark image
+    'videoWatermarkPath' => '',
+
+    // Optional watermark width in pixels; leave empty to keep its original size
+    'videoWatermarkWidth' => '',
+
+    // Watermark position: top-left, top-right, bottom-left, or bottom-right
+    'videoWatermarkPosition' => 'bottom-right',
+
+    // Watermark distance from the selected edges in pixels
+    'videoWatermarkPadding' => 24,
+
+    // Watermark opacity percentage
+    'videoWatermarkOpacity' => 100,
+
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [
