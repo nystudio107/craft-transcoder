@@ -96,6 +96,21 @@ return [
     // Watermark opacity percentage
     'videoWatermarkOpacity' => 100,
 
+    // Generate configured poster images after queued video encoding
+    'enableVideoPosters' => false,
+
+    // Fill unused poster space with a blurred cover image instead of black bars
+    'preventVideoPosterBlackBars' => false,
+
+    // Poster images generated for each queued video
+    'videoPosterFormats' => [
+        '16_9' => [
+            'width' => 800,
+            'height' => 450,
+            'timeInSecs' => 3,
+        ],
+    ],
+
     // Preset video encoders
     'videoEncoders' => [
         'h264' => [

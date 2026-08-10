@@ -132,6 +132,21 @@ class Settings extends Model
     /** @var int Watermark opacity percentage. */
     public int $videoWatermarkOpacity = 100;
 
+    /** @var bool Generate configured poster images after queued video encoding. */
+    public bool $enableVideoPosters = false;
+
+    /** @var bool Fill unused poster space with a blurred cover image. */
+    public bool $preventVideoPosterBlackBars = false;
+
+    /** @var array Poster images generated for each queued video. */
+    public array $videoPosterFormats = [
+        '16_9' => [
+            'width' => 800,
+            'height' => 450,
+            'timeInSecs' => 3,
+        ],
+    ];
+
     /**
      * Preset video encoders
      *
@@ -315,11 +330,36 @@ class Settings extends Model
             ['videoWatermarkPosition', 'in', 'range' => ['top-left', 'top-right', 'bottom-left', 'bottom-right']],
             ['videoWatermarkPadding', 'integer', 'min' => 0],
             ['videoWatermarkOpacity', 'integer', 'min' => 0, 'max' => 100],
+            ['enableVideoPosters', 'boolean'],
+            ['preventVideoPosterBlackBars', 'boolean'],
+            ['videoPosterFormats', ArrayValidator::class],
             ['videoEncoders', 'required'],
             ['audioEncoders', 'required'],
             ['defaultVideoOptions', 'required'],
             ['defaultThumbnailOptions', 'required'],
             ['defaultAudioOptions', 'required'],
         ];
+    }
+
+    /**
+     * Return poster formats as editable-table rows.
+     */
+    public function getVideoPosterFormatRows(): array
+    {
+        $rows = [];
+        foreach ($this->videoPosterFormats as $handle => $format) {
+            if (!is_array($format)) {
+                continue;
+            }
+
+            $rows[] = [
+                'handle' => is_string($handle) ? $handle : ($format['handle'] ?? ''),
+                'width' => $format['width'] ?? '',
+                'height' => $format['height'] ?? '',
+                'timeInSecs' => $format['timeInSecs'] ?? '',
+            ];
+        }
+
+        return $rows;
     }
 }

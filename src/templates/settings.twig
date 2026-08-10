@@ -34,6 +34,53 @@
 }) }}
 
 <hr>
+<h2>{{ 'Video posters'|t('transcoder') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Generate video posters'|t('transcoder'),
+    instructions: 'Generate the configured poster images after a queued video is encoded.'|t('transcoder'),
+    id: 'enableVideoPosters',
+    name: 'enableVideoPosters',
+    on: settings.enableVideoPosters,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Prevent poster black bars'|t('transcoder'),
+    instructions: 'Fill unused poster space with a blurred cover image behind the fitted video frame.'|t('transcoder'),
+    id: 'preventVideoPosterBlackBars',
+    name: 'preventVideoPosterBlackBars',
+    on: settings.preventVideoPosterBlackBars,
+}) }}
+
+{{ forms.editableTableField({
+    label: 'Video poster formats'|t('transcoder'),
+    id: 'videoPosterFormats',
+    name: 'videoPosterFormats',
+    cols: {
+        handle: {
+            type: 'singleline',
+            heading: 'Handle'|t('transcoder'),
+        },
+        width: {
+            type: 'number',
+            heading: 'Width'|t('transcoder'),
+        },
+        height: {
+            type: 'number',
+            heading: 'Height'|t('transcoder'),
+        },
+        timeInSecs: {
+            type: 'number',
+            heading: 'Time in seconds'|t('transcoder'),
+        },
+    },
+    rows: settings.getVideoPosterFormatRows(),
+    allowAdd: true,
+    allowReorder: true,
+    allowDelete: true,
+}) }}
+
+<hr>
 <h2>{{ 'Video watermark'|t('transcoder') }}</h2>
 
 {{ forms.lightswitchField({

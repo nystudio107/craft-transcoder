@@ -39,6 +39,13 @@ class EncodeVideo extends BaseJob
         }
 
         Craft::info("Encoded video asset #{$this->assetId}: $url", __METHOD__);
+
+        if (Transcoder::$plugin->getSettings()->enableVideoPosters) {
+            $posters = Transcoder::$plugin->transcode->generateVideoPosters($asset);
+            if (in_array('', $posters, true)) {
+                throw new RuntimeException("Video poster generation failed for asset #{$this->assetId}.");
+            }
+        }
     }
 
     /**

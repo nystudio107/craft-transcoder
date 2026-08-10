@@ -282,7 +282,13 @@ class Transcode extends Component
      * @return string|false|null URL or path of the video thumbnail
      * @throws InvalidConfigException
      */
-    public function getVideoThumbnailUrl(Asset|string $filePath, array $thumbnailOptions, bool $generate = true, bool $asPath = false): string|false|null
+    public function getVideoThumbnailUrl(
+        Asset|string $filePath,
+        array $thumbnailOptions,
+        bool $generate = true,
+        bool $asPath = false,
+        bool $synchronous = false
+    ): string|false|null
     {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
@@ -308,11 +314,19 @@ class Transcode extends Component
                 . ' -vcodec mjpeg'
                 . ' -vframes 1';
 
-            // Adjust the scaling if desired
-            $ffmpegCmd = $this->addScalingFfmpegArgs(
-                $thumbnailOptions,
-                $ffmpegCmd
-            );
+            if (!empty($thumbnailOptions['preventBlackBars'])
+                && !empty($thumbnailOptions['width'])
+                && !empty($thumbnailOptions['height'])
+            ) {
+                $ffmpegCmd .= ' -filter_complex ' . escapeshellarg($this->getPosterBlackBarFilter($thumbnailOptions))
+                    . ' -map ' . escapeshellarg('[poster]');
+            } else {
+                // Adjust the scaling if desired
+                $ffmpegCmd = $this->addScalingFfmpegArgs(
+                    $thumbnailOptions,
+                    $ffmpegCmd
+                );
+            }
 
             // Set the timecode to get the thumbnail from if desired
             if (!empty($thumbnailOptions['timeInSecs'])) {
@@ -333,7 +347,10 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destThumbnailPath .= $destThumbnailFile;
-            $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath) . ' >/dev/null 2>/dev/null &';
+            $ffmpegCmd .= ' -f image2 -y ' . escapeshellarg($destThumbnailPath);
+            if (!$synchronous) {
+                $ffmpegCmd .= ' >/dev/null 2>/dev/null &';
+            }
 
             // If the thumbnail file already exists, return it.  Otherwise, generate it and return it
             if (!file_exists($destThumbnailPath)) {
@@ -341,6 +358,20 @@ class Transcode extends Component
                     /** @noinspection PhpUnusedLocalVariableInspection */
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
+
+                    if ($synchronous && file_exists($destThumbnailPath) && filesize($destThumbnailPath) > 0) {
+                        if ($asPath) {
+                            return $destThumbnailPath;
+                        }
+
+                        $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
+                        $url .= $subfolder;
+                        return App::parseEnv($url) . $destThumbnailFile;
+                    }
+
+                    if ($synchronous) {
+                        Craft::error("Video poster generation failed: $shellOutput", __METHOD__);
+                    }
 
                 // if ffmpeg fails which we can't check because the process is ran in the background
                     // don't return the future path of the image or else we can't check this in the front end
@@ -362,6 +393,58 @@ class Transcode extends Component
         }
 
         return $result;
+    }
+
+    /**
+     * Return a configured poster URL, or an empty string if it is unavailable.
+     */
+    public function getVideoPosterUrl(
+        Asset|string $filePath,
+        string $formatHandle,
+        bool $generate = false,
+        bool $synchronous = false
+    ): string {
+        $formats = $this->getVideoPosterFormats();
+        if (!isset($formats[$formatHandle])) {
+            return '';
+        }
+
+        $options = $formats[$formatHandle];
+        $options['posterFormat'] = $formatHandle;
+        if (!empty($options['timeInSecs'])) {
+            $fileInfo = $this->getFileInfo($filePath, true) ?? [];
+            $duration = (float)($fileInfo['duration'] ?? 0);
+            if ($duration > 0) {
+                $options['timeInSecs'] = min((float)$options['timeInSecs'], max(0, $duration - 0.1));
+            }
+        }
+        if (Transcoder::$plugin->getSettings()->preventVideoPosterBlackBars) {
+            $options['preventBlackBars'] = true;
+        }
+
+        $url = $this->getVideoThumbnailUrl($filePath, $options, $generate, false, $synchronous);
+        return is_string($url) ? $url : '';
+    }
+
+    /**
+     * Return configured poster URLs keyed by format handle.
+     */
+    public function getVideoPosterUrls(Asset|string $filePath, bool $generate = false, bool $synchronous = false): array
+    {
+        $urls = [];
+        foreach (array_keys($this->getVideoPosterFormats()) as $formatHandle) {
+            $urls[$formatHandle] = $this->getVideoPosterUrl($filePath, $formatHandle, $generate, $synchronous);
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Generate every configured poster inside the current process.
+     */
+    public function generateVideoPosters(Asset|string $filePath): array
+    {
+        return $this->getVideoPosterUrls($filePath, true, true);
     }
 
     /**
@@ -918,6 +1001,50 @@ class Transcode extends Component
             'bottom-left' => [(string)$padding, "H-h-$padding"],
             default => ["W-w-$padding", "H-h-$padding"],
         };
+    }
+
+    /**
+     * Normalize configured poster formats by handle.
+     */
+    protected function getVideoPosterFormats(): array
+    {
+        $formats = [];
+        foreach (Transcoder::$plugin->getSettings()->videoPosterFormats as $handle => $format) {
+            if (!is_array($format)) {
+                continue;
+            }
+
+            $handle = is_string($handle) ? $handle : ($format['handle'] ?? '');
+            $handle = trim((string)$handle);
+            if ($handle === '') {
+                continue;
+            }
+
+            $options = [];
+            foreach (['width', 'height', 'timeInSecs'] as $key) {
+                if (isset($format[$key]) && $format[$key] !== '') {
+                    $options[$key] = (int)$format[$key];
+                }
+            }
+            $formats[$handle] = $options;
+        }
+
+        return $formats;
+    }
+
+    /**
+     * Build a poster filter that fills unused space with a blurred cover frame.
+     */
+    protected function getPosterBlackBarFilter(array $options): string
+    {
+        $width = (int)$options['width'];
+        $height = (int)$options['height'];
+
+        return '[0:v]split=2[background][foreground];'
+            . "[background]scale=$width:$height:force_original_aspect_ratio=increase,"
+            . "crop=$width:$height,boxblur=20:1[background];"
+            . "[foreground]scale=$width:$height:force_original_aspect_ratio=decrease[foreground];"
+            . '[background][foreground]overlay=(W-w)/2:(H-h)/2[poster]';
     }
 
     /**

@@ -60,6 +60,22 @@ class TranscoderVariable implements ViteVariableInterface
     }
 
     /**
+     * Return a configured video poster URL without starting generation by default.
+     */
+    public function getVideoPosterUrl($filePath, string $formatHandle, bool $generate = false): string
+    {
+        return Transcoder::$plugin->transcode->getVideoPosterUrl($filePath, $formatHandle, $generate);
+    }
+
+    /**
+     * Return configured video poster URLs keyed by format handle.
+     */
+    public function getVideoPosterUrls($filePath, bool $generate = false): array
+    {
+        return Transcoder::$plugin->transcode->getVideoPosterUrls($filePath, $generate);
+    }
+
+    /**
      * Returns a URL to the transcoded audio file or "" if it doesn't exist
      * (at which time it will create it).
      *
