@@ -115,9 +115,7 @@ class Transcode extends Component
 
         if ($outputInfo !== null) {
             $filePath = $outputInfo['sourcePath'];
-            $subfolder = $outputInfo['subfolder'];
             $destVideoPath = $outputInfo['directory'];
-            $destVideoFile = $outputInfo['filename'];
             $videoOptions = $outputInfo['videoOptions'];
             $thisEncoder = $outputInfo['encoder'];
             $watermarkPath = $outputInfo['watermarkPath'];
@@ -217,10 +215,8 @@ class Transcode extends Component
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
-                $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
-                $url .= $subfolder;
                 $result = $this->getVersionedMediaUrl(
-                    (string)App::parseEnv($url) . $destVideoFile,
+                    $outputInfo['url'],
                     $destVideoPath
                 );
             // skip encoding
@@ -235,10 +231,8 @@ class Transcode extends Component
                     @unlink($progressFile);
 
                     if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
-                        $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
-                        $url .= $subfolder;
                         $result = $this->getVersionedMediaUrl(
-                            (string)App::parseEnv($url) . $destVideoFile,
+                            $outputInfo['url'],
                             $destVideoPath
                         );
                     } else {
@@ -1029,6 +1023,50 @@ class Transcode extends Component
     }
 
     /**
+     * Resolve the configured output subfolder from an Asset or URL/path segment.
+     */
+    protected function getSubfolderFromPath(Asset|string $filePath): string
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        if ($filePath instanceof Asset && $settings->createSubfolders) {
+            $folderPath = trim((string)$filePath->folderPath, '/\\');
+            return $folderPath === '' ? '' : $folderPath . DIRECTORY_SEPARATOR;
+        }
+
+        $segment = (int)$settings->subfolderUrlSegment;
+        if ($segment < 1 || !is_string($filePath)) {
+            return '';
+        }
+
+        $urlPath = parse_url($filePath, PHP_URL_PATH);
+        if (!is_string($urlPath)) {
+            return '';
+        }
+
+        $segments = array_values(array_filter(
+            explode('/', str_replace('\\', '/', $urlPath)),
+            static fn(string $value): bool => $value !== ''
+        ));
+
+        if (!isset($segments[$segment - 1])) {
+            return '';
+        }
+
+        $subfolder = rawurldecode($segments[$segment - 1]);
+        if ($subfolder === '.'
+            || $subfolder === '..'
+            || str_contains($subfolder, "\0")
+            || str_contains($subfolder, '/')
+            || str_contains($subfolder, '\\')
+        ) {
+            Craft::warning('Ignored an unsafe video output subfolder from a string input.', __METHOD__);
+            return '';
+        }
+
+        return $subfolder . DIRECTORY_SEPARATOR;
+    }
+
+    /**
      * Resolve every output value shared by video encoding and refresh cleanup.
      *
      * @return array{
@@ -1037,6 +1075,7 @@ class Transcode extends Component
      *     directory: string,
      *     filename: string,
      *     path: string,
+     *     url: string,
      *     lockFile: string,
      *     progressFile: string,
      *     videoOptions: array,
@@ -1047,7 +1086,7 @@ class Transcode extends Component
     protected function getVideoOutputInfo(Asset|string $filePath, array $videoOptions): ?array
     {
         $settings = Transcoder::$plugin->getSettings();
-        $subfolder = $filePath instanceof Asset && $settings->createSubfolders ? $filePath->folderPath : '';
+        $subfolder = $this->getSubfolderFromPath($filePath);
         $sourcePath = $this->getAssetPath($filePath);
         if ($sourcePath === '') {
             return null;
@@ -1062,8 +1101,18 @@ class Transcode extends Component
             $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
         }
 
-        $directory = $settings->transcoderPaths['video'] ?? $settings->transcoderPaths['default'];
-        $directory = (string)App::parseEnv($directory . $subfolder);
+        $directory = (string)App::parseEnv(
+            $settings->transcoderPaths['video'] ?? $settings->transcoderPaths['default']
+        );
+        $directory = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $urlDirectory = (string)App::parseEnv(
+            $settings->transcoderUrls['video'] ?? $settings->transcoderUrls['default']
+        );
+        $urlDirectory = rtrim($urlDirectory, '/') . '/';
+        if ($subfolder !== '') {
+            $directory .= trim($subfolder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            $urlDirectory .= trim(str_replace('\\', '/', $subfolder), '/') . '/';
+        }
         $filename = $this->getFilename(
             $sourcePath,
             $videoOptions,
@@ -1076,6 +1125,7 @@ class Transcode extends Component
             'directory' => $directory,
             'filename' => $filename,
             'path' => $directory . $filename,
+            'url' => $urlDirectory . $filename,
             'lockFile' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.lock',
             'progressFile' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.progress',
             'videoOptions' => $videoOptions,

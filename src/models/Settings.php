@@ -95,6 +95,9 @@ class Settings extends Model
      */
     public bool $createSubfolders = true;
 
+    /** @var bool|int|string One-based URL/path segment used as the output subfolder for string inputs. */
+    public bool|int|string $subfolderUrlSegment = false;
+
     /**
      * clear caches when somebody clears all caches from the CP?
      *
@@ -317,6 +320,7 @@ class Settings extends Model
             ['enableDownloadFileEndpoint', 'boolean'],
             ['useHashedNames', 'boolean'],
             ['createSubfolders', 'boolean'],
+            ['subfolderUrlSegment', 'integer', 'min' => 1, 'skipOnEmpty' => true],
             ['clearCaches', 'boolean'],
             ['queueVideosOnAssetUpload', 'boolean'],
             ['videoQueueDelaySeconds', 'integer', 'min' => 0],

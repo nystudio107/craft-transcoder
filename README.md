@@ -13,6 +13,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 - Generate named poster formats after queued encodes.
 - Replace poster letterboxing with a blurred cover background.
 - Refresh managed video derivatives after a third-party plugin replaces a source asset.
+- Keep Asset and string-URL video calls in the same configured output subfolder.
 
 All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen or `config/transcoder.php`.
 

@@ -28,6 +28,8 @@ You can also pass in an URL:
 }) %}
 ```
 
+When passing a URL or string path, Transcoder cannot read Craft’s `folderPath` directly. Configure `subfolderUrlSegment` if the encoded output should retain a folder segment from that URL. Passing the actual `Asset` remains preferred because its subfolder is available without parsing the URL.
+
 You can also pass in an `Asset`:
 
 ```twig

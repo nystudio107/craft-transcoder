@@ -24,6 +24,8 @@ return [
     'Use the original option-based filename, or keep one stable filename per source asset.' => 'Use the original option-based filename, or keep one stable filename per source asset.',
     'Encoding options' => 'Encoding options',
     'Source asset' => 'Source asset',
+    'URL subfolder segment' => 'URL subfolder segment',
+    'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.' => 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.',
     'Video watermark' => 'Video watermark',
     'Enable video watermark' => 'Enable video watermark',
     'Overlay the configured image on newly encoded videos.' => 'Overlay the configured image on newly encoded videos.',

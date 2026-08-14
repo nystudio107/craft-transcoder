@@ -344,6 +344,7 @@ namespace {
             'videoQueueDelaySeconds' => 9,
             'queuedVideoOptions' => [],
             'createSubfolders' => true,
+            'subfolderUrlSegment' => false,
             'transcoderPaths' => [
                 'default' => '@encoded/',
                 'video' => '@encoded/video/',
@@ -442,6 +443,29 @@ namespace {
         assertSameValue($flat['path'], $service->refreshTargets($asset)['output'][0], 'Flat paths diverge.');
 
         $settings->createSubfolders = true;
+        $settings->subfolderUrlSegment = 3;
+        $paths = $settings->transcoderPaths;
+        $paths['video'] = '@encoded/video';
+        $settings->transcoderPaths = $paths;
+        $urls = $settings->transcoderUrls;
+        $urls['video'] = 'https://example.test/encoded/video';
+        $settings->transcoderUrls = $urls;
+        $urlInput = 'https://example.test/content/videos/197915/' . $filename;
+        $urlOutput = $service->outputInfo($urlInput, []);
+        assertSameValue($expectedPath, $urlOutput['path'], 'String URL input ignored its configured output subfolder.');
+        assertSameValue(
+            'https://example.test/encoded/video/197915/' . $expectedFilename,
+            $urlOutput['url'],
+            'String URL output URL ignored its configured subfolder.'
+        );
+        assertSameValue($outputInfo['path'], $urlOutput['path'], 'Asset and URL callers do not resolve to the same output path.');
+        $unsafeUrl = 'https://example.test/content/videos/%2E%2E/' . $filename;
+        assertSameValue(
+            $encodedRoot . $expectedFilename,
+            $service->outputInfo($unsafeUrl, [])['path'],
+            'An unsafe URL segment escaped the configured video output directory.'
+        );
+        $settings->subfolderUrlSegment = false;
 
         $result = $service->performVideoAssetRefresh($asset);
         assertSameValue(false, $settings->queueVideosOnAssetUpload, 'The regression must run with upload queueing disabled.');

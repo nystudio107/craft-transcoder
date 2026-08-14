@@ -18,6 +18,7 @@
 * Use one byte-identical output-path calculation for replacement cleanup and queued encoding.
 * Fail refresh jobs when Craft cannot queue replacement encoding instead of reporting completion.
 * Add modification-time cache versions to generated video and poster URLs after regeneration.
+* Preserve configured video output subfolders when `getVideoUrl()` receives a string URL or path.
 
 ## 4.0.2 - 2024.09.30
 ## Added

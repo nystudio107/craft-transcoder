@@ -63,6 +63,9 @@ return [
     // if a upload location has a subfolder defined, add this to the transcoder paths too
     'createSubfolders' => true,
 
+    // One-based URL/path segment to use as the output subfolder for string inputs; false disables it
+    'subfolderUrlSegment' => false,
+
     // Add the Clear Caches utility to the CP?
     'clearCaches' => false,
 

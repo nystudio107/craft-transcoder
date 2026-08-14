@@ -41,6 +41,21 @@ A working Craft queue runner is required. The queue job waits for ffmpeg to fini
 - `options` (default): preserves Transcoder’s original parameterized filenames. Output-affecting options such as `videoBitRate` remain part of the filename.
 - `source`: uses the source asset name plus the encoder suffix, producing one stable output name per source asset.
 
+### Subfolders for URL inputs
+
+Passing the actual Craft `Asset` to `getVideoUrl()` is preferred. With `createSubfolders` enabled, Transcoder uses the Asset’s `folderPath` for both the encoded filesystem path and public URL.
+
+When an integration can only pass a string URL or path, configure `subfolderUrlSegment` with the one-based path segment that contains the desired output folder. For example, segment `3` extracts `197915` from `/content/videos/197915/video.mp4`:
+
+```php
+return [
+    'createSubfolders' => true,
+    'subfolderUrlSegment' => 3,
+];
+```
+
+Leave `subfolderUrlSegment` as `false` (the default) when string inputs should use the base video output directory. Transcoder normalizes path and URL separators, so configured transcoder paths no longer depend on a trailing slash for video output.
+
 ## Watermarks
 
 Watermarking accepts a local path, Yii alias, environment value, or public image URL:

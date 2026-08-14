@@ -33,6 +33,17 @@
     ],
 }) }}
 
+{{ forms.textField({
+    label: 'URL subfolder segment'|t('transcoder'),
+    instructions: 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.'|t('transcoder'),
+    id: 'subfolderUrlSegment',
+    name: 'subfolderUrlSegment',
+    value: settings.subfolderUrlSegment ?: '',
+    type: 'number',
+    min: 1,
+    size: 5,
+}) }}
+
 <hr>
 <h2>{{ 'Video posters'|t('transcoder') }}</h2>
 
