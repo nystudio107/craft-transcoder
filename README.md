@@ -12,8 +12,11 @@ Transcode video & audio files to various formats, and provide video thumbnails
 - Overlay a configurable watermark on encoded videos.
 - Generate named poster formats after queued encodes.
 - Replace poster letterboxing with a blurred cover background.
+- Refresh managed video derivatives after a third-party plugin replaces a source asset.
 
 All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen or `config/transcoder.php`.
+
+Third-party plugins that intentionally replace a video asset can call `Transcoder::$plugin->getTranscode()->refreshVideoAsset($asset)`. Cleanup and re-encoding run asynchronously through Craft’s queue; see the usage documentation for the integration contract.
 
 ![Screenshot](./docs/docs/resources/img/plugin-banner.jpg)
 

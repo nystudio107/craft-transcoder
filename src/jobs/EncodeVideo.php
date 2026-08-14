@@ -27,24 +27,30 @@ class EncodeVideo extends BaseJob
             throw new RuntimeException("Unable to find video asset #{$this->assetId}.");
         }
 
-        $url = Transcoder::$plugin->transcode->getVideoUrl(
-            $asset,
-            $this->videoOptions,
-            true,
-            true
-        );
+        $executed = Transcoder::$plugin->transcode->runVideoAssetWork($asset, function() use ($asset): void {
+            $url = Transcoder::$plugin->transcode->getVideoUrl(
+                $asset,
+                $this->videoOptions,
+                true,
+                true
+            );
 
-        if ($url === '') {
-            throw new RuntimeException("Video encoding failed for asset #{$this->assetId}.");
-        }
-
-        Craft::info("Encoded video asset #{$this->assetId}: $url", __METHOD__);
-
-        if (Transcoder::$plugin->getSettings()->enableVideoPosters) {
-            $posters = Transcoder::$plugin->transcode->generateVideoPosters($asset);
-            if (in_array('', $posters, true)) {
-                throw new RuntimeException("Video poster generation failed for asset #{$this->assetId}.");
+            if ($url === '') {
+                throw new RuntimeException("Video encoding failed for asset #{$this->assetId}.");
             }
+
+            Craft::info("Encoded video asset #{$this->assetId}: $url", __METHOD__);
+
+            if (Transcoder::$plugin->getSettings()->enableVideoPosters) {
+                $posters = Transcoder::$plugin->transcode->generateVideoPosters($asset);
+                if (in_array('', $posters, true)) {
+                    throw new RuntimeException("Video poster generation failed for asset #{$this->assetId}.");
+                }
+            }
+        });
+
+        if (!$executed) {
+            throw new RuntimeException("Video asset #{$this->assetId} is already being processed.");
         }
     }
 

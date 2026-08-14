@@ -11,6 +11,7 @@
 * Add configurable video watermark overlays.
 * Generate configured video poster formats after queued encodes.
 * Add blurred-background poster fitting to prevent black bars.
+* Add `refreshVideoAsset()` for integrations that intentionally replace a video asset’s source file.
 
 ## 4.0.2 - 2024.09.30
 ## Added

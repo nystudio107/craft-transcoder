@@ -16,10 +16,14 @@ use craft\elements\Asset;
 use craft\events\DefineAssetThumbUrlEvent;
 use craft\fs\Local;
 use craft\helpers\App;
+use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\Json as JsonHelper;
 use mikehaertl\shellcommand\Command as ShellCommand;
+use nystudio107\transcoder\jobs\EncodeVideo;
+use nystudio107\transcoder\jobs\RefreshVideoAsset;
 use nystudio107\transcoder\Transcoder;
+use RuntimeException;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\validators\UrlValidator;
@@ -404,22 +408,9 @@ class Transcode extends Component
         bool $generate = false,
         bool $synchronous = false
     ): string {
-        $formats = $this->getVideoPosterFormats();
-        if (!isset($formats[$formatHandle])) {
+        $options = $this->getVideoPosterOptions($filePath, $formatHandle);
+        if ($options === null) {
             return '';
-        }
-
-        $options = $formats[$formatHandle];
-        $options['posterFormat'] = $formatHandle;
-        if (!empty($options['timeInSecs'])) {
-            $fileInfo = $this->getFileInfo($filePath, true) ?? [];
-            $duration = (float)($fileInfo['duration'] ?? 0);
-            if ($duration > 0) {
-                $options['timeInSecs'] = min((float)$options['timeInSecs'], max(0, $duration - 0.1));
-            }
-        }
-        if (Transcoder::$plugin->getSettings()->preventVideoPosterBlackBars) {
-            $options['preventBlackBars'] = true;
         }
 
         $url = $this->getVideoThumbnailUrl($filePath, $options, $generate, false, $synchronous);
@@ -445,6 +436,108 @@ class Transcode extends Component
     public function generateVideoPosters(Asset|string $filePath): array
     {
         return $this->getVideoPosterUrls($filePath, true, true);
+    }
+
+    /**
+     * Queue invalidation and regeneration after an integration replaces a video asset.
+     *
+     * @return array{queued: bool, jobId: mixed}
+     */
+    public function refreshVideoAsset(Asset $asset): array
+    {
+        $this->validateRefreshVideoAsset($asset);
+
+        $jobId = Craft::$app->getQueue()->push(new RefreshVideoAsset([
+            'assetId' => (int)$asset->id,
+        ]));
+
+        return [
+            'queued' => true,
+            'jobId' => $jobId,
+        ];
+    }
+
+    /**
+     * Perform queued cleanup and queue the existing video encoder.
+     *
+     * @internal Used by RefreshVideoAsset.
+     * @return array{removedFiles: int, queued: bool, jobId: mixed, active?: bool}
+     */
+    public function performVideoAssetRefresh(Asset $asset): array
+    {
+        $this->validateRefreshVideoAsset($asset);
+        $removedFiles = 0;
+        $encodingActive = false;
+
+        $locked = $this->runVideoAssetWork($asset, function() use ($asset, &$removedFiles, &$encodingActive): void {
+            $targets = $this->getVideoAssetRefreshTargets($asset);
+            if ($this->isVideoEncodingActive($targets['temporary'])) {
+                $encodingActive = true;
+                return;
+            }
+
+            $removedFiles = $this->removeVideoAssetRefreshTargets($targets);
+        });
+
+        if (!$locked || $encodingActive) {
+            return [
+                'removedFiles' => 0,
+                'queued' => false,
+                'jobId' => null,
+                'active' => true,
+            ];
+        }
+
+        $settings = Transcoder::$plugin->getSettings();
+        $queue = Craft::$app->getQueue();
+        if ($settings->videoQueueDelaySeconds > 0) {
+            $queue = $queue->delay($settings->videoQueueDelaySeconds);
+        }
+        $jobId = $queue->push(new EncodeVideo([
+            'assetId' => (int)$asset->id,
+            'videoOptions' => $settings->queuedVideoOptions,
+        ]));
+
+        return [
+            'removedFiles' => $removedFiles,
+            'queued' => true,
+            'jobId' => $jobId,
+        ];
+    }
+
+    /**
+     * Run asset-specific work under a non-blocking process lock.
+     *
+     * @internal Used by Transcoder queue jobs.
+     */
+    public function runVideoAssetWork(Asset $asset, callable $callback): bool
+    {
+        if (!$asset->id) {
+            return false;
+        }
+
+        $lockPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'transcoder-video-asset-' . (int)$asset->id . '.lock';
+        $handle = @fopen($lockPath, 'c+');
+        if ($handle === false) {
+            throw new RuntimeException('Unable to create the Transcoder video asset lock.');
+        }
+
+        if (!flock($handle, LOCK_EX | LOCK_NB)) {
+            fclose($handle);
+            return false;
+        }
+
+        try {
+            ftruncate($handle, 0);
+            fwrite($handle, (string)getmypid());
+            fflush($handle);
+            $callback();
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+
+        return true;
     }
 
     /**
@@ -921,6 +1014,141 @@ class Transcode extends Component
     }
 
     /**
+     * Validate the public replacement-refresh contract.
+     */
+    protected function validateRefreshVideoAsset(Asset $asset): void
+    {
+        if (!$asset->id || AssetsHelper::getFileKindByExtension($asset->filename) !== Asset::KIND_VIDEO) {
+            throw new RuntimeException('Transcoder can only refresh a persisted video Asset.');
+        }
+    }
+
+    /**
+     * Return exact files managed by the configured automatic video workflow.
+     *
+     * @return array{output: string[], temporary: string[]}
+     */
+    protected function getVideoAssetRefreshTargets(Asset $asset): array
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $subfolder = $settings->createSubfolders ? $asset->folderPath : '';
+        $videoDirectory = App::parseEnv(
+            $settings->transcoderPaths['video'] ?? $settings->transcoderPaths['default']
+        ) . $subfolder;
+        $videoFilename = $this->getVideoFilename($asset, $settings->queuedVideoOptions);
+        $outputs = [$videoDirectory . $videoFilename];
+        $temporary = [
+            sys_get_temp_dir() . DIRECTORY_SEPARATOR . $videoFilename . '.lock',
+            sys_get_temp_dir() . DIRECTORY_SEPARATOR . $videoFilename . '.progress',
+        ];
+
+        if ($settings->enableVideoPosters) {
+            $posterDirectory = App::parseEnv(
+                $settings->transcoderPaths['thumbnail'] ?? $settings->transcoderPaths['default']
+            ) . $subfolder;
+            foreach (array_keys($this->getVideoPosterFormats()) as $formatHandle) {
+                $options = $this->getVideoPosterOptions($asset, $formatHandle);
+                if ($options !== null) {
+                    $options = $this->coalesceOptions('defaultThumbnailOptions', $options);
+                    $outputs[] = $posterDirectory . $this->getFilename($asset, $options);
+                }
+            }
+        }
+
+        return [
+            'output' => array_values(array_unique($outputs)),
+            'temporary' => array_values(array_unique($temporary)),
+        ];
+    }
+
+    /**
+     * Return whether the configured video encoder still owns its process lock.
+     *
+     * @param string[] $temporaryPaths
+     */
+    protected function isVideoEncodingActive(array $temporaryPaths): bool
+    {
+        foreach ($temporaryPaths as $path) {
+            if (!str_ends_with($path, '.lock') || !is_file($path)) {
+                continue;
+            }
+
+            $pid = trim((string)@file_get_contents($path));
+            if ($pid === '' || !ctype_digit($pid)) {
+                continue;
+            }
+
+            $processState = [];
+            exec('kill -0 ' . (int)$pid . ' 2>&1', $processState);
+            if ($processState === []) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Delete exact refresh targets after validating their managed roots.
+     *
+     * @param array{output: string[], temporary: string[]} $targets
+     */
+    protected function removeVideoAssetRefreshTargets(array $targets): int
+    {
+        $removed = 0;
+        foreach ($targets as $kind => $paths) {
+            foreach ($paths as $path) {
+                if (!is_file($path) && !is_link($path)) {
+                    continue;
+                }
+                if (!$this->isSafeVideoAssetRefreshPath($path, $kind)) {
+                    throw new RuntimeException('Refusing to remove a Transcoder file outside its managed roots.');
+                }
+                if (!@unlink($path) && (is_file($path) || is_link($path))) {
+                    throw new RuntimeException('Unable to remove a managed Transcoder file.');
+                }
+                $removed++;
+            }
+        }
+
+        return $removed;
+    }
+
+    /**
+     * Verify a deletion target without following a file symlink outside its root.
+     */
+    protected function isSafeVideoAssetRefreshPath(string $path, string $kind): bool
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        if ($kind === 'temporary') {
+            $roots = [sys_get_temp_dir()];
+        } elseif ($kind === 'output') {
+            $roots = [];
+            foreach (['default', 'video', 'thumbnail'] as $key) {
+                if (!empty($settings->transcoderPaths[$key])) {
+                    $roots[] = (string)App::parseEnv($settings->transcoderPaths[$key]);
+                }
+            }
+        } else {
+            return false;
+        }
+
+        $parent = realpath(dirname(FileHelper::normalizePath($path)));
+        if ($parent === false) {
+            return false;
+        }
+
+        foreach ($roots as $root) {
+            $root = realpath(rtrim(FileHelper::normalizePath($root), DIRECTORY_SEPARATOR));
+            if ($root !== false && ($parent === $root || str_starts_with($parent, $root . DIRECTORY_SEPARATOR))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Resolve the configured watermark input.
      */
     protected function getVideoWatermarkPath(): ?string
@@ -1030,6 +1258,32 @@ class Transcode extends Component
         }
 
         return $formats;
+    }
+
+    /**
+     * Return the exact thumbnail options used by a configured poster format.
+     */
+    protected function getVideoPosterOptions(Asset|string $filePath, string $formatHandle): ?array
+    {
+        $formats = $this->getVideoPosterFormats();
+        if (!isset($formats[$formatHandle])) {
+            return null;
+        }
+
+        $options = $formats[$formatHandle];
+        $options['posterFormat'] = $formatHandle;
+        if (!empty($options['timeInSecs'])) {
+            $fileInfo = $this->getFileInfo($filePath, true) ?? [];
+            $duration = (float)($fileInfo['duration'] ?? 0);
+            if ($duration > 0) {
+                $options['timeInSecs'] = min((float)$options['timeInSecs'], max(0, $duration - 0.1));
+            }
+        }
+        if (Transcoder::$plugin->getSettings()->preventVideoPosterBlackBars) {
+            $options['preventBlackBars'] = true;
+        }
+
+        return $options;
     }
 
     /**

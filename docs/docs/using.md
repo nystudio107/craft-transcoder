@@ -103,6 +103,22 @@ Queued poster generation does not need to be started from a template. Read a con
 
 `getVideoPosterUrl()` returns an empty string until the poster exists. Passing `true` as its third argument keeps the original on-demand behavior and starts poster generation when needed.
 
+## Refreshing Replaced Video Assets
+
+Plugins that intentionally replace the source file of an existing video asset can ask Transcoder to invalidate its managed derivatives and encode the replacement again:
+
+```php
+use nystudio107\transcoder\Transcoder;
+
+$result = Transcoder::$plugin
+    ->getTranscode()
+    ->refreshVideoAsset($asset);
+```
+
+The result contains `queued` and `jobId`. Cleanup and encoding are asynchronous, so a working Craft queue runner is required. The refresh is explicit and works independently of `queueVideosOnAssetUpload`; Transcoder does not listen globally for every asset replacement.
+
+Only the encoded variant produced with `queuedVideoOptions`, its lock/progress files, and currently configured poster formats are managed. Arbitrary variants generated from Twig are not removed. Missing derivatives are a successful no-op. Transcoder waits when the asset is already being processed and never signals or terminates FFmpeg. No database state or migration is required.
+
 ## Generating a Transcoded Audio File
 
 To generate a transcoded audio File, do the following:
