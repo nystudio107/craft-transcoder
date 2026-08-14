@@ -38,13 +38,25 @@ class RefreshVideoAsset extends BaseJob
                 throw new RuntimeException('Video refresh timed out waiting for current encoding to finish.');
             }
 
-            Craft::$app->getQueue()->delay(self::RETRY_DELAY_SECONDS)->push(new self([
+            $retryJobId = Craft::$app->getQueue()->delay(self::RETRY_DELAY_SECONDS)->push(new self([
                 'assetId' => $this->assetId,
                 'attempt' => $this->attempt + 1,
                 'maxAttempts' => $this->maxAttempts,
             ]));
+            if ($retryJobId === null) {
+                throw new RuntimeException("Unable to requeue video refresh for asset #{$this->assetId}.");
+            }
+
+            Craft::info(
+                "Video refresh for asset #{$this->assetId} is waiting; retry job ID: $retryJobId",
+                __METHOD__
+            );
             $this->setProgress($queue, 1, Craft::t('transcoder', 'Waiting for current video encoding to finish'));
             return;
+        }
+
+        if (empty($result['queued']) || empty($result['jobId'])) {
+            throw new RuntimeException("Video refresh did not queue replacement encoding for asset #{$this->assetId}.");
         }
 
         $this->setProgress($queue, 1, Craft::t('transcoder', 'Video refresh complete'));

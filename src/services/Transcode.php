@@ -111,31 +111,16 @@ class Transcode extends Component
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
-        $subfolder = '';
+        $outputInfo = $this->getVideoOutputInfo($filePath, $videoOptions);
 
-        // sub folder check
-        if (($filePath instanceof Asset) && $settings['createSubfolders']) {
-            $subfolder = $filePath->folderPath;
-        }
-
-        // file path
-        $filePath = $this->getAssetPath($filePath);
-
-        if (!empty($filePath)) {
-            $destVideoPath = $settings['transcoderPaths']['video'] ?? $settings['transcoderPaths']['default'];
-            $destVideoPath .= $subfolder;
-            $destVideoPath = App::parseEnv($destVideoPath);
-            $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
-
-            // Get the video encoder presets to use
-            $videoEncoders = $settings['videoEncoders'];
-            $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
-
-            $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
-            $watermarkPath = $this->getVideoWatermarkPath();
-            if ($watermarkPath !== null) {
-                $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
-            }
+        if ($outputInfo !== null) {
+            $filePath = $outputInfo['sourcePath'];
+            $subfolder = $outputInfo['subfolder'];
+            $destVideoPath = $outputInfo['directory'];
+            $destVideoFile = $outputInfo['filename'];
+            $videoOptions = $outputInfo['videoOptions'];
+            $thisEncoder = $outputInfo['encoder'];
+            $watermarkPath = $outputInfo['watermarkPath'];
 
             // Build the basic command for ffmpeg
             $ffmpegCmd = $settings['ffmpegPath']
@@ -202,17 +187,11 @@ class Transcode extends Component
                 }
             }
 
-            $destVideoFile = $this->getFilename(
-                $filePath,
-                $videoOptions,
-                $this->getVideoFilenameExcludeParams($videoOptions)
-            );
-
             // File to store the video encoding progress in
-            $progressFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.progress';
+            $progressFile = $outputInfo['progressFile'];
 
             // Assemble the destination path and final ffmpeg command
-            $destVideoPath .= $destVideoFile;
+            $destVideoPath = $outputInfo['path'];
             $ffmpegCmd .= ' -f '
                 . $thisEncoder['fileFormat']
                 . ' -y ' . escapeshellarg($destVideoPath);
@@ -222,7 +201,7 @@ class Transcode extends Component
             }
 
             // Make sure there isn't a lockfile for this video already
-            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
+            $lockFile = $outputInfo['lockFile'];
             $oldPid = @file_get_contents($lockFile);
             if ($oldPid !== false) {
                 // See if the process is running, and empty result means the process is still running
@@ -240,7 +219,10 @@ class Transcode extends Component
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
-                $result = App::parseEnv($url) . $destVideoFile;
+                $result = $this->getVersionedMediaUrl(
+                    (string)App::parseEnv($url) . $destVideoFile,
+                    $destVideoPath
+                );
             // skip encoding
             } elseif (!$generate) {
                 $result = '';
@@ -255,7 +237,10 @@ class Transcode extends Component
                     if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
                         $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                         $url .= $subfolder;
-                        $result = App::parseEnv($url) . $destVideoFile;
+                        $result = $this->getVersionedMediaUrl(
+                            (string)App::parseEnv($url) . $destVideoFile,
+                            $destVideoPath
+                        );
                     } else {
                         Craft::error("Video encoding failed: $output", __METHOD__);
                     }
@@ -370,7 +355,10 @@ class Transcode extends Component
 
                         $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
                         $url .= $subfolder;
-                        return App::parseEnv($url) . $destThumbnailFile;
+                        return $this->getVersionedMediaUrl(
+                            (string)App::parseEnv($url) . $destThumbnailFile,
+                            $destThumbnailPath
+                        );
                     }
 
                     if ($synchronous) {
@@ -392,7 +380,10 @@ class Transcode extends Component
             } else {
                 $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
-                $result = App::parseEnv($url) . $destThumbnailFile;
+                $result = $this->getVersionedMediaUrl(
+                    (string)App::parseEnv($url) . $destThumbnailFile,
+                    $destThumbnailPath
+                );
             }
         }
 
@@ -450,6 +441,11 @@ class Transcode extends Component
         $jobId = Craft::$app->getQueue()->push(new RefreshVideoAsset([
             'assetId' => (int)$asset->id,
         ]));
+        if ($jobId === null) {
+            throw new RuntimeException("Unable to queue video refresh for asset #{$asset->id}.");
+        }
+
+        Craft::info("Queued video refresh for asset #{$asset->id}; refresh job ID: $jobId", __METHOD__);
 
         return [
             'queued' => true,
@@ -497,6 +493,18 @@ class Transcode extends Component
             'assetId' => (int)$asset->id,
             'videoOptions' => $settings->queuedVideoOptions,
         ]));
+        if ($jobId === null) {
+            Craft::error(
+                "Video refresh handoff failed for asset #{$asset->id}; removed files: $removedFiles; follow-up encode job ID: none",
+                __METHOD__
+            );
+            throw new RuntimeException("Unable to queue replacement video encoding for asset #{$asset->id}.");
+        }
+
+        Craft::info(
+            "Refreshed video asset #{$asset->id}; removed files: $removedFiles; follow-up encode job ID: $jobId",
+            __METHOD__
+        );
 
         return [
             'removedFiles' => $removedFiles,
@@ -768,24 +776,7 @@ class Transcode extends Component
      */
     public function getVideoFilename(Asset|string $filePath, array $videoOptions): string
     {
-        $settings = Transcoder::$plugin->getSettings();
-        $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
-
-        // Get the video encoder presets to use
-        $videoEncoders = $settings['videoEncoders'];
-        $thisEncoder = $videoEncoders[$videoOptions['videoEncoder']];
-
-        $videoOptions['fileSuffix'] = $thisEncoder['fileSuffix'];
-        $watermarkPath = $this->getVideoWatermarkPath();
-        if ($watermarkPath !== null) {
-            $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
-        }
-
-        return $this->getFilename(
-            $filePath,
-            $videoOptions,
-            $this->getVideoFilenameExcludeParams($videoOptions)
-        );
+        return $this->getVideoOutputInfo($filePath, $videoOptions)['filename'] ?? '';
     }
 
     /**
@@ -1014,6 +1005,20 @@ class Transcode extends Component
     }
 
     /**
+     * Add a cache version from the bytes that are actually on disk.
+     */
+    protected function getVersionedMediaUrl(string $url, string $path): string
+    {
+        clearstatcache(true, $path);
+        $modifiedAt = @filemtime($path);
+        if ($modifiedAt === false) {
+            return $url;
+        }
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . 'v=' . $modifiedAt;
+    }
+
+    /**
      * Validate the public replacement-refresh contract.
      */
     protected function validateRefreshVideoAsset(Asset $asset): void
@@ -1024,6 +1029,62 @@ class Transcode extends Component
     }
 
     /**
+     * Resolve every output value shared by video encoding and refresh cleanup.
+     *
+     * @return array{
+     *     sourcePath: string,
+     *     subfolder: string,
+     *     directory: string,
+     *     filename: string,
+     *     path: string,
+     *     lockFile: string,
+     *     progressFile: string,
+     *     videoOptions: array,
+     *     encoder: array,
+     *     watermarkPath: ?string
+     * }|null
+     */
+    protected function getVideoOutputInfo(Asset|string $filePath, array $videoOptions): ?array
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $subfolder = $filePath instanceof Asset && $settings->createSubfolders ? $filePath->folderPath : '';
+        $sourcePath = $this->getAssetPath($filePath);
+        if ($sourcePath === '') {
+            return null;
+        }
+
+        $videoOptions = $this->coalesceOptions('defaultVideoOptions', $videoOptions);
+        $videoEncoders = $settings->videoEncoders;
+        $encoder = $videoEncoders[$videoOptions['videoEncoder']];
+        $videoOptions['fileSuffix'] = $encoder['fileSuffix'];
+        $watermarkPath = $this->getVideoWatermarkPath();
+        if ($watermarkPath !== null) {
+            $videoOptions['watermark'] = $this->getVideoWatermarkFingerprint($watermarkPath);
+        }
+
+        $directory = $settings->transcoderPaths['video'] ?? $settings->transcoderPaths['default'];
+        $directory = (string)App::parseEnv($directory . $subfolder);
+        $filename = $this->getFilename(
+            $sourcePath,
+            $videoOptions,
+            $this->getVideoFilenameExcludeParams($videoOptions)
+        );
+
+        return [
+            'sourcePath' => $sourcePath,
+            'subfolder' => $subfolder,
+            'directory' => $directory,
+            'filename' => $filename,
+            'path' => $directory . $filename,
+            'lockFile' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.lock',
+            'progressFile' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '.progress',
+            'videoOptions' => $videoOptions,
+            'encoder' => $encoder,
+            'watermarkPath' => $watermarkPath,
+        ];
+    }
+
+    /**
      * Return exact files managed by the configured automatic video workflow.
      *
      * @return array{output: string[], temporary: string[]}
@@ -1031,15 +1092,16 @@ class Transcode extends Component
     protected function getVideoAssetRefreshTargets(Asset $asset): array
     {
         $settings = Transcoder::$plugin->getSettings();
-        $subfolder = $settings->createSubfolders ? $asset->folderPath : '';
-        $videoDirectory = App::parseEnv(
-            $settings->transcoderPaths['video'] ?? $settings->transcoderPaths['default']
-        ) . $subfolder;
-        $videoFilename = $this->getVideoFilename($asset, $settings->queuedVideoOptions);
-        $outputs = [$videoDirectory . $videoFilename];
+        $videoOutput = $this->getVideoOutputInfo($asset, $settings->queuedVideoOptions);
+        if ($videoOutput === null) {
+            throw new RuntimeException('Unable to resolve the source or output path for the video Asset.');
+        }
+
+        $subfolder = $videoOutput['subfolder'];
+        $outputs = [$videoOutput['path']];
         $temporary = [
-            sys_get_temp_dir() . DIRECTORY_SEPARATOR . $videoFilename . '.lock',
-            sys_get_temp_dir() . DIRECTORY_SEPARATOR . $videoFilename . '.progress',
+            $videoOutput['lockFile'],
+            $videoOutput['progressFile'],
         ];
 
         if ($settings->enableVideoPosters) {

@@ -27,6 +27,7 @@ class EncodeVideo extends BaseJob
             throw new RuntimeException("Unable to find video asset #{$this->assetId}.");
         }
 
+        Craft::info("Starting queued video encoding for asset #{$this->assetId}.", __METHOD__);
         $executed = Transcoder::$plugin->transcode->runVideoAssetWork($asset, function() use ($asset): void {
             $url = Transcoder::$plugin->transcode->getVideoUrl(
                 $asset,

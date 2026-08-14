@@ -119,6 +119,10 @@ The result contains `queued` and `jobId`. Cleanup and encoding are asynchronous,
 
 Only the encoded variant produced with `queuedVideoOptions`, its lock/progress files, and currently configured poster formats are managed. Arbitrary variants generated from Twig are not removed. Missing derivatives are a successful no-op. Transcoder waits when the asset is already being processed and never signals or terminates FFmpeg. No database state or migration is required.
 
+The refresh and encoding jobs use the same output-path calculation, including subfolders, aliases, hashed names, filename strategy, encoding options, and watermark fingerprint. If cleanup or the follow-up queue push fails, Craft records a failed queue job rather than a completed refresh. Successful refreshes log the asset ID, removed-file count, and follow-up job ID without exposing filesystem paths.
+
+Generated video and poster URLs include a `v` query parameter based on the output file’s actual modification time. This prevents a stable output URL from continuing to serve cached bytes after successful regeneration.
+
 ## Generating a Transcoded Audio File
 
 To generate a transcoded audio File, do the following:

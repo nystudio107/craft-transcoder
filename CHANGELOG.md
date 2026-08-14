@@ -13,6 +13,12 @@
 * Add blurred-background poster fitting to prevent black bars.
 * Add `refreshVideoAsset()` for integrations that intentionally replace a video asset’s source file.
 
+### Fixed
+
+* Use one byte-identical output-path calculation for replacement cleanup and queued encoding.
+* Fail refresh jobs when Craft cannot queue replacement encoding instead of reporting completion.
+* Add modification-time cache versions to generated video and poster URLs after regeneration.
+
 ## 4.0.2 - 2024.09.30
 ## Added
 * Add `phpstan` and `ecs` code linting
