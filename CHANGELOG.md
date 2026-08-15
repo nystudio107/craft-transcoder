@@ -12,6 +12,7 @@
 ### Added
 
 * Queue video encoding when new video assets are uploaded, with a configurable delay.
+* Queue GIF encoding when new GIF assets are uploaded, with a configurable delay.
 * Add source-asset and encoding-options video filename strategies while preserving bitrate-based filenames by default.
 * Add configurable video watermark overlays.
 * Generate configured video poster formats after queued encodes.

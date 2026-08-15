@@ -78,6 +78,15 @@ return [
     // Options passed to the queued video encode
     'queuedVideoOptions' => [],
 
+    // Queue GIF encoding when a new GIF asset is uploaded
+    'queueGifsOnAssetUpload' => false,
+
+    // Seconds to wait before an uploaded GIF starts encoding
+    'gifQueueDelaySeconds' => 0,
+
+    // Options passed to the queued GIF encode
+    'queuedGifOptions' => [],
+
     // How encoded video filenames are generated: options or source
     'videoFilenameStrategy' => 'options',
 

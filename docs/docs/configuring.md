@@ -38,6 +38,22 @@ return [
 
 A working Craft queue runner is required. The queue job waits for ffmpeg to finish, so Craft can report failures and retry the job through the configured queue driver.
 
+## GIF queue
+
+GIF uploads can use the same failure-visible Craft queue workflow without changing `getGifUrl()` or its string return value:
+
+```php
+return [
+    'queueGifsOnAssetUpload' => true,
+    'gifQueueDelaySeconds' => 5,
+    'queuedGifOptions' => [
+        'videoEncoder' => 'gif',
+    ],
+];
+```
+
+GIF queueing is disabled by default. The queue worker runs ffmpeg synchronously and only completes after a non-empty output has been created. Existing Twig calls keep their original on-demand behavior.
+
 `videoFilenameStrategy` supports:
 
 - `options` (default): preserves Transcoder’s original parameterized filenames. Output-affecting options such as `videoBitRate` remain part of the filename.

@@ -189,6 +189,10 @@ The above example would cause it to not change the audio of the source audio fil
 
 The file format setting `audioEncoder` is preset to what you’ll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
+## Queued GIF Encoding
+
+When `queueGifsOnAssetUpload` is enabled, newly uploaded GIF Assets are converted using Craft’s queue and `queuedGifOptions`. This does not change the existing `craft.transcoder.getGifUrl()` response or its on-demand behavior. Queue failures are reported as failed Craft jobs.
+
 ## Getting Transcoding Progress
 
 Transcoding of video/audio files can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()` or `craft.transcoder.getAudioProgressUrl()`. For example:

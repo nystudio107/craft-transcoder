@@ -31,8 +31,9 @@ use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use craft\web\View;
-use nystudio107\transcoder\models\Settings;
+use nystudio107\transcoder\jobs\EncodeGif;
 use nystudio107\transcoder\jobs\EncodeVideo;
+use nystudio107\transcoder\models\Settings;
 use nystudio107\transcoder\services\ServicesTrait;
 use nystudio107\transcoder\variables\TranscoderVariable;
 use yii\base\ErrorException;
@@ -183,6 +184,10 @@ class Transcoder extends Plugin
                             'url' => '#settings-tab-video-queue',
                         ],
                         [
+                            'label' => Craft::t('transcoder', 'GIF queue'),
+                            'url' => '#settings-tab-gif-queue',
+                        ],
+                        [
                             'label' => Craft::t('transcoder', 'Video posters'),
                             'url' => '#settings-tab-video-posters',
                         ],
@@ -254,7 +259,7 @@ class Transcoder extends Plugin
                 }
             );
         }
-        if ($settings->queueVideosOnAssetUpload) {
+        if ($settings->queueVideosOnAssetUpload || $settings->queueGifsOnAssetUpload) {
             Event::on(
                 Asset::class,
                 Asset::EVENT_AFTER_SAVE,
@@ -264,20 +269,32 @@ class Transcoder extends Plugin
                         return;
                     }
 
-                    if (AssetsHelper::getFileKindByExtension($asset->filename) !== Asset::KIND_VIDEO) {
+                    $isGif = strtolower(pathinfo($asset->filename, PATHINFO_EXTENSION)) === 'gif';
+                    $kind = AssetsHelper::getFileKindByExtension($asset->filename);
+                    if ($isGif && $settings->queueGifsOnAssetUpload) {
+                        $this->queueUploadedMedia(
+                            new EncodeGif([
+                                'assetId' => $asset->id,
+                                'gifOptions' => $settings->queuedGifOptions,
+                            ]),
+                            $settings->gifQueueDelaySeconds,
+                            'GIF',
+                            (int)$asset->id
+                        );
                         return;
                     }
 
-                    $queue = Craft::$app->getQueue();
-                    $queueDelay = max(0, (int)App::parseEnv((string)$settings->videoQueueDelaySeconds));
-                    if ($queueDelay > 0) {
-                        $queue = $queue->delay($queueDelay);
+                    if ($kind === Asset::KIND_VIDEO && $settings->queueVideosOnAssetUpload) {
+                        $this->queueUploadedMedia(
+                            new EncodeVideo([
+                                'assetId' => $asset->id,
+                                'videoOptions' => $settings->queuedVideoOptions,
+                            ]),
+                            $settings->videoQueueDelaySeconds,
+                            'video',
+                            (int)$asset->id
+                        );
                     }
-
-                    $queue->push(new EncodeVideo([
-                        'assetId' => $asset->id,
-                        'videoOptions' => $settings->queuedVideoOptions,
-                    ]));
                 }
             );
         }
@@ -322,6 +339,26 @@ class Transcoder extends Plugin
                 );
             }
         );
+    }
+
+    /**
+     * Push an uploaded media job with its configured delay.
+     */
+    protected function queueUploadedMedia(object $job, int|string $delaySeconds, string $mediaType, int $assetId): void
+    {
+        $queue = Craft::$app->getQueue();
+        $queueDelay = max(0, (int)App::parseEnv((string)$delaySeconds));
+        if ($queueDelay > 0) {
+            $queue = $queue->delay($queueDelay);
+        }
+
+        $jobId = $queue->push($job);
+        if ($jobId === null) {
+            Craft::error("Unable to queue $mediaType asset #$assetId for encoding.", __METHOD__);
+            return;
+        }
+
+        Craft::info("Queued $mediaType asset #$assetId for encoding; job ID: $jobId", __METHOD__);
     }
 
     /**

@@ -44,6 +44,27 @@
     }) }}
 </div>
 
+<div id="tab-gif-queue" class="hidden">
+    {{ forms.lightswitchField({
+        label: 'Queue GIFs on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded GIF assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueGifsOnAssetUpload',
+        name: 'queueGifsOnAssetUpload',
+        on: settings.queueGifsOnAssetUpload,
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'GIF queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before an uploaded GIF starts encoding.'|t('transcoder'),
+        id: 'gifQueueDelaySeconds',
+        name: 'gifQueueDelaySeconds',
+        value: settings.gifQueueDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+    }) }}
+</div>
+
 <div id="tab-video-posters" class="hidden">
     {{ forms.lightswitchField({
         label: 'Generate video posters'|t('transcoder'),

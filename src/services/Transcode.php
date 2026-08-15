@@ -515,14 +515,32 @@ class Transcode extends Component
      */
     public function runVideoAssetWork(Asset $asset, callable $callback): bool
     {
+        return $this->runMediaAssetWork($asset, 'video', $callback);
+    }
+
+    /**
+     * Run GIF asset work under a non-blocking process lock.
+     *
+     * @internal Used by Transcoder queue jobs.
+     */
+    public function runGifAssetWork(Asset $asset, callable $callback): bool
+    {
+        return $this->runMediaAssetWork($asset, 'gif', $callback);
+    }
+
+    /**
+     * Run media asset work under a non-blocking process lock.
+     */
+    protected function runMediaAssetWork(Asset $asset, string $mediaType, callable $callback): bool
+    {
         if (!$asset->id) {
             return false;
         }
 
-        $lockPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'transcoder-video-asset-' . (int)$asset->id . '.lock';
+        $lockPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "transcoder-$mediaType-asset-" . (int)$asset->id . '.lock';
         $handle = @fopen($lockPath, 'c+');
         if ($handle === false) {
-            throw new RuntimeException('Unable to create the Transcoder video asset lock.');
+            throw new RuntimeException("Unable to create the Transcoder $mediaType asset lock.");
         }
 
         if (!flock($handle, LOCK_EX | LOCK_NB)) {
@@ -845,12 +863,13 @@ class Transcode extends Component
      *
      * @param Asset|string $filePath path to the original video or an Asset
      * @param array $gifOptions of options for the GIF file
+     * @param bool $synchronous whether ffmpeg should finish before returning
      *
      * @return string|false|null URL or path of the GIF file
      * @throws InvalidConfigException
      */
 
-    public function getGifUrl(Asset|string $filePath, array $gifOptions): string|false|null
+    public function getGifUrl(Asset|string $filePath, array $gifOptions, bool $synchronous = false): string|false|null
     {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
@@ -901,37 +920,51 @@ class Transcode extends Component
 
             // Assemble the destination path and final ffmpeg command
             $destVideoPath .= $destVideoFile;
-            $ffmpegCmd .= ' '
-                . ' -y ' . escapeshellarg($destVideoPath)
-                . ' 1> ' . $progressFile . ' 2>&1 & echo $!';
-
-            // Make sure there isn't a lockfile for this video already
-            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
-            $oldPid = @file_get_contents($lockFile);
-            if ($oldPid !== false) {
-                // See if the process is running, and empty result means the process is still running
-                // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
-                exec("kill -0 $oldPid 2>&1", $ProcessState);
-                if (count($ProcessState) === 0) {
-                    return $result;
-                }
-                // It's finished transcoding, so delete the lockfile and progress file
-                @unlink($lockFile);
-                @unlink($progressFile);
+            $ffmpegCmd .= ' -y ' . escapeshellarg($destVideoPath);
+            if (!$synchronous) {
+                $ffmpegCmd .= ' 1> ' . $progressFile . ' 2>&1 & echo $!';
             }
 
-            // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
+            // Make sure there isn't a lockfile for this GIF already
+            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
+            if (!$synchronous) {
+                $oldPid = @file_get_contents($lockFile);
+                if ($oldPid !== false) {
+                    // See if the process is running, and empty result means the process is still running
+                    // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                    exec("kill -0 $oldPid 2>&1", $processState);
+                    if (count($processState) === 0) {
+                        return $result;
+                    }
+                    // It's finished transcoding, so delete the lockfile and progress file
+                    @unlink($lockFile);
+                    @unlink($progressFile);
+                }
+            }
+
+            // If the GIF output already exists and hasn't been modified, return it. Otherwise, start transcoding.
             if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
                 $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
                 $result = App::parseEnv($url) . $destVideoFile;
             } else {
                 // Kick off the transcoding
-                $pid = $this->executeShellCommand($ffmpegCmd);
-                Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
+                $output = $this->executeShellCommand($ffmpegCmd);
+                if ($synchronous) {
+                    if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
+                        $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
+                        $url .= $subfolder;
+                        return App::parseEnv($url) . $destVideoFile;
+                    }
+
+                    Craft::error("GIF encoding failed: $output", __METHOD__);
+                    return '';
+                }
+
+                Craft::info($ffmpegCmd . "\nffmpeg PID: " . $output, __METHOD__);
 
                 // Create a lockfile in tmp
-                file_put_contents($lockFile, $pid);
+                file_put_contents($lockFile, $output);
             }
         }
 

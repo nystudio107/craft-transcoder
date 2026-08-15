@@ -116,6 +116,15 @@ class Settings extends Model
     /** @var array Options passed to queued video encodes. */
     public array $queuedVideoOptions = [];
 
+    /** @var bool Queue GIF encoding when a new GIF asset is uploaded. */
+    public bool $queueGifsOnAssetUpload = false;
+
+    /** @var int|string Seconds to wait before an uploaded GIF starts encoding. */
+    public int|string $gifQueueDelaySeconds = 0;
+
+    /** @var array Options passed to queued GIF encodes. */
+    public array $queuedGifOptions = [];
+
     /** @var string How encoded video filenames are generated: options or source. */
     public string $videoFilenameStrategy = 'options';
 
@@ -327,6 +336,9 @@ class Settings extends Model
             ['queueVideosOnAssetUpload', 'boolean'],
             ['videoQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
             ['queuedVideoOptions', ArrayValidator::class],
+            ['queueGifsOnAssetUpload', 'boolean'],
+            ['gifQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['queuedGifOptions', ArrayValidator::class],
             ['videoFilenameStrategy', 'in', 'range' => ['options', 'source']],
             ['enableVideoWatermark', 'boolean'],
             ['videoWatermarkPath', 'string'],

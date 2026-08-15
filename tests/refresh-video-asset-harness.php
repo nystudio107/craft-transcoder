@@ -58,16 +58,36 @@ namespace craft\base {
 namespace craft\elements {
     class Asset
     {
+        public const KIND_AUDIO = 'audio';
         public const KIND_VIDEO = 'video';
+
+        /** @var array<int, self> */
+        public static array $assets = [];
 
         public ?int $id = null;
         public string $filename = '';
         public string $folderPath = '';
         public string $sourcePath = '';
 
-        public static function find(): object
+        public static function find(): AssetQuery
         {
-            throw new \RuntimeException('Asset queries are not used by this focused harness.');
+            return new AssetQuery();
+        }
+    }
+
+    class AssetQuery
+    {
+        private ?int $assetId = null;
+
+        public function id(?int $assetId): self
+        {
+            $this->assetId = $assetId;
+            return $this;
+        }
+
+        public function one(): ?Asset
+        {
+            return $this->assetId === null ? null : (Asset::$assets[$this->assetId] ?? null);
         }
     }
 }
@@ -220,9 +240,11 @@ namespace nystudio107\transcoder {
 namespace {
     use craft\elements\Asset;
     use nystudio107\transcoder\Transcoder;
+    use nystudio107\transcoder\jobs\EncodeGif;
     use nystudio107\transcoder\jobs\EncodeVideo;
     use nystudio107\transcoder\services\Transcode as BaseTranscode;
 
+    require dirname(__DIR__) . '/src/jobs/EncodeGif.php';
     require dirname(__DIR__) . '/src/jobs/EncodeVideo.php';
     require dirname(__DIR__) . '/src/jobs/RefreshVideoAsset.php';
     require dirname(__DIR__) . '/src/services/Transcode.php';
@@ -326,8 +348,10 @@ namespace {
     $sourceDirectory = $root . '/content/videos/197915/';
     $encodedRoot = $root . '/content/encoded/video/';
     $encodedDirectory = $encodedRoot . '197915/';
+    $gifDirectory = $root . '/content/encoded/gif/197915/';
     mkdir($sourceDirectory, 0777, true);
     mkdir($encodedDirectory, 0777, true);
+    mkdir($gifDirectory, 0777, true);
 
     try {
         putenv('TRANSCODER_QUEUE_DELAY=9');
@@ -360,6 +384,7 @@ namespace {
                 'default' => '@encoded/',
                 'video' => '@encoded/video/',
                 'thumbnail' => '@encoded/thumbnail/',
+                'gif' => '@encoded/gif/',
             ],
             'defaultVideoOptions' => [
                 'videoEncoder' => 'h264',
@@ -384,6 +409,20 @@ namespace {
                     'audioCodecOptions' => '',
                     'threads' => '0',
                 ],
+                'gif' => [
+                    'fileSuffix' => '.mp4',
+                    'fileFormat' => 'mp4',
+                    'videoCodec' => 'libx264',
+                    'videoCodecOptions' => '-pix_fmt yuv420p -movflags +faststart',
+                    'threads' => '0',
+                ],
+            ],
+            'defaultGifOptions' => [
+                'videoEncoder' => 'gif',
+                'fileSuffix' => '',
+                'fileFormat' => '',
+                'videoCodec' => '',
+                'videoCodecOptions' => '',
             ],
             'videoFilenameStrategy' => 'options',
             'useHashedNames' => false,
@@ -399,6 +438,7 @@ namespace {
                 'default' => 'https://example.test/encoded/',
                 'video' => 'https://example.test/encoded/video/',
                 'thumbnail' => 'https://example.test/encoded/thumbnail/',
+                'gif' => 'https://example.test/encoded/gif/',
             ],
         ], ArrayObject::ARRAY_AS_PROPS);
 
@@ -414,6 +454,36 @@ namespace {
         $asset->filename = $filename;
         $asset->folderPath = '197915/';
         $asset->sourcePath = $sourcePath;
+        Asset::$assets[$asset->id] = $asset;
+
+        $gifSourcePath = $sourceDirectory . 'animated.gif';
+        exec(
+            escapeshellarg($ffmpegBinary)
+            . ' -loglevel error -f lavfi -i color=c=red:s=64x64:d=0.4'
+            . ' -vf fps=5 -y ' . escapeshellarg($gifSourcePath),
+            $gifFixtureOutput,
+            $gifFixtureExitCode
+        );
+        assertSameValue(0, $gifFixtureExitCode, 'Could not create the focused GIF source fixture.');
+        $gifAsset = new Asset();
+        $gifAsset->id = 197916;
+        $gifAsset->filename = 'animated.gif';
+        $gifAsset->folderPath = '197915/';
+        $gifAsset->sourcePath = $gifSourcePath;
+        Asset::$assets[$gifAsset->id] = $gifAsset;
+
+        $gifJob = new EncodeGif([
+            'assetId' => $gifAsset->id,
+            'gifOptions' => [],
+        ]);
+        $gifJob->execute($queue);
+        $gifFilename = $service->getGifFilename($gifAsset, []);
+        assertTrue(is_file($gifDirectory . $gifFilename), 'Queued GIF encoding did not create its expected output.');
+        assertTrue(filesize($gifDirectory . $gifFilename) > 0, 'Queued GIF encoding created an empty output.');
+        assertTrue(
+            in_array("Encoded GIF asset #197916: https://example.test/encoded/gif/197915/$gifFilename", Craft::$logs, true),
+            'Queued GIF encoding did not log successful completion.'
+        );
 
         $expectedFilename = 'asset-89b333afee70d7c0f2d21c1230b33777_bps_fps_bps__c_w_h_letterbox_.mp4';
         $expectedPath = $encodedDirectory . $expectedFilename;

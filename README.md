@@ -7,6 +7,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 ## Video workflow features
 
 - Queue newly uploaded video assets through Craft’s queue.
+- Queue newly uploaded GIF assets through Craft’s queue.
 - Delay queued encodes when other asset-save handlers need time to finish.
 - Keep the original option-based filenames, including bitrate, or opt into stable source-asset filenames.
 - Overlay a configurable watermark on encoded videos.
