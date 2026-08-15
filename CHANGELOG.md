@@ -4,6 +4,10 @@
 ### Changed
 * Remove the `bufsize` parameter entirely from the FFMPEG default command, which was preventing `WebM` files from being generated properly ([#72](https://github.com/nystudio107/craft-transcoder/issues/72))
 
+### Changed
+
+* Organize video settings into separate queue, posters, and watermark tabs in the Craft control panel.
+
 ### Added
 
 * Queue video encoding when new video assets are uploaded, with a configurable delay.

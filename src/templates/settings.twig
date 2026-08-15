@@ -1,157 +1,155 @@
 {% import '_includes/forms' as forms %}
 
-<h2>{{ 'Video queue'|t('transcoder') }}</h2>
+<div id="tab-video-queue">
+    {{ forms.lightswitchField({
+        label: 'Queue videos on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded video assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueVideosOnAssetUpload',
+        name: 'queueVideosOnAssetUpload',
+        on: settings.queueVideosOnAssetUpload,
+    }) }}
 
-{{ forms.lightswitchField({
-    label: 'Queue videos on asset upload'|t('transcoder'),
-    instructions: 'Add newly uploaded video assets to Craft’s queue for background encoding.'|t('transcoder'),
-    id: 'queueVideosOnAssetUpload',
-    name: 'queueVideosOnAssetUpload',
-    on: settings.queueVideosOnAssetUpload,
-}) }}
+    {{ forms.textField({
+        label: 'Video queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before an uploaded video starts encoding.'|t('transcoder'),
+        id: 'videoQueueDelaySeconds',
+        name: 'videoQueueDelaySeconds',
+        value: settings.videoQueueDelaySeconds,
+        type: 'number',
+        min: 0,
+        size: 5,
+    }) }}
 
-{{ forms.textField({
-    label: 'Video queue delay'|t('transcoder'),
-    instructions: 'Seconds to wait before an uploaded video starts encoding.'|t('transcoder'),
-    id: 'videoQueueDelaySeconds',
-    name: 'videoQueueDelaySeconds',
-    value: settings.videoQueueDelaySeconds,
-    type: 'number',
-    min: 0,
-    size: 5,
-}) }}
+    {{ forms.selectField({
+        label: 'Video filename strategy'|t('transcoder'),
+        instructions: 'Use the original option-based filename, or keep one stable filename per source asset.'|t('transcoder'),
+        id: 'videoFilenameStrategy',
+        name: 'videoFilenameStrategy',
+        value: settings.videoFilenameStrategy,
+        options: [
+            { label: 'Encoding options'|t('transcoder'), value: 'options' },
+            { label: 'Source asset'|t('transcoder'), value: 'source' },
+        ],
+    }) }}
 
-{{ forms.selectField({
-    label: 'Video filename strategy'|t('transcoder'),
-    instructions: 'Use the original option-based filename, or keep one stable filename per source asset.'|t('transcoder'),
-    id: 'videoFilenameStrategy',
-    name: 'videoFilenameStrategy',
-    value: settings.videoFilenameStrategy,
-    options: [
-        { label: 'Encoding options'|t('transcoder'), value: 'options' },
-        { label: 'Source asset'|t('transcoder'), value: 'source' },
-    ],
-}) }}
+    {{ forms.textField({
+        label: 'URL subfolder segment'|t('transcoder'),
+        instructions: 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.'|t('transcoder'),
+        id: 'subfolderUrlSegment',
+        name: 'subfolderUrlSegment',
+        value: settings.subfolderUrlSegment ?: '',
+        type: 'number',
+        min: 1,
+        size: 5,
+    }) }}
+</div>
 
-{{ forms.textField({
-    label: 'URL subfolder segment'|t('transcoder'),
-    instructions: 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.'|t('transcoder'),
-    id: 'subfolderUrlSegment',
-    name: 'subfolderUrlSegment',
-    value: settings.subfolderUrlSegment ?: '',
-    type: 'number',
-    min: 1,
-    size: 5,
-}) }}
+<div id="tab-video-posters" class="hidden">
+    {{ forms.lightswitchField({
+        label: 'Generate video posters'|t('transcoder'),
+        instructions: 'Generate the configured poster images after a queued video is encoded.'|t('transcoder'),
+        id: 'enableVideoPosters',
+        name: 'enableVideoPosters',
+        on: settings.enableVideoPosters,
+    }) }}
 
-<hr>
-<h2>{{ 'Video posters'|t('transcoder') }}</h2>
+    {{ forms.lightswitchField({
+        label: 'Prevent poster black bars'|t('transcoder'),
+        instructions: 'Fill unused poster space with a blurred cover image behind the fitted video frame.'|t('transcoder'),
+        id: 'preventVideoPosterBlackBars',
+        name: 'preventVideoPosterBlackBars',
+        on: settings.preventVideoPosterBlackBars,
+    }) }}
 
-{{ forms.lightswitchField({
-    label: 'Generate video posters'|t('transcoder'),
-    instructions: 'Generate the configured poster images after a queued video is encoded.'|t('transcoder'),
-    id: 'enableVideoPosters',
-    name: 'enableVideoPosters',
-    on: settings.enableVideoPosters,
-}) }}
-
-{{ forms.lightswitchField({
-    label: 'Prevent poster black bars'|t('transcoder'),
-    instructions: 'Fill unused poster space with a blurred cover image behind the fitted video frame.'|t('transcoder'),
-    id: 'preventVideoPosterBlackBars',
-    name: 'preventVideoPosterBlackBars',
-    on: settings.preventVideoPosterBlackBars,
-}) }}
-
-{{ forms.editableTableField({
-    label: 'Video poster formats'|t('transcoder'),
-    id: 'videoPosterFormats',
-    name: 'videoPosterFormats',
-    cols: {
-        handle: {
-            type: 'singleline',
-            heading: 'Handle'|t('transcoder'),
+    {{ forms.editableTableField({
+        label: 'Video poster formats'|t('transcoder'),
+        id: 'videoPosterFormats',
+        name: 'videoPosterFormats',
+        cols: {
+            handle: {
+                type: 'singleline',
+                heading: 'Handle'|t('transcoder'),
+            },
+            width: {
+                type: 'number',
+                heading: 'Width'|t('transcoder'),
+            },
+            height: {
+                type: 'number',
+                heading: 'Height'|t('transcoder'),
+            },
+            timeInSecs: {
+                type: 'number',
+                heading: 'Time in seconds'|t('transcoder'),
+            },
         },
-        width: {
-            type: 'number',
-            heading: 'Width'|t('transcoder'),
-        },
-        height: {
-            type: 'number',
-            heading: 'Height'|t('transcoder'),
-        },
-        timeInSecs: {
-            type: 'number',
-            heading: 'Time in seconds'|t('transcoder'),
-        },
-    },
-    rows: settings.getVideoPosterFormatRows(),
-    allowAdd: true,
-    allowReorder: true,
-    allowDelete: true,
-}) }}
+        rows: settings.getVideoPosterFormatRows(),
+        allowAdd: true,
+        allowReorder: true,
+        allowDelete: true,
+    }) }}
+</div>
 
-<hr>
-<h2>{{ 'Video watermark'|t('transcoder') }}</h2>
+<div id="tab-video-watermark" class="hidden">
+    {{ forms.lightswitchField({
+        label: 'Enable video watermark'|t('transcoder'),
+        instructions: 'Overlay the configured image on newly encoded videos.'|t('transcoder'),
+        id: 'enableVideoWatermark',
+        name: 'enableVideoWatermark',
+        on: settings.enableVideoWatermark,
+    }) }}
 
-{{ forms.lightswitchField({
-    label: 'Enable video watermark'|t('transcoder'),
-    instructions: 'Overlay the configured image on newly encoded videos.'|t('transcoder'),
-    id: 'enableVideoWatermark',
-    name: 'enableVideoWatermark',
-    on: settings.enableVideoWatermark,
-}) }}
+    {{ forms.textField({
+        label: 'Watermark path or URL'|t('transcoder'),
+        instructions: 'Use a local path, Yii alias, environment value, or public image URL.'|t('transcoder'),
+        id: 'videoWatermarkPath',
+        name: 'videoWatermarkPath',
+        value: settings.videoWatermarkPath,
+    }) }}
 
-{{ forms.textField({
-    label: 'Watermark path or URL'|t('transcoder'),
-    instructions: 'Use a local path, Yii alias, environment value, or public image URL.'|t('transcoder'),
-    id: 'videoWatermarkPath',
-    name: 'videoWatermarkPath',
-    value: settings.videoWatermarkPath,
-}) }}
+    {{ forms.textField({
+        label: 'Watermark width'|t('transcoder'),
+        instructions: 'Optional width in pixels. Leave empty to keep the original size.'|t('transcoder'),
+        id: 'videoWatermarkWidth',
+        name: 'videoWatermarkWidth',
+        value: settings.videoWatermarkWidth,
+        type: 'number',
+        min: 1,
+        size: 6,
+    }) }}
 
-{{ forms.textField({
-    label: 'Watermark width'|t('transcoder'),
-    instructions: 'Optional width in pixels. Leave empty to keep the original size.'|t('transcoder'),
-    id: 'videoWatermarkWidth',
-    name: 'videoWatermarkWidth',
-    value: settings.videoWatermarkWidth,
-    type: 'number',
-    min: 1,
-    size: 6,
-}) }}
+    {{ forms.selectField({
+        label: 'Watermark position'|t('transcoder'),
+        id: 'videoWatermarkPosition',
+        name: 'videoWatermarkPosition',
+        value: settings.videoWatermarkPosition,
+        options: [
+            { label: 'Top left'|t('transcoder'), value: 'top-left' },
+            { label: 'Top right'|t('transcoder'), value: 'top-right' },
+            { label: 'Bottom left'|t('transcoder'), value: 'bottom-left' },
+            { label: 'Bottom right'|t('transcoder'), value: 'bottom-right' },
+        ],
+    }) }}
 
-{{ forms.selectField({
-    label: 'Watermark position'|t('transcoder'),
-    id: 'videoWatermarkPosition',
-    name: 'videoWatermarkPosition',
-    value: settings.videoWatermarkPosition,
-    options: [
-        { label: 'Top left'|t('transcoder'), value: 'top-left' },
-        { label: 'Top right'|t('transcoder'), value: 'top-right' },
-        { label: 'Bottom left'|t('transcoder'), value: 'bottom-left' },
-        { label: 'Bottom right'|t('transcoder'), value: 'bottom-right' },
-    ],
-}) }}
+    {{ forms.textField({
+        label: 'Watermark padding'|t('transcoder'),
+        id: 'videoWatermarkPadding',
+        name: 'videoWatermarkPadding',
+        value: settings.videoWatermarkPadding,
+        type: 'number',
+        min: 0,
+        size: 6,
+    }) }}
 
-{{ forms.textField({
-    label: 'Watermark padding'|t('transcoder'),
-    id: 'videoWatermarkPadding',
-    name: 'videoWatermarkPadding',
-    value: settings.videoWatermarkPadding,
-    type: 'number',
-    min: 0,
-    size: 6,
-}) }}
-
-{{ forms.textField({
-    label: 'Watermark opacity'|t('transcoder'),
-    instructions: 'Percentage from 0 to 100.'|t('transcoder'),
-    id: 'videoWatermarkOpacity',
-    name: 'videoWatermarkOpacity',
-    value: settings.videoWatermarkOpacity,
-    type: 'number',
-    min: 0,
-    max: 100,
-    size: 6,
-}) }}
+    {{ forms.textField({
+        label: 'Watermark opacity'|t('transcoder'),
+        instructions: 'Percentage from 0 to 100.'|t('transcoder'),
+        id: 'videoWatermarkOpacity',
+        name: 'videoWatermarkOpacity',
+        value: settings.videoWatermarkOpacity,
+        type: 'number',
+        min: 0,
+        max: 100,
+        size: 6,
+    }) }}
+</div>
