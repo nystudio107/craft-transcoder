@@ -7,6 +7,7 @@
 ### Changed
 
 * Organize video settings into separate queue, posters, and watermark tabs in the Craft control panel.
+* Use Craft autosuggest fields for queue, subfolder, and watermark values, including environment-variable support.
 
 ### Added
 

@@ -9,14 +9,14 @@
         on: settings.queueVideosOnAssetUpload,
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'Video queue delay'|t('transcoder'),
         instructions: 'Seconds to wait before an uploaded video starts encoding.'|t('transcoder'),
         id: 'videoQueueDelaySeconds',
         name: 'videoQueueDelaySeconds',
         value: settings.videoQueueDelaySeconds,
-        type: 'number',
-        min: 0,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
         size: 5,
     }) }}
 
@@ -32,14 +32,14 @@
         ],
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'URL subfolder segment'|t('transcoder'),
         instructions: 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.'|t('transcoder'),
         id: 'subfolderUrlSegment',
         name: 'subfolderUrlSegment',
         value: settings.subfolderUrlSegment ?: '',
-        type: 'number',
-        min: 1,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
         size: 5,
     }) }}
 </div>
@@ -99,22 +99,24 @@
         on: settings.enableVideoWatermark,
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'Watermark path or URL'|t('transcoder'),
         instructions: 'Use a local path, Yii alias, environment value, or public image URL.'|t('transcoder'),
         id: 'videoWatermarkPath',
         name: 'videoWatermarkPath',
         value: settings.videoWatermarkPath,
+        suggestEnvVars: true,
+        suggestAliases: true,
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'Watermark width'|t('transcoder'),
         instructions: 'Optional width in pixels. Leave empty to keep the original size.'|t('transcoder'),
         id: 'videoWatermarkWidth',
         name: 'videoWatermarkWidth',
         value: settings.videoWatermarkWidth,
-        type: 'number',
-        min: 1,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
         size: 6,
     }) }}
 
@@ -131,25 +133,24 @@
         ],
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'Watermark padding'|t('transcoder'),
         id: 'videoWatermarkPadding',
         name: 'videoWatermarkPadding',
         value: settings.videoWatermarkPadding,
-        type: 'number',
-        min: 0,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
         size: 6,
     }) }}
 
-    {{ forms.textField({
+    {{ forms.autosuggestField({
         label: 'Watermark opacity'|t('transcoder'),
         instructions: 'Percentage from 0 to 100.'|t('transcoder'),
         id: 'videoWatermarkOpacity',
         name: 'videoWatermarkOpacity',
         value: settings.videoWatermarkOpacity,
-        type: 'number',
-        min: 0,
-        max: 100,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
         size: 6,
     }) }}
 </div>

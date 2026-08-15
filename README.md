@@ -15,7 +15,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 - Refresh managed video derivatives after a third-party plugin replaces a source asset.
 - Keep Asset and string-URL video calls in the same configured output subfolder.
 
-All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen, organized into Video queue, Video posters, and Video watermark tabs, or `config/transcoder.php`.
+All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen, organized into Video queue, Video posters, and Video watermark tabs, or `config/transcoder.php`. Text and numeric fields in these tabs support Craft environment-variable autosuggestions; the watermark path also supports aliases.
 
 Third-party plugins that intentionally replace a video asset can call `Transcoder::$plugin->getTranscode()->refreshVideoAsset($asset)`. Cleanup and re-encoding run asynchronously through Craft’s queue; see the usage documentation for the integration contract.
 

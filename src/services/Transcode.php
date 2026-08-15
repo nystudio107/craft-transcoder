@@ -480,8 +480,9 @@ class Transcode extends Component
 
         $settings = Transcoder::$plugin->getSettings();
         $queue = Craft::$app->getQueue();
-        if ($settings->videoQueueDelaySeconds > 0) {
-            $queue = $queue->delay($settings->videoQueueDelaySeconds);
+        $queueDelay = max(0, (int)App::parseEnv((string)$settings->videoQueueDelaySeconds));
+        if ($queueDelay > 0) {
+            $queue = $queue->delay($queueDelay);
         }
         $jobId = $queue->push(new EncodeVideo([
             'assetId' => (int)$asset->id,
@@ -1033,7 +1034,7 @@ class Transcode extends Component
             return $folderPath === '' ? '' : $folderPath . DIRECTORY_SEPARATOR;
         }
 
-        $segment = (int)$settings->subfolderUrlSegment;
+        $segment = (int)App::parseEnv((string)$settings->subfolderUrlSegment);
         if ($segment < 1 || !is_string($filePath)) {
             return '';
         }
@@ -1294,10 +1295,10 @@ class Transcode extends Component
 
         return substr(sha1(JsonHelper::encode([
             $path,
-            $settings->videoWatermarkWidth,
+            App::parseEnv((string)$settings->videoWatermarkWidth),
             $settings->videoWatermarkPosition,
-            $settings->videoWatermarkPadding,
-            $settings->videoWatermarkOpacity,
+            App::parseEnv((string)$settings->videoWatermarkPadding),
+            App::parseEnv((string)$settings->videoWatermarkOpacity),
         ])), 0, 10);
     }
 
@@ -1310,13 +1311,14 @@ class Transcode extends Component
         $baseFilter = $this->getScalingFilter($videoOptions) ?? 'null';
         $watermarkFilters = ['format=rgba'];
 
-        $width = (int)$settings->videoWatermarkWidth;
+        $width = max(0, (int)App::parseEnv((string)$settings->videoWatermarkWidth));
         if ($width > 0) {
             $watermarkFilters[] = "scale=$width:-1";
         }
 
-        if ($settings->videoWatermarkOpacity < 100) {
-            $opacity = max(0, $settings->videoWatermarkOpacity) / 100;
+        $opacityPercentage = max(0, min(100, (int)App::parseEnv((string)$settings->videoWatermarkOpacity)));
+        if ($opacityPercentage < 100) {
+            $opacity = $opacityPercentage / 100;
             $watermarkFilters[] = 'colorchannelmixer=aa=' . rtrim(rtrim(number_format($opacity, 2, '.', ''), '0'), '.');
         }
 
@@ -1333,7 +1335,7 @@ class Transcode extends Component
     protected function getVideoWatermarkPosition(): array
     {
         $settings = Transcoder::$plugin->getSettings();
-        $padding = max(0, $settings->videoWatermarkPadding);
+        $padding = max(0, (int)App::parseEnv((string)$settings->videoWatermarkPadding));
 
         return match ($settings->videoWatermarkPosition) {
             'top-left' => [(string)$padding, (string)$padding],

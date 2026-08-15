@@ -21,6 +21,7 @@ use craft\events\PluginEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\TemplateEvent;
+use craft\helpers\App;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\UrlHelper;
@@ -268,8 +269,9 @@ class Transcoder extends Plugin
                     }
 
                     $queue = Craft::$app->getQueue();
-                    if ($settings->videoQueueDelaySeconds > 0) {
-                        $queue = $queue->delay($settings->videoQueueDelaySeconds);
+                    $queueDelay = max(0, (int)App::parseEnv((string)$settings->videoQueueDelaySeconds));
+                    if ($queueDelay > 0) {
+                        $queue = $queue->delay($queueDelay);
                     }
 
                     $queue->push(new EncodeVideo([

@@ -89,6 +89,11 @@ namespace craft\helpers {
     {
         public static function parseEnv(?string $value): bool|string|null
         {
+            if ($value !== null && str_starts_with($value, '$')) {
+                $environmentValue = getenv(substr($value, 1));
+                return $environmentValue === false ? $value : $environmentValue;
+            }
+
             if ($value !== null && str_starts_with($value, '@')) {
                 return \Craft::getAlias($value, false) ?: $value;
             }
@@ -325,6 +330,12 @@ namespace {
     mkdir($encodedDirectory, 0777, true);
 
     try {
+        putenv('TRANSCODER_QUEUE_DELAY=9');
+        putenv('TRANSCODER_SUBFOLDER_SEGMENT=3');
+        putenv('TRANSCODER_WATERMARK_WIDTH=180');
+        putenv('TRANSCODER_WATERMARK_PADDING=24');
+        putenv('TRANSCODER_WATERMARK_OPACITY=100');
+
         $filename = 'asset-89b333afee70d7c0f2d21c1230b33777.mp4';
         $sourcePath = $sourceDirectory . $filename;
         $ffmpegBinary = trim((string)shell_exec('command -v ffmpeg'));
@@ -341,7 +352,7 @@ namespace {
         Craft::$aliases['@encoded'] = $root . '/content/encoded';
         $settings = new HarnessSettings([
             'queueVideosOnAssetUpload' => false,
-            'videoQueueDelaySeconds' => 9,
+            'videoQueueDelaySeconds' => '$TRANSCODER_QUEUE_DELAY',
             'queuedVideoOptions' => [],
             'createSubfolders' => true,
             'subfolderUrlSegment' => false,
@@ -378,10 +389,10 @@ namespace {
             'useHashedNames' => false,
             'enableVideoWatermark' => false,
             'videoWatermarkPath' => '',
-            'videoWatermarkWidth' => '',
+            'videoWatermarkWidth' => '$TRANSCODER_WATERMARK_WIDTH',
             'videoWatermarkPosition' => 'bottom-right',
-            'videoWatermarkPadding' => 24,
-            'videoWatermarkOpacity' => 100,
+            'videoWatermarkPadding' => '$TRANSCODER_WATERMARK_PADDING',
+            'videoWatermarkOpacity' => '$TRANSCODER_WATERMARK_OPACITY',
             'enableVideoPosters' => false,
             'ffmpegPath' => $ffmpegBinary,
             'transcoderUrls' => [
@@ -443,7 +454,7 @@ namespace {
         assertSameValue($flat['path'], $service->refreshTargets($asset)['output'][0], 'Flat paths diverge.');
 
         $settings->createSubfolders = true;
-        $settings->subfolderUrlSegment = 3;
+        $settings->subfolderUrlSegment = '$TRANSCODER_SUBFOLDER_SEGMENT';
         $paths = $settings->transcoderPaths;
         $paths['video'] = '@encoded/video';
         $settings->transcoderPaths = $paths;
@@ -528,6 +539,12 @@ namespace {
 
         echo "refresh-video-asset harness: OK\n";
     } finally {
+        putenv('TRANSCODER_QUEUE_DELAY');
+        putenv('TRANSCODER_SUBFOLDER_SEGMENT');
+        putenv('TRANSCODER_WATERMARK_WIDTH');
+        putenv('TRANSCODER_WATERMARK_PADDING');
+        putenv('TRANSCODER_WATERMARK_OPACITY');
+
         if (is_dir($root)) {
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),

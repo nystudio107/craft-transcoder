@@ -11,7 +11,9 @@
 namespace nystudio107\transcoder\models;
 
 use craft\base\Model;
+use craft\helpers\App;
 use craft\validators\ArrayValidator;
+use yii\validators\NumberValidator;
 
 /**
  * Transcoder Settings model
@@ -108,8 +110,8 @@ class Settings extends Model
     /** @var bool Queue video encoding when a new video asset is uploaded. */
     public bool $queueVideosOnAssetUpload = false;
 
-    /** @var int Seconds to wait before an uploaded video starts encoding. */
-    public int $videoQueueDelaySeconds = 0;
+    /** @var int|string Seconds to wait before an uploaded video starts encoding. */
+    public int|string $videoQueueDelaySeconds = 0;
 
     /** @var array Options passed to queued video encodes. */
     public array $queuedVideoOptions = [];
@@ -129,11 +131,11 @@ class Settings extends Model
     /** @var string Watermark position. */
     public string $videoWatermarkPosition = 'bottom-right';
 
-    /** @var int Watermark distance from the selected edges in pixels. */
-    public int $videoWatermarkPadding = 24;
+    /** @var int|string Watermark distance from the selected edges in pixels. */
+    public int|string $videoWatermarkPadding = 24;
 
-    /** @var int Watermark opacity percentage. */
-    public int $videoWatermarkOpacity = 100;
+    /** @var int|string Watermark opacity percentage. */
+    public int|string $videoWatermarkOpacity = 100;
 
     /** @var bool Generate configured poster images after queued video encoding. */
     public bool $enableVideoPosters = false;
@@ -320,18 +322,18 @@ class Settings extends Model
             ['enableDownloadFileEndpoint', 'boolean'],
             ['useHashedNames', 'boolean'],
             ['createSubfolders', 'boolean'],
-            ['subfolderUrlSegment', 'integer', 'min' => 1, 'skipOnEmpty' => true],
+            ['subfolderUrlSegment', 'validateIntegerSetting', 'params' => ['min' => 1], 'skipOnEmpty' => true],
             ['clearCaches', 'boolean'],
             ['queueVideosOnAssetUpload', 'boolean'],
-            ['videoQueueDelaySeconds', 'integer', 'min' => 0],
+            ['videoQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
             ['queuedVideoOptions', ArrayValidator::class],
             ['videoFilenameStrategy', 'in', 'range' => ['options', 'source']],
             ['enableVideoWatermark', 'boolean'],
             ['videoWatermarkPath', 'string'],
-            ['videoWatermarkWidth', 'safe'],
+            ['videoWatermarkWidth', 'validateIntegerSetting', 'params' => ['min' => 1], 'skipOnEmpty' => true],
             ['videoWatermarkPosition', 'in', 'range' => ['top-left', 'top-right', 'bottom-left', 'bottom-right']],
-            ['videoWatermarkPadding', 'integer', 'min' => 0],
-            ['videoWatermarkOpacity', 'integer', 'min' => 0, 'max' => 100],
+            ['videoWatermarkPadding', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoWatermarkOpacity', 'validateIntegerSetting', 'params' => ['min' => 0, 'max' => 100]],
             ['enableVideoPosters', 'boolean'],
             ['preventVideoPosterBlackBars', 'boolean'],
             ['videoPosterFormats', ArrayValidator::class],
@@ -341,6 +343,28 @@ class Settings extends Model
             ['defaultThumbnailOptions', 'required'],
             ['defaultAudioOptions', 'required'],
         ];
+    }
+
+    /**
+     * Validate a numeric setting after resolving its environment variable.
+     */
+    public function validateIntegerSetting(string $attribute, array $params): void
+    {
+        if ($this->$attribute === false) {
+            return;
+        }
+
+        $validator = new NumberValidator([
+            'integerOnly' => true,
+            'min' => $params['min'] ?? null,
+            'max' => $params['max'] ?? null,
+        ]);
+        $error = null;
+        $value = App::parseEnv((string)$this->$attribute);
+
+        if (!$validator->validate($value, $error)) {
+            $this->addError($attribute, $error);
+        }
     }
 
     /**

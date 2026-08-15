@@ -4,7 +4,9 @@ description: Configuring Transcoder documentation for the Transcoder plugin. The
 ---
 # Configuring Transcoder
 
-The only configuration for Transcoder is in the `config.php` file, which is a multi-environment friendly way to store the default settings.  Don’t edit this file, instead copy it to `craft/config` as `transcoder.php` and make your changes there.
+Configure the video workflow from Transcoder’s Craft control-panel settings or with a `craft/config/transcoder.php` file. Don’t edit the plugin’s bundled `config.php`; copy it to `craft/config` when settings should be managed in code.
+
+The Video queue and Video watermark tabs use Craft autosuggest fields for values that can come from environment variables. The watermark path also suggests Yii aliases. Numeric environment variables must resolve to integers within the same limits shown by their literal values.
 
 You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to work. On Ubuntu 16.04, you can do just:
 
