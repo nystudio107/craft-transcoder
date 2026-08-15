@@ -126,9 +126,15 @@ namespace craft\helpers {
     {
         public static function getFileKindByExtension(string $filename): string
         {
-            return in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), ['mp4', 'mov', 'webm'], true)
-                ? \craft\elements\Asset::KIND_VIDEO
-                : 'unknown';
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if (in_array($extension, ['mp4', 'mov', 'webm'], true)) {
+                return \craft\elements\Asset::KIND_VIDEO;
+            }
+            if (in_array($extension, ['aac', 'flac', 'm4a', 'mp3', 'ogg', 'wav'], true)) {
+                return \craft\elements\Asset::KIND_AUDIO;
+            }
+
+            return 'unknown';
         }
     }
 
@@ -240,10 +246,12 @@ namespace nystudio107\transcoder {
 namespace {
     use craft\elements\Asset;
     use nystudio107\transcoder\Transcoder;
+    use nystudio107\transcoder\jobs\EncodeAudio;
     use nystudio107\transcoder\jobs\EncodeGif;
     use nystudio107\transcoder\jobs\EncodeVideo;
     use nystudio107\transcoder\services\Transcode as BaseTranscode;
 
+    require dirname(__DIR__) . '/src/jobs/EncodeAudio.php';
     require dirname(__DIR__) . '/src/jobs/EncodeGif.php';
     require dirname(__DIR__) . '/src/jobs/EncodeVideo.php';
     require dirname(__DIR__) . '/src/jobs/RefreshVideoAsset.php';
@@ -349,9 +357,11 @@ namespace {
     $encodedRoot = $root . '/content/encoded/video/';
     $encodedDirectory = $encodedRoot . '197915/';
     $gifDirectory = $root . '/content/encoded/gif/197915/';
+    $audioDirectory = $root . '/content/encoded/audio/197915/';
     mkdir($sourceDirectory, 0777, true);
     mkdir($encodedDirectory, 0777, true);
     mkdir($gifDirectory, 0777, true);
+    mkdir($audioDirectory, 0777, true);
 
     try {
         putenv('TRANSCODER_QUEUE_DELAY=9');
@@ -385,6 +395,7 @@ namespace {
                 'video' => '@encoded/video/',
                 'thumbnail' => '@encoded/thumbnail/',
                 'gif' => '@encoded/gif/',
+                'audio' => '@encoded/audio/',
             ],
             'defaultVideoOptions' => [
                 'videoEncoder' => 'h264',
@@ -424,6 +435,25 @@ namespace {
                 'videoCodec' => '',
                 'videoCodecOptions' => '',
             ],
+            'audioEncoders' => [
+                'wav' => [
+                    'fileSuffix' => '.wav',
+                    'fileFormat' => 'wav',
+                    'audioCodec' => 'pcm_s16le',
+                    'audioCodecOptions' => '',
+                    'threads' => '0',
+                ],
+            ],
+            'defaultAudioOptions' => [
+                'audioEncoder' => 'wav',
+                'audioBitRate' => '',
+                'audioSampleRate' => '22050',
+                'audioChannels' => '1',
+                'timeInSecs' => '',
+                'seekInSecs' => '',
+                'synchronous' => false,
+                'stripMetadata' => false,
+            ],
             'videoFilenameStrategy' => 'options',
             'useHashedNames' => false,
             'enableVideoWatermark' => false,
@@ -439,6 +469,7 @@ namespace {
                 'video' => 'https://example.test/encoded/video/',
                 'thumbnail' => 'https://example.test/encoded/thumbnail/',
                 'gif' => 'https://example.test/encoded/gif/',
+                'audio' => 'https://example.test/encoded/audio/',
             ],
         ], ArrayObject::ARRAY_AS_PROPS);
 
@@ -484,6 +515,61 @@ namespace {
             in_array("Encoded GIF asset #197916: https://example.test/encoded/gif/197915/$gifFilename", Craft::$logs, true),
             'Queued GIF encoding did not log successful completion.'
         );
+        $gifPidLock = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $gifFilename . '.lock';
+        file_put_contents($gifPidLock, (string)getmypid());
+        try {
+            $gifJob->execute($queue);
+            throw new RuntimeException('Queued GIF encoding ignored an active legacy PID lock.');
+        } catch (RuntimeException $e) {
+            assertTrue(
+                str_contains($e->getMessage(), 'GIF encoding failed'),
+                'An active GIF PID lock did not fail visibly in Craft’s queue.'
+            );
+        } finally {
+            @unlink($gifPidLock);
+        }
+
+        $audioSourcePath = $sourceDirectory . 'tone.wav';
+        exec(
+            escapeshellarg($ffmpegBinary)
+            . ' -loglevel error -f lavfi -i sine=frequency=1000:duration=0.2'
+            . ' -c:a pcm_s16le -y ' . escapeshellarg($audioSourcePath),
+            $audioFixtureOutput,
+            $audioFixtureExitCode
+        );
+        assertSameValue(0, $audioFixtureExitCode, 'Could not create the focused audio source fixture.');
+        $audioAsset = new Asset();
+        $audioAsset->id = 197917;
+        $audioAsset->filename = 'tone.wav';
+        $audioAsset->folderPath = '197915/';
+        $audioAsset->sourcePath = $audioSourcePath;
+        Asset::$assets[$audioAsset->id] = $audioAsset;
+
+        $audioJob = new EncodeAudio([
+            'assetId' => $audioAsset->id,
+            'audioOptions' => [],
+        ]);
+        $audioJob->execute($queue);
+        $audioFilename = $service->getAudioFilename($audioAsset, []);
+        assertTrue(is_file($audioDirectory . $audioFilename), 'Queued audio encoding did not create its expected output.');
+        assertTrue(filesize($audioDirectory . $audioFilename) > 0, 'Queued audio encoding created an empty output.');
+        assertTrue(
+            in_array("Encoded audio asset #197917: https://example.test/encoded/audio/197915/$audioFilename", Craft::$logs, true),
+            'Queued audio encoding did not log successful completion.'
+        );
+        $audioPidLock = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $audioFilename . '.lock';
+        file_put_contents($audioPidLock, (string)getmypid());
+        try {
+            $audioJob->execute($queue);
+            throw new RuntimeException('Queued audio encoding ignored an active legacy PID lock.');
+        } catch (RuntimeException $e) {
+            assertTrue(
+                str_contains($e->getMessage(), 'Audio encoding failed'),
+                'An active audio PID lock did not fail visibly in Craft’s queue.'
+            );
+        } finally {
+            @unlink($audioPidLock);
+        }
 
         $expectedFilename = 'asset-89b333afee70d7c0f2d21c1230b33777_bps_fps_bps__c_w_h_letterbox_.mp4';
         $expectedPath = $encodedDirectory . $expectedFilename;

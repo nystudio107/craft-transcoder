@@ -87,6 +87,15 @@ return [
     // Options passed to the queued GIF encode
     'queuedGifOptions' => [],
 
+    // Queue audio encoding when a new audio Asset is uploaded
+    'queueAudioOnAssetUpload' => false,
+
+    // Seconds to wait before uploaded audio starts encoding
+    'audioQueueDelaySeconds' => 0,
+
+    // Options passed to the queued audio encode
+    'queuedAudioOptions' => [],
+
     // How encoded video filenames are generated: options or source
     'videoFilenameStrategy' => 'options',
 

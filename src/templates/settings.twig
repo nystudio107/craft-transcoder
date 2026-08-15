@@ -65,6 +65,27 @@
     }) }}
 </div>
 
+<div id="tab-audio-queue" class="hidden">
+    {{ forms.lightswitchField({
+        label: 'Queue audio on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded audio Assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueAudioOnAssetUpload',
+        name: 'queueAudioOnAssetUpload',
+        on: settings.queueAudioOnAssetUpload,
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Audio queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before uploaded audio starts encoding.'|t('transcoder'),
+        id: 'audioQueueDelaySeconds',
+        name: 'audioQueueDelaySeconds',
+        value: settings.audioQueueDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+    }) }}
+</div>
+
 <div id="tab-video-posters" class="hidden">
     {{ forms.lightswitchField({
         label: 'Generate video posters'|t('transcoder'),

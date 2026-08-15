@@ -4,10 +4,11 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
-## Video workflow features
+## Media workflow features
 
 - Queue newly uploaded video assets through Craft’s queue.
 - Queue newly uploaded GIF assets through Craft’s queue.
+- Queue newly uploaded audio Assets through Craft’s queue.
 - Delay queued encodes when other asset-save handlers need time to finish.
 - Keep the original option-based filenames, including bitrate, or opt into stable source-asset filenames.
 - Overlay a configurable watermark on encoded videos.
@@ -16,7 +17,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 - Refresh managed video derivatives after a third-party plugin replaces a source asset.
 - Keep Asset and string-URL video calls in the same configured output subfolder.
 
-All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen, organized into Video queue, Video posters, and Video watermark tabs, or `config/transcoder.php`. Text and numeric fields in these tabs support Craft environment-variable autosuggestions; the watermark path also supports aliases.
+All features are disabled by default except the original `options` filename strategy, so existing installations keep their current behavior. Configuration is available from the plugin settings screen, organized into media queue, poster, and watermark tabs, or `config/transcoder.php`. Text and numeric fields in these tabs support Craft environment-variable autosuggestions; the watermark path also supports aliases.
 
 Third-party plugins that intentionally replace a video asset can call `Transcoder::$plugin->getTranscode()->refreshVideoAsset($asset)`. Cleanup and re-encoding run asynchronously through Craft’s queue; see the usage documentation for the integration contract.
 

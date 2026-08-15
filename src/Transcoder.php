@@ -31,6 +31,7 @@ use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use craft\web\View;
+use nystudio107\transcoder\jobs\EncodeAudio;
 use nystudio107\transcoder\jobs\EncodeGif;
 use nystudio107\transcoder\jobs\EncodeVideo;
 use nystudio107\transcoder\models\Settings;
@@ -188,6 +189,10 @@ class Transcoder extends Plugin
                             'url' => '#settings-tab-gif-queue',
                         ],
                         [
+                            'label' => Craft::t('transcoder', 'Audio queue'),
+                            'url' => '#settings-tab-audio-queue',
+                        ],
+                        [
                             'label' => Craft::t('transcoder', 'Video posters'),
                             'url' => '#settings-tab-video-posters',
                         ],
@@ -259,7 +264,10 @@ class Transcoder extends Plugin
                 }
             );
         }
-        if ($settings->queueVideosOnAssetUpload || $settings->queueGifsOnAssetUpload) {
+        if ($settings->queueVideosOnAssetUpload
+            || $settings->queueGifsOnAssetUpload
+            || $settings->queueAudioOnAssetUpload
+        ) {
             Event::on(
                 Asset::class,
                 Asset::EVENT_AFTER_SAVE,
@@ -279,6 +287,19 @@ class Transcoder extends Plugin
                             ]),
                             $settings->gifQueueDelaySeconds,
                             'GIF',
+                            (int)$asset->id
+                        );
+                        return;
+                    }
+
+                    if ($kind === Asset::KIND_AUDIO && $settings->queueAudioOnAssetUpload) {
+                        $this->queueUploadedMedia(
+                            new EncodeAudio([
+                                'assetId' => $asset->id,
+                                'audioOptions' => $settings->queuedAudioOptions,
+                            ]),
+                            $settings->audioQueueDelaySeconds,
+                            'audio',
                             (int)$asset->id
                         );
                         return;

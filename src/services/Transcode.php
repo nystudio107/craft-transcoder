@@ -529,6 +529,16 @@ class Transcode extends Component
     }
 
     /**
+     * Run audio asset work under a non-blocking process lock.
+     *
+     * @internal Used by Transcoder queue jobs.
+     */
+    public function runAudioAssetWork(Asset $asset, callable $callback): bool
+    {
+        return $this->runMediaAssetWork($asset, 'audio', $callback);
+    }
+
+    /**
      * Run media asset work under a non-blocking process lock.
      */
     protected function runMediaAssetWork(Asset $asset, string $mediaType, callable $callback): bool
@@ -660,22 +670,25 @@ class Transcode extends Component
             if (!empty($audioOptions['synchronous'])) {
                 $synchronous = $audioOptions['synchronous'];
             }
-            if (!$synchronous) {
-                $ffmpegCmd .= ' 1> ' . $progressFile . ' 2>&1 & echo $!';
-                // Make sure there isn't a lockfile for this audio file already
-                $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destAudioFile . '.lock';
-                $oldPid = @file_get_contents($lockFile);
-                if ($oldPid !== false) {
-                    // See if the process is running, and empty result means the process is still running
-                    // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
-                    exec("kill -0 $oldPid 2>&1", $ProcessState);
-                    if (count($ProcessState) === 0) {
+            $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destAudioFile . '.lock';
+            $oldPid = @file_get_contents($lockFile);
+            if ($oldPid !== false) {
+                // See if the process is running, and empty result means the process is still running
+                // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                $oldPid = trim($oldPid);
+                if ($oldPid !== '' && ctype_digit($oldPid)) {
+                    $processState = [];
+                    exec('kill -0 ' . (int)$oldPid . ' 2>&1', $processState);
+                    if ($processState === []) {
                         return $result;
                     }
-                    // It's finished transcoding, so delete the lockfile and progress file
-                    @unlink($lockFile);
-                    @unlink($progressFile);
                 }
+                // It's finished transcoding, so delete the lockfile and progress file
+                @unlink($lockFile);
+                @unlink($progressFile);
+            }
+            if (!$synchronous) {
+                $ffmpegCmd .= ' 1> ' . $progressFile . ' 2>&1 & echo $!';
             }
 
             // If the audio file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
@@ -685,17 +698,24 @@ class Transcode extends Component
                 $result = App::parseEnv($url) . $destAudioFile;
             } else {
                 // Kick off the transcoding
-                $pid = $this->executeShellCommand($ffmpegCmd);
+                $execution = $synchronous
+                    ? $this->executeShellCommandWithStatus($ffmpegCmd)
+                    : ['success' => true, 'output' => $this->executeShellCommand($ffmpegCmd)];
+                $output = $execution['output'];
 
                 if ($synchronous) {
                     Craft::info($ffmpegCmd, __METHOD__);
-                    $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
-                    $url .= $subfolder;
-                    $result = App::parseEnv($url) . $destAudioFile;
+                    if ($execution['success'] && file_exists($destAudioPath) && filesize($destAudioPath) > 0) {
+                        $url = $settings['transcoderUrls']['audio'] ?? $settings['transcoderUrls']['default'];
+                        $url .= $subfolder;
+                        $result = App::parseEnv($url) . $destAudioFile;
+                    } else {
+                        Craft::error("Audio encoding failed: $output", __METHOD__);
+                    }
                 } else {
-                    Craft::info($ffmpegCmd . "\nffmpeg PID: " . $pid, __METHOD__);
+                    Craft::info($ffmpegCmd . "\nffmpeg PID: " . $output, __METHOD__);
                     // Create a lockfile in tmp
-                    file_put_contents($lockFile, $pid);
+                    file_put_contents($lockFile, $output);
                 }
             }
         }
@@ -927,19 +947,21 @@ class Transcode extends Component
 
             // Make sure there isn't a lockfile for this GIF already
             $lockFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $destVideoFile . '.lock';
-            if (!$synchronous) {
-                $oldPid = @file_get_contents($lockFile);
-                if ($oldPid !== false) {
-                    // See if the process is running, and empty result means the process is still running
-                    // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
-                    exec("kill -0 $oldPid 2>&1", $processState);
-                    if (count($processState) === 0) {
+            $oldPid = @file_get_contents($lockFile);
+            if ($oldPid !== false) {
+                // See if the process is running, and empty result means the process is still running
+                // ref: https://stackoverflow.com/questions/3043978/how-to-check-if-a-process-id-pid-exists
+                $oldPid = trim($oldPid);
+                if ($oldPid !== '' && ctype_digit($oldPid)) {
+                    $processState = [];
+                    exec('kill -0 ' . (int)$oldPid . ' 2>&1', $processState);
+                    if ($processState === []) {
                         return $result;
                     }
-                    // It's finished transcoding, so delete the lockfile and progress file
-                    @unlink($lockFile);
-                    @unlink($progressFile);
                 }
+                // It's finished transcoding, so delete the lockfile and progress file
+                @unlink($lockFile);
+                @unlink($progressFile);
             }
 
             // If the GIF output already exists and hasn't been modified, return it. Otherwise, start transcoding.
@@ -949,9 +971,12 @@ class Transcode extends Component
                 $result = App::parseEnv($url) . $destVideoFile;
             } else {
                 // Kick off the transcoding
-                $output = $this->executeShellCommand($ffmpegCmd);
+                $execution = $synchronous
+                    ? $this->executeShellCommandWithStatus($ffmpegCmd)
+                    : ['success' => true, 'output' => $this->executeShellCommand($ffmpegCmd)];
+                $output = $execution['output'];
                 if ($synchronous) {
-                    if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
+                    if ($execution['success'] && file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
                         $url = $settings['transcoderUrls']['gif'] ?? $settings['transcoderUrls']['default'];
                         $url .= $subfolder;
                         return App::parseEnv($url) . $destVideoFile;
@@ -1597,6 +1622,16 @@ class Transcode extends Component
      */
     protected function executeShellCommand(string $command): string
     {
+        return $this->executeShellCommandWithStatus($command)['output'];
+    }
+
+    /**
+     * Execute a shell command and retain whether it exited successfully.
+     *
+     * @return array{success: bool, output: string}
+     */
+    protected function executeShellCommandWithStatus(string $command): array
+    {
         // Create the shell command
         $shellCommand = new ShellCommand();
         $shellCommand->setCommand($command);
@@ -1607,12 +1642,16 @@ class Transcode extends Component
         }
 
         // Return the result of the command's output or error
-        if ($shellCommand->execute()) {
+        $success = $shellCommand->execute();
+        if ($success) {
             $result = $shellCommand->getOutput();
         } else {
             $result = $shellCommand->getError();
         }
 
-        return $result;
+        return [
+            'success' => $success,
+            'output' => $result,
+        ];
     }
 }

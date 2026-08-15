@@ -4,9 +4,9 @@ description: Configuring Transcoder documentation for the Transcoder plugin. The
 ---
 # Configuring Transcoder
 
-Configure the video workflow from Transcoder’s Craft control-panel settings or with a `craft/config/transcoder.php` file. Don’t edit the plugin’s bundled `config.php`; copy it to `craft/config` when settings should be managed in code.
+Configure the media workflow from Transcoder’s Craft control-panel settings or with a `craft/config/transcoder.php` file. Don’t edit the plugin’s bundled `config.php`; copy it to `craft/config` when settings should be managed in code.
 
-The Video queue and Video watermark tabs use Craft autosuggest fields for values that can come from environment variables. The watermark path also suggests Yii aliases. Numeric environment variables must resolve to integers within the same limits shown by their literal values.
+The media queue and Video watermark tabs use Craft autosuggest fields for values that can come from environment variables. The watermark path also suggests Yii aliases. Numeric environment variables must resolve to integers within the same limits shown by their literal values.
 
 You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to work. On Ubuntu 16.04, you can do just:
 
@@ -53,6 +53,25 @@ return [
 ```
 
 GIF queueing is disabled by default. The queue worker runs ffmpeg synchronously and only completes after a non-empty output has been created. Existing Twig calls keep their original on-demand behavior.
+
+## Audio queue
+
+Audio uploads can also be encoded by Craft’s queue without changing `getAudioUrl()` or its string return value:
+
+```php
+return [
+    'queueAudioOnAssetUpload' => true,
+    'audioQueueDelaySeconds' => 5,
+    'queuedAudioOptions' => [
+        'audioEncoder' => 'mp3',
+        'audioBitRate' => '128k',
+        'audioSampleRate' => '44100',
+        'audioChannels' => '2',
+    ],
+];
+```
+
+Audio queueing is disabled by default. The job overrides the internal `synchronous` option so Craft only marks it complete after ffmpeg exits successfully and creates a non-empty output. Existing Twig calls and configured filenames are unchanged.
 
 `videoFilenameStrategy` supports:
 
