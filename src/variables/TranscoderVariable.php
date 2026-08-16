@@ -50,13 +50,14 @@ class TranscoderVariable implements ViteVariableInterface
      *
      * @param $filePath
      * @param $thumbnailOptions
+     * @param bool $generate
      *
      * @return string|false|null URL or path of the video thumbnail
      * @throws InvalidConfigException
      */
-    public function getVideoThumbnailUrl($filePath, $thumbnailOptions): string|false|null
+    public function getVideoThumbnailUrl($filePath, $thumbnailOptions, bool $generate = true): string|false|null
     {
-        return Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions);
+        return Transcoder::$plugin->transcode->getVideoThumbnailUrl($filePath, $thumbnailOptions, $generate);
     }
 
     /**

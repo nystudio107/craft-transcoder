@@ -261,6 +261,7 @@ class Transcode extends Component
      * @param bool $generate whether the thumbnail should be
      *                                 generated if it doesn't exists
      * @param bool $asPath Whether we should return a path or not
+     * @param bool $synchronous Whether FFmpeg should finish before returning
      *
      * @return string|false|null URL or path of the video thumbnail
      * @throws InvalidConfigException
@@ -275,19 +276,12 @@ class Transcode extends Component
     {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
-        $subfolder = '';
-
-        // sub folder check
-        if (($filePath instanceof Asset) && $settings['createSubfolders']) {
-            $subfolder = $filePath->folderPath;
-        }
+        $outputInfo = $this->getThumbnailOutputInfo($filePath);
 
         $filePath = $this->getAssetPath($filePath);
 
         if (!empty($filePath)) {
-            $destThumbnailPath = $settings['transcoderPaths']['thumbnail'] ?? $settings['transcoderPaths']['default'];
-            $destThumbnailPath .= $subfolder;
-            $destThumbnailPath = App::parseEnv($destThumbnailPath);
+            $destThumbnailPath = $outputInfo['directory'];
 
             $thumbnailOptions = $this->coalesceOptions('defaultThumbnailOptions', $thumbnailOptions);
 
@@ -347,10 +341,8 @@ class Transcode extends Component
                             return $destThumbnailPath;
                         }
 
-                        $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
-                        $url .= $subfolder;
                         return $this->getVersionedMediaUrl(
-                            (string)App::parseEnv($url) . $destThumbnailFile,
+                            $outputInfo['url'] . $destThumbnailFile,
                             $destThumbnailPath
                         );
                     }
@@ -372,10 +364,8 @@ class Transcode extends Component
             if ($asPath) {
                 $result = $destThumbnailPath;
             } else {
-                $url = $settings['transcoderUrls']['thumbnail'] ?? $settings['transcoderUrls']['default'];
-                $url .= $subfolder;
                 $result = $this->getVersionedMediaUrl(
-                    (string)App::parseEnv($url) . $destThumbnailFile,
+                    $outputInfo['url'] . $destThumbnailFile,
                     $destThumbnailPath
                 );
             }
@@ -868,11 +858,20 @@ class Transcode extends Component
      */
     public function handleGetAssetThumbPath(DefineAssetThumbUrlEvent $event): null|false|string
     {
+        $asset = $this->resolveControlPanelThumbnailAsset($event->asset);
+        if ($this->isTemporaryUploadAsset($asset)) {
+            Craft::info(
+                "Skipped Control Panel video thumbnail generation for temporary asset #{$asset->id}.",
+                __METHOD__
+            );
+            return null;
+        }
+
         $options = [
             'width' => $event->width,
             'height' => $event->height,
         ];
-        return $this->getVideoThumbnailUrl($event->asset, $options);
+        return $this->getVideoThumbnailUrl($asset, $options);
     }
 
     // Protected Methods
@@ -1088,7 +1087,7 @@ class Transcode extends Component
     {
         $settings = Transcoder::$plugin->getSettings();
         if ($filePath instanceof Asset && $settings->createSubfolders) {
-            $folderPath = trim((string)$filePath->folderPath, '/\\');
+            $folderPath = $this->getAssetFolderPath($filePath);
             return $folderPath === '' ? '' : $folderPath . DIRECTORY_SEPARATOR;
         }
 
@@ -1118,11 +1117,117 @@ class Transcode extends Component
             || str_contains($subfolder, '/')
             || str_contains($subfolder, '\\')
         ) {
-            Craft::warning('Ignored an unsafe video output subfolder from a string input.', __METHOD__);
+            Craft::warning('Ignored an unsafe generated media subfolder from a string input.', __METHOD__);
             return '';
         }
 
         return $subfolder . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * Resolve an Asset folder from Craft's folder model, with hydrated Asset
+     * properties as fallbacks.
+     */
+    protected function getAssetFolderPath(Asset $asset): string
+    {
+        $candidates = [];
+        try {
+            $candidates[] = (string)$asset->getFolder()->path;
+        } catch (InvalidConfigException) {
+        }
+
+        $candidates[] = (string)($asset->folderPath ?? '');
+        try {
+            $assetPath = str_replace('\\', '/', $asset->getPath());
+            $candidates[] = dirname($assetPath);
+        } catch (InvalidConfigException) {
+        }
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim(str_replace('\\', '/', $candidate), '/');
+            if ($candidate === '' || $candidate === '.') {
+                continue;
+            }
+
+            $segments = explode('/', $candidate);
+            if (in_array('.', $segments, true) || in_array('..', $segments, true)) {
+                Craft::warning("Ignored an unsafe output folder for asset #{$asset->id}.", __METHOD__);
+                continue;
+            }
+
+            return implode(DIRECTORY_SEPARATOR, $segments);
+        }
+
+        return '';
+    }
+
+    /**
+     * Return normalized filesystem and public URL directories for thumbnails.
+     *
+     * @return array{subfolder: string, directory: string, url: string}
+     */
+    protected function getThumbnailOutputInfo(Asset|string $filePath): array
+    {
+        $settings = Transcoder::$plugin->getSettings();
+        $subfolder = $this->getSubfolderFromPath($filePath);
+        $directory = (string)App::parseEnv(
+            $settings->transcoderPaths['thumbnail'] ?? $settings->transcoderPaths['default']
+        );
+        $directory = rtrim($directory, '/\\') . DIRECTORY_SEPARATOR;
+        $url = (string)App::parseEnv(
+            $settings->transcoderUrls['thumbnail'] ?? $settings->transcoderUrls['default']
+        );
+        $url = rtrim($url, '/') . '/';
+
+        if ($subfolder !== '') {
+            $directory .= trim($subfolder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            $url .= trim(str_replace('\\', '/', $subfolder), '/') . '/';
+        }
+
+        return [
+            'subfolder' => $subfolder,
+            'directory' => $directory,
+            'url' => $url,
+        ];
+    }
+
+    /**
+     * Reload an incomplete Control Panel event Asset after Craft has persisted it.
+     */
+    protected function resolveControlPanelThumbnailAsset(Asset $asset): Asset
+    {
+        $folderPath = trim((string)($asset->folderPath ?? ''));
+        if ($asset->id && ($folderPath === '' || $this->isTemporaryUploadAsset($asset))) {
+            $persistedAsset = Asset::find()->id($asset->id)->one();
+            if ($persistedAsset instanceof Asset) {
+                return $persistedAsset;
+            }
+        }
+
+        return $asset;
+    }
+
+    /**
+     * Return whether Craft has not moved an uploaded Asset into its final folder yet.
+     */
+    protected function isTemporaryUploadAsset(Asset $asset): bool
+    {
+        $references = [$this->getAssetFolderPath($asset)];
+        try {
+            $references[] = $asset->getPath();
+        } catch (InvalidConfigException) {
+        }
+
+        foreach ($references as $reference) {
+            $reference = str_replace('\\', '/', trim((string)$reference));
+            if (preg_match('~(?:^|/)user_\d+(?:/|$)~i', $reference) === 1
+                || preg_match('~(?:^|/)(?:storage/)?runtime/assets/tempuploads(?:/|$)~i', $reference) === 1
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1206,7 +1311,6 @@ class Transcode extends Component
             throw new RuntimeException('Unable to resolve the source or output path for the video Asset.');
         }
 
-        $subfolder = $videoOutput['subfolder'];
         $outputs = [$videoOutput['path']];
         $temporary = [
             $videoOutput['lockFile'],
@@ -1214,9 +1318,7 @@ class Transcode extends Component
         ];
 
         if ($settings->enableVideoPosters) {
-            $posterDirectory = App::parseEnv(
-                $settings->transcoderPaths['thumbnail'] ?? $settings->transcoderPaths['default']
-            ) . $subfolder;
+            $posterDirectory = $this->getThumbnailOutputInfo($asset)['directory'];
             foreach (array_keys($this->getVideoPosterFormats()) as $formatHandle) {
                 $options = $this->getVideoPosterOptions($asset, $formatHandle);
                 if ($options !== null) {

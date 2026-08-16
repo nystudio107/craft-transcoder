@@ -91,7 +91,7 @@ The file format setting `videoEncoder` is preset to what you’ll need to genera
 
 ![Screenshot](./resources/screenshots/admin-cp-video-thumbnails.png)
 
-Transcoder will also automatically add video thumbnails in the Control Panel Asset index.
+Transcoder will also automatically add video thumbnails in the Control Panel Asset index. During an upload, thumbnail generation waits until Craft has moved the Asset into its final folder so `createSubfolders` remains consistent.
 
 ## Reading Generated Video Posters
 
@@ -247,7 +247,7 @@ To generate a thumbnail from a video, do the following:
 You can also pass in a URL:
 
 ```twig
-{% set transVideoUrl = craft.transcoder.getVideoUrl('http://vjs.zencdn.net/v/oceans.mp4', {
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('http://vjs.zencdn.net/v/oceans.mp4', {
     "width": 300,
     "height": 200,
     "timeInSecs": 20,
@@ -258,14 +258,22 @@ You can also pass in an `Asset`:
 
 ```twig
 {% set myAsset = entry.someAsset.one() %}
-{% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl(myAsset, {
     "width": 300,
     "height": 200,
     "timeInSecs": 20,
 }) %}
 ```
 
-It will return to you a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video.  It creates this thumbnail immediately if it doesn’t already exist.
+It will return a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video. It creates this thumbnail immediately if it doesn’t already exist. Pass `false` as the third argument to perform a read-only lookup without starting FFmpeg:
+
+```twig
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl(myAsset, {
+    "width": 300,
+    "height": 200,
+    "timeInSecs": 20,
+}, false) %}
+```
 
 In the array you pass in, the default values are used if the key-value pair does not exist:
 

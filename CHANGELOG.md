@@ -26,6 +26,8 @@
 * Fail refresh jobs when Craft cannot queue replacement encoding instead of reporting completion.
 * Add modification-time cache versions to generated video and poster URLs after regeneration.
 * Preserve configured video output subfolders when `getVideoUrl()` receives a string URL or path.
+* Keep automatic Control Panel video thumbnails out of temporary upload storage and in the Asset's final subfolder.
+* Forward the optional `generate` argument from Twig's `getVideoThumbnailUrl()` helper.
 
 ## 4.0.2 - 2024.09.30
 ## Added

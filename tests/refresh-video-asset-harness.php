@@ -66,12 +66,28 @@ namespace craft\elements {
 
         public ?int $id = null;
         public string $filename = '';
-        public string $folderPath = '';
+        public ?string $folderPath = '';
+        public string $path = '';
         public string $sourcePath = '';
+        public ?object $folder = null;
 
         public static function find(): AssetQuery
         {
             return new AssetQuery();
+        }
+
+        public function getFolder(): object
+        {
+            return $this->folder ?? (object)['path' => $this->folderPath ?? ''];
+        }
+
+        public function getPath(): string
+        {
+            if ($this->path !== '') {
+                return $this->path;
+            }
+
+            return ($this->folderPath ?? '') . $this->filename;
         }
     }
 
@@ -93,8 +109,16 @@ namespace craft\elements {
 }
 
 namespace craft\events {
+    use craft\elements\Asset;
+
     class DefineAssetThumbUrlEvent
     {
+        public function __construct(
+            public Asset $asset,
+            public int $width,
+            public int $height,
+        ) {
+        }
     }
 }
 
@@ -162,6 +186,10 @@ namespace craft\helpers {
         {
             return json_decode($value, $asArray);
         }
+    }
+
+    final class UrlHelper
+    {
     }
 }
 
@@ -243,19 +271,32 @@ namespace nystudio107\transcoder {
     }
 }
 
+namespace nystudio107\pluginvite\variables {
+    interface ViteVariableInterface
+    {
+    }
+
+    trait ViteVariableTrait
+    {
+    }
+}
+
 namespace {
     use craft\elements\Asset;
+    use craft\events\DefineAssetThumbUrlEvent;
     use nystudio107\transcoder\Transcoder;
     use nystudio107\transcoder\jobs\EncodeAudio;
     use nystudio107\transcoder\jobs\EncodeGif;
     use nystudio107\transcoder\jobs\EncodeVideo;
     use nystudio107\transcoder\services\Transcode as BaseTranscode;
+    use nystudio107\transcoder\variables\TranscoderVariable;
 
     require dirname(__DIR__) . '/src/jobs/EncodeAudio.php';
     require dirname(__DIR__) . '/src/jobs/EncodeGif.php';
     require dirname(__DIR__) . '/src/jobs/EncodeVideo.php';
     require dirname(__DIR__) . '/src/jobs/RefreshVideoAsset.php';
     require dirname(__DIR__) . '/src/services/Transcode.php';
+    require dirname(__DIR__) . '/src/variables/TranscoderVariable.php';
 
     final class HarnessSettings extends ArrayObject
     {
@@ -338,6 +379,22 @@ namespace {
         }
     }
 
+    final class HarnessVariableTranscode extends BaseTranscode
+    {
+        public ?bool $thumbnailGenerate = null;
+
+        public function getVideoThumbnailUrl(
+            Asset|string $filePath,
+            array $thumbnailOptions,
+            bool $generate = true,
+            bool $asPath = false,
+            bool $synchronous = false
+        ): string|false|null {
+            $this->thumbnailGenerate = $generate;
+            return null;
+        }
+    }
+
     function assertSameValue(mixed $expected, mixed $actual, string $message): void
     {
         if ($expected !== $actual) {
@@ -358,10 +415,12 @@ namespace {
     $encodedDirectory = $encodedRoot . '197915/';
     $gifDirectory = $root . '/content/encoded/gif/197915/';
     $audioDirectory = $root . '/content/encoded/audio/197915/';
+    $thumbnailRoot = $root . '/content/encoded/thumbnail/';
     mkdir($sourceDirectory, 0777, true);
     mkdir($encodedDirectory, 0777, true);
     mkdir($gifDirectory, 0777, true);
     mkdir($audioDirectory, 0777, true);
+    mkdir($thumbnailRoot, 0777, true);
 
     try {
         putenv('TRANSCODER_QUEUE_DELAY=9');
@@ -454,6 +513,15 @@ namespace {
                 'synchronous' => false,
                 'stripMetadata' => false,
             ],
+            'defaultThumbnailOptions' => [
+                'fileSuffix' => '.jpg',
+                'timeInSecs' => 4,
+                'width' => '',
+                'height' => '',
+                'sharpen' => true,
+                'aspectRatio' => 'letterbox',
+                'letterboxColor' => '',
+            ],
             'videoFilenameStrategy' => 'options',
             'useHashedNames' => false,
             'enableVideoWatermark' => false,
@@ -486,6 +554,90 @@ namespace {
         $asset->folderPath = '197915/';
         $asset->sourcePath = $sourcePath;
         Asset::$assets[$asset->id] = $asset;
+
+        $cpFilename = 'asset-cp-thumbnail.mp4';
+        $cpSourcePath = $sourceDirectory . $cpFilename;
+        copy($sourcePath, $cpSourcePath);
+        $persistedCpAsset = new Asset();
+        $persistedCpAsset->id = 200961;
+        $persistedCpAsset->filename = $cpFilename;
+        $persistedCpAsset->folderPath = null;
+        $persistedCpAsset->folder = (object)['path' => '200961/'];
+        $persistedCpAsset->path = '200961/' . $cpFilename;
+        $persistedCpAsset->sourcePath = $cpSourcePath;
+        Asset::$assets[$persistedCpAsset->id] = $persistedCpAsset;
+
+        $uploadEventAsset = new Asset();
+        $uploadEventAsset->id = $persistedCpAsset->id;
+        $uploadEventAsset->filename = $cpFilename;
+        $uploadEventAsset->folderPath = null;
+        $uploadEventAsset->folder = (object)['path' => 'user_42/'];
+        $uploadEventAsset->path = 'user_42/' . $cpFilename;
+        $uploadEventAsset->sourcePath = $cpSourcePath;
+
+        $cpThumbnailFilename = 'asset-cp-thumbnail_4s_800w_450h_letterbox_.jpg';
+        $cpThumbnailDirectory = $thumbnailRoot . '200961/';
+        mkdir($cpThumbnailDirectory, 0777, true);
+        file_put_contents($cpThumbnailDirectory . $cpThumbnailFilename, 'cp-thumbnail');
+        file_put_contents($thumbnailRoot . $cpThumbnailFilename, 'stale-root-thumbnail');
+        $cpThumbnailUrl = $service->handleGetAssetThumbPath(
+            new DefineAssetThumbUrlEvent($uploadEventAsset, 800, 450)
+        );
+        assertTrue(
+            is_string($cpThumbnailUrl)
+                && str_starts_with(
+                    $cpThumbnailUrl,
+                    'https://example.test/encoded/thumbnail/200961/' . $cpThumbnailFilename . '?v='
+                ),
+            'The Control Panel thumbnail event did not reload the final Asset folder.'
+        );
+        assertSameValue(
+            'stale-root-thumbnail',
+            file_get_contents($thumbnailRoot . $cpThumbnailFilename),
+            'The Control Panel thumbnail event reused or replaced the stale root derivative.'
+        );
+        assertSameValue(
+            $cpThumbnailDirectory . $cpThumbnailFilename,
+            $service->getVideoThumbnailUrl(
+                $persistedCpAsset,
+                ['width' => 800, 'height' => 450],
+                false,
+                true
+            ),
+            'Thumbnail generation did not fall back to the Craft folder model when folderPath was empty.'
+        );
+
+        $temporaryAsset = new Asset();
+        $temporaryAsset->id = 200962;
+        $temporaryAsset->filename = 'temporary-upload.mp4';
+        $temporaryAsset->folderPath = null;
+        $temporaryAsset->folder = (object)['path' => 'user_84/'];
+        $temporaryAsset->path = 'user_84/temporary-upload.mp4';
+        $temporaryAsset->sourcePath = $cpSourcePath;
+        Asset::$assets[$temporaryAsset->id] = $temporaryAsset;
+        assertSameValue(
+            null,
+            $service->handleGetAssetThumbPath(new DefineAssetThumbUrlEvent($temporaryAsset, 800, 450)),
+            'A temporary Control Panel upload should not generate a Transcoder thumbnail.'
+        );
+        assertTrue(
+            in_array(
+                'Skipped Control Panel video thumbnail generation for temporary asset #200962.',
+                Craft::$logs,
+                true
+            ),
+            'The skipped temporary Control Panel thumbnail was not logged.'
+        );
+
+        $variableService = new HarnessVariableTranscode();
+        $plugin->transcode = $variableService;
+        (new TranscoderVariable())->getVideoThumbnailUrl($asset, [], false);
+        assertSameValue(
+            false,
+            $variableService->thumbnailGenerate,
+            'The Twig thumbnail variable did not forward its generate argument.'
+        );
+        $plugin->transcode = $service;
 
         $gifSourcePath = $sourceDirectory . 'animated.gif';
         exec(

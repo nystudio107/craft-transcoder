@@ -78,9 +78,9 @@ Audio queueing is disabled by default. The job overrides the internal `synchrono
 - `options` (default): preserves Transcoder’s original parameterized filenames. Output-affecting options such as `videoBitRate` remain part of the filename.
 - `source`: uses the source asset name plus the encoder suffix, producing one stable output name per source asset.
 
-### Subfolders for URL inputs
+### Output subfolders
 
-Passing the actual Craft `Asset` to `getVideoUrl()` is preferred. With `createSubfolders` enabled, Transcoder uses the Asset’s `folderPath` for both the encoded filesystem path and public URL.
+Passing the actual Craft `Asset` to video and thumbnail helpers is preferred. With `createSubfolders` enabled, Transcoder uses Craft's Asset folder for both the generated filesystem path and public URL. Automatic Control Panel thumbnails wait until an uploaded Asset has reached its final folder.
 
 When an integration can only pass a string URL or path, configure `subfolderUrlSegment` with the one-based path segment that contains the desired output folder. For example, segment `3` extracts `197915` from `/content/videos/197915/video.mp4`:
 
@@ -91,7 +91,7 @@ return [
 ];
 ```
 
-Leave `subfolderUrlSegment` as `false` (the default) when string inputs should use the base video output directory. Transcoder normalizes path and URL separators, so configured transcoder paths no longer depend on a trailing slash for video output.
+Leave `subfolderUrlSegment` as `false` (the default) when string inputs should use their base output directories. Transcoder normalizes path and URL separators, so configured video and thumbnail paths do not depend on a trailing slash.
 
 ## Watermarks
 
