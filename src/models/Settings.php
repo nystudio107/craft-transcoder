@@ -158,6 +158,9 @@ class Settings extends Model
     /** @var bool Generate configured poster images after queued video encoding. */
     public bool $enableVideoPosters = false;
 
+    /** @var bool Queue configured poster generation when a new video Asset is uploaded. */
+    public bool $queueVideoPostersOnAssetUpload = false;
+
     /** @var bool Fill unused poster space with a blurred cover image. */
     public bool $preventVideoPosterBlackBars = false;
 
@@ -359,6 +362,7 @@ class Settings extends Model
             ['videoWatermarkPadding', 'validateIntegerSetting', 'params' => ['min' => 0]],
             ['videoWatermarkOpacity', 'validateIntegerSetting', 'params' => ['min' => 0, 'max' => 100]],
             ['enableVideoPosters', 'boolean'],
+            ['queueVideoPostersOnAssetUpload', 'boolean'],
             ['preventVideoPosterBlackBars', 'boolean'],
             ['videoPosterFormats', ArrayValidator::class],
             ['videoEncoders', 'required'],

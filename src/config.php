@@ -120,6 +120,9 @@ return [
     // Generate configured poster images after queued video encoding
     'enableVideoPosters' => false,
 
+    // Queue configured poster generation for uploaded videos, even when video encoding is not queued
+    'queueVideoPostersOnAssetUpload' => false,
+
     // Fill unused poster space with a blurred cover image instead of black bars
     'preventVideoPosterBlackBars' => false,
 

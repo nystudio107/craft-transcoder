@@ -89,10 +89,18 @@
 <div id="tab-video-posters" class="hidden">
     {{ forms.lightswitchField({
         label: 'Generate video posters'|t('transcoder'),
-        instructions: 'Generate the configured poster images after a queued video is encoded.'|t('transcoder'),
+        instructions: 'Enable configured poster formats for automated video workflows.'|t('transcoder'),
         id: 'enableVideoPosters',
         name: 'enableVideoPosters',
         on: settings.enableVideoPosters,
+    }) }}
+
+    {{ forms.lightswitchField({
+        label: 'Queue video posters on asset upload'|t('transcoder'),
+        instructions: 'Generate configured posters through Craft’s queue when full video encoding is not queued.'|t('transcoder'),
+        id: 'queueVideoPostersOnAssetUpload',
+        name: 'queueVideoPostersOnAssetUpload',
+        on: settings.queueVideoPostersOnAssetUpload,
     }) }}
 
     {{ forms.lightswitchField({

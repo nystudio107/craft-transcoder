@@ -288,12 +288,14 @@ namespace {
     use nystudio107\transcoder\jobs\EncodeAudio;
     use nystudio107\transcoder\jobs\EncodeGif;
     use nystudio107\transcoder\jobs\EncodeVideo;
+    use nystudio107\transcoder\jobs\GenerateVideoPosters;
     use nystudio107\transcoder\services\Transcode as BaseTranscode;
     use nystudio107\transcoder\variables\TranscoderVariable;
 
     require dirname(__DIR__) . '/src/jobs/EncodeAudio.php';
     require dirname(__DIR__) . '/src/jobs/EncodeGif.php';
     require dirname(__DIR__) . '/src/jobs/EncodeVideo.php';
+    require dirname(__DIR__) . '/src/jobs/GenerateVideoPosters.php';
     require dirname(__DIR__) . '/src/jobs/RefreshVideoAsset.php';
     require dirname(__DIR__) . '/src/services/Transcode.php';
     require dirname(__DIR__) . '/src/variables/TranscoderVariable.php';
@@ -531,6 +533,9 @@ namespace {
             'videoWatermarkPadding' => '$TRANSCODER_WATERMARK_PADDING',
             'videoWatermarkOpacity' => '$TRANSCODER_WATERMARK_OPACITY',
             'enableVideoPosters' => false,
+            'queueVideoPostersOnAssetUpload' => false,
+            'preventVideoPosterBlackBars' => false,
+            'videoPosterFormats' => [],
             'ffmpegPath' => $ffmpegBinary,
             'transcoderUrls' => [
                 'default' => 'https://example.test/encoded/',
@@ -638,6 +643,85 @@ namespace {
             'The Twig thumbnail variable did not forward its generate argument.'
         );
         $plugin->transcode = $service;
+
+        $settings->enableVideoPosters = true;
+        $settings->queueVideoPostersOnAssetUpload = true;
+        assertSameValue(
+            true,
+            $service->shouldQueueStandaloneVideoPostersOnUpload(),
+            'Poster-only upload queueing was not enabled independently.'
+        );
+        $settings->queueVideosOnAssetUpload = true;
+        assertSameValue(
+            false,
+            $service->shouldQueueStandaloneVideoPostersOnUpload(),
+            'Poster-only upload queueing would duplicate the full video job.'
+        );
+        $settings->queueVideosOnAssetUpload = false;
+        $settings->videoPosterFormats = [
+            'upload' => [
+                'width' => 64,
+                'height' => 64,
+                'timeInSecs' => 0,
+            ],
+        ];
+        $posterJob = new GenerateVideoPosters([
+            'assetId' => $asset->id,
+        ]);
+        $posterJob->execute($queue);
+        $posterPath = $service->getVideoThumbnailUrl(
+            $asset,
+            [
+                'width' => 64,
+                'height' => 64,
+                'timeInSecs' => 0,
+                'posterFormat' => 'upload',
+            ],
+            false,
+            true
+        );
+        assertTrue(is_string($posterPath) && is_file($posterPath), 'The standalone poster job did not create its output.');
+        assertTrue(
+            str_contains($posterPath, DIRECTORY_SEPARATOR . 'thumbnail' . DIRECTORY_SEPARATOR . '197915' . DIRECTORY_SEPARATOR),
+            'The standalone poster job ignored the Asset subfolder.'
+        );
+        assertTrue(
+            in_array('Generated 1 video poster(s) for asset #197915.', Craft::$logs, true),
+            'The standalone poster job did not log successful completion.'
+        );
+
+        $settings->enableVideoPosters = false;
+        assertSameValue(
+            false,
+            $service->shouldQueueStandaloneVideoPostersOnUpload(),
+            'Disabled poster generation still requested an upload job.'
+        );
+        $disabledPosterMtime = filemtime($posterPath);
+        $posterJob->execute($queue);
+        clearstatcache(true, $posterPath);
+        assertSameValue(
+            $disabledPosterMtime,
+            filemtime($posterPath),
+            'A disabled standalone poster job changed its existing output.'
+        );
+        assertTrue(
+            in_array('Skipped disabled video poster generation for asset #197915.', Craft::$logs, true),
+            'The disabled standalone poster job did not log its no-op.'
+        );
+
+        $settings->enableVideoPosters = true;
+        try {
+            (new GenerateVideoPosters(['assetId' => $temporaryAsset->id]))->execute($queue);
+            throw new RuntimeException('A temporary upload poster job should fail visibly.');
+        } catch (RuntimeException $e) {
+            assertTrue(
+                str_contains($e->getMessage(), 'temporary upload storage'),
+                'A temporary upload poster job did not report the expected failure.'
+            );
+        }
+        $settings->enableVideoPosters = false;
+        $settings->queueVideoPostersOnAssetUpload = false;
+        $settings->videoPosterFormats = [];
 
         $gifSourcePath = $sourceDirectory . 'animated.gif';
         exec(

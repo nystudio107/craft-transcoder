@@ -414,6 +414,20 @@ class Transcode extends Component
     }
 
     /**
+     * Return whether poster upload queueing needs its own job.
+     *
+     * @internal Used by the Asset upload event handler.
+     */
+    public function shouldQueueStandaloneVideoPostersOnUpload(): bool
+    {
+        $settings = Transcoder::$plugin->getSettings();
+
+        return $settings->enableVideoPosters
+            && $settings->queueVideoPostersOnAssetUpload
+            && !$settings->queueVideosOnAssetUpload;
+    }
+
+    /**
      * Queue invalidation and regeneration after an integration replaces a video asset.
      *
      * @return array{queued: bool, jobId: mixed}
@@ -1209,8 +1223,10 @@ class Transcode extends Component
 
     /**
      * Return whether Craft has not moved an uploaded Asset into its final folder yet.
+     *
+     * @internal Used by Control Panel and queue jobs.
      */
-    protected function isTemporaryUploadAsset(Asset $asset): bool
+    public function isTemporaryUploadAsset(Asset $asset): bool
     {
         $references = [$this->getAssetFolderPath($asset)];
         try {

@@ -13,6 +13,7 @@ Transcode video & audio files to various formats, and provide video thumbnails
 - Keep the original option-based filenames, including bitrate, or opt into stable source-asset filenames.
 - Overlay a configurable watermark on encoded videos.
 - Generate named poster formats after queued encodes.
+- Queue configured video posters on upload without requiring full video encoding.
 - Replace poster letterboxing with a blurred cover background.
 - Refresh managed video derivatives after a third-party plugin replaces a source asset.
 - Keep Asset and string-URL video calls in the same configured output subfolder.

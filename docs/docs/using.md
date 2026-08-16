@@ -95,7 +95,7 @@ Transcoder will also automatically add video thumbnails in the Control Panel Ass
 
 ## Reading Generated Video Posters
 
-Queued poster generation does not need to be started from a template. Read a configured poster by its format handle:
+Queued poster generation does not need to be started from a template. Enable `queueVideoPostersOnAssetUpload` to generate configured formats when full video upload encoding is disabled, then read a poster by its format handle:
 
 ```twig
 {% set video = entry.video.one() %}

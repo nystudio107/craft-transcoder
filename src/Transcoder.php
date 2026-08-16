@@ -34,6 +34,7 @@ use craft\web\View;
 use nystudio107\transcoder\jobs\EncodeAudio;
 use nystudio107\transcoder\jobs\EncodeGif;
 use nystudio107\transcoder\jobs\EncodeVideo;
+use nystudio107\transcoder\jobs\GenerateVideoPosters;
 use nystudio107\transcoder\models\Settings;
 use nystudio107\transcoder\services\ServicesTrait;
 use nystudio107\transcoder\variables\TranscoderVariable;
@@ -265,6 +266,7 @@ class Transcoder extends Plugin
             );
         }
         if ($settings->queueVideosOnAssetUpload
+            || $settings->queueVideoPostersOnAssetUpload
             || $settings->queueGifsOnAssetUpload
             || $settings->queueAudioOnAssetUpload
         ) {
@@ -305,16 +307,30 @@ class Transcoder extends Plugin
                         return;
                     }
 
-                    if ($kind === Asset::KIND_VIDEO && $settings->queueVideosOnAssetUpload) {
-                        $this->queueUploadedMedia(
-                            new EncodeVideo([
-                                'assetId' => $asset->id,
-                                'videoOptions' => $settings->queuedVideoOptions,
-                            ]),
-                            $settings->videoQueueDelaySeconds,
-                            'video',
-                            (int)$asset->id
-                        );
+                    if ($kind === Asset::KIND_VIDEO) {
+                        if ($settings->queueVideosOnAssetUpload) {
+                            $this->queueUploadedMedia(
+                                new EncodeVideo([
+                                    'assetId' => $asset->id,
+                                    'videoOptions' => $settings->queuedVideoOptions,
+                                ]),
+                                $settings->videoQueueDelaySeconds,
+                                'video',
+                                (int)$asset->id
+                            );
+                            return;
+                        }
+
+                        if ($this->transcode->shouldQueueStandaloneVideoPostersOnUpload()) {
+                            $this->queueUploadedMedia(
+                                new GenerateVideoPosters([
+                                    'assetId' => $asset->id,
+                                ]),
+                                $settings->videoQueueDelaySeconds,
+                                'video poster',
+                                (int)$asset->id
+                            );
+                        }
                     }
                 }
             );

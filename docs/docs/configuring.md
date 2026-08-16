@@ -112,11 +112,14 @@ Watermark settings are included in option-based output filenames through a short
 
 ## Video posters
 
-Configured poster formats are generated after a queued video encode:
+Configured poster formats can be generated after a queued video encode or through their own upload job:
 
 ```php
 return [
     'enableVideoPosters' => true,
+    'queueVideoPostersOnAssetUpload' => true,
+    // Shared with uploaded video encoding jobs.
+    'videoQueueDelaySeconds' => 5,
     'preventVideoPosterBlackBars' => true,
     'videoPosterFormats' => [
         '16_9' => [
@@ -132,6 +135,8 @@ return [
     ],
 ];
 ```
+
+`queueVideoPostersOnAssetUpload` is disabled by default. When full video upload encoding is enabled, its existing `EncodeVideo` job remains responsible for poster generation and no duplicate poster job is queued. When full video upload encoding is disabled, this setting queues only the configured poster formats. The job reloads the Asset by ID and fails visibly instead of writing into Craft's temporary upload folder.
 
 When `preventVideoPosterBlackBars` is enabled, the video frame is fitted over a blurred cover version of the same frame. Poster timestamps are clamped to the source duration for short videos.
 
