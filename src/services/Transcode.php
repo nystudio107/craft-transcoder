@@ -127,7 +127,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -vcodec ' . $thisEncoder['videoCodec']
                 . ' ' . $thisEncoder['videoCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -threads ' . $thisEncoder['threads'];
 
             // Set the framerate if desired
@@ -209,7 +208,7 @@ class Transcode extends Component
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
                 $result = Craft::parseEnv($url) . $destVideoFile;
-            // skip encoding
+                // skip encoding
             } elseif (!$generate) {
                 $result = "";
             } else {
@@ -360,7 +359,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -acodec ' . $thisEncoder['audioCodec']
                 . ' ' . $thisEncoder['audioCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -vn'
                 . ' -threads ' . $thisEncoder['threads'];
 
