@@ -1,5 +1,9 @@
 # Transcoder Changelog
 
+## 4.0.3 - UNRELEASED
+### Changed
+* Remove the `bufsize` parameter entirely from the FFMPEG default command, which was preventing `WebM` files from being generated properly ([#72](https://github.com/nystudio107/craft-transcoder/issues/72))
+
 ## 4.0.2 - 2024.09.30
 ## Added
 * Add `phpstan` and `ecs` code linting
