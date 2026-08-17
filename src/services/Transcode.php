@@ -129,7 +129,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -vcodec ' . $thisEncoder['videoCodec']
                 . ' ' . $thisEncoder['videoCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -threads ' . $thisEncoder['threads'];
 
             // Set the framerate if desired
@@ -362,7 +361,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -acodec ' . $thisEncoder['audioCodec']
                 . ' ' . $thisEncoder['audioCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -vn'
                 . ' -threads ' . $thisEncoder['threads'];
 
