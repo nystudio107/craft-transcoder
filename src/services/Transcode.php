@@ -801,6 +801,7 @@ class Transcode extends Component
                     $subPath = $assetVolume->getSubPath();
                     if (!empty($subPath)) {
                         $subPath = rtrim($subPath, DIRECTORY_SEPARATOR);
+                        $subPath .= '' === $subPath ? '' : DIRECTORY_SEPARATOR;
                     }
                     $sourcePath = rtrim($fs->path, DIRECTORY_SEPARATOR);
                     $sourcePath .= '' === $sourcePath ? '' : DIRECTORY_SEPARATOR;
