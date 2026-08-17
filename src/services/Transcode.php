@@ -210,7 +210,7 @@ class Transcode extends Component
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
                 $result = App::parseEnv($url) . $destVideoFile;
-                // skip encoding
+            // skip encoding
             } elseif (!$generate) {
                 $result = '';
             } else {
@@ -298,7 +298,7 @@ class Transcode extends Component
                     $shellOutput = $this->executeShellCommand($ffmpegCmd);
                     Craft::info($ffmpegCmd, __METHOD__);
 
-                    // if ffmpeg fails which we can't check because the process is ran in the background
+                // if ffmpeg fails which we can't check because the process is ran in the background
                     // don't return the future path of the image or else we can't check this in the front end
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
