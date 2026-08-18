@@ -1,14 +1,13 @@
 <template>
-  <div />
+  <div/>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {onMounted} from 'vue';
 import Confetti from 'vue-confetti/src/confetti.js';
-import {ParticlesType} from './@types/confetti.d.ts';
 
 const config: Partial<ConfettiConfig> = {
-  defaultType: ParticlesType.rect,
+  defaultType: 'rect',
   defaultSize: 15,
   defaultColors: ['DodgerBlue', 'OliveDrab', 'Gold', 'pink', 'SlateBlue', 'lightblue', 'Violet', 'PaleGreen', 'SteelBlue', 'SandyBrown', 'Chocolate', 'Crimson'],
 };
