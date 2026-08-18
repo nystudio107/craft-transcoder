@@ -1,9 +1,8 @@
 import {defineConfig} from 'vite';
 import createVuePlugin from '@vitejs/plugin-vue';
 import viteCompressionPlugin from 'vite-plugin-compression';
-import viteEslintPlugin from 'vite-plugin-eslint';
-import viteStylelintPlugin from 'vite-plugin-stylelint';
-import viteRestartPlugin from 'vite-plugin-restart';
+import checker from 'vite-plugin-checker';
+import tailwindcss from "@tailwindcss/vite";
 import {visualizer} from 'rollup-plugin-visualizer';
 import * as path from 'path';
 
@@ -25,11 +24,6 @@ export default defineConfig(({command}) => ({
     }
   },
   plugins: [
-    viteRestartPlugin({
-      reload: [
-        '../src/templates/**/*',
-      ],
-    }),
     createVuePlugin(),
     viteCompressionPlugin({
       filter: /\.(js|mjs|json|css|map)$/i
@@ -39,14 +33,28 @@ export default defineConfig(({command}) => ({
       template: 'treemap',
       sourcemap: true,
     }),
-    viteEslintPlugin({
-      cache: false,
-      fix: true,
+    tailwindcss(),
+    checker({
+      eslint: {
+        lintCommand: 'eslint "./src/**/*.{js,ts}"',
+        useFlatConfig: true,
+        dev: {
+          overrideConfig: {
+            cache: true,
+          }
+        }
+      },
+      stylelint: {
+        lintCommand: 'stylelint ./src/**/*.{css,scss,sass,pcss} --fix',
+        dev: {
+          overrideConfig: {
+            cache: true,
+          }
+        }
+      },
+      typescript: true,
+      vueTsc: true,
     }),
-    viteStylelintPlugin({
-      fix: true,
-      lintInWorker: true
-    })
   ],
   resolve: {
     alias: [
