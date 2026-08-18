@@ -29,6 +29,7 @@
 * Preserve configured video output subfolders when `getVideoUrl()` receives a string URL or path.
 * Keep automatic Control Panel video thumbnails out of temporary upload storage and in the Asset's final subfolder.
 * Forward the optional `generate` argument from Twig's `getVideoThumbnailUrl()` helper.
+* Keep poster format handles and black-bar generation flags out of thumbnail filenames so queued posters and equivalent Twig requests reuse the same file.
 
 ## 4.0.2 - 2024.09.30
 ## Added

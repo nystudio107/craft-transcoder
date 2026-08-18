@@ -320,7 +320,11 @@ class Transcode extends Component
                 }
             }
 
-            $destThumbnailFile = $this->getFilename($filePath, $thumbnailOptions);
+            $destThumbnailFile = $this->getFilename(
+                $filePath,
+                $thumbnailOptions,
+                $this->getThumbnailFilenameExcludeParams()
+            );
 
             // Assemble the destination path and final ffmpeg command
             $destThumbnailPath .= $destThumbnailFile;
@@ -1339,7 +1343,11 @@ class Transcode extends Component
                 $options = $this->getVideoPosterOptions($asset, $formatHandle);
                 if ($options !== null) {
                     $options = $this->coalesceOptions('defaultThumbnailOptions', $options);
-                    $outputs[] = $posterDirectory . $this->getFilename($asset, $options);
+                    $outputs[] = $posterDirectory . $this->getFilename(
+                        $asset,
+                        $options,
+                        $this->getThumbnailFilenameExcludeParams()
+                    );
                 }
             }
         }
@@ -1574,6 +1582,17 @@ class Transcode extends Component
         }
 
         return $options;
+    }
+
+    /**
+     * Return option keys that affect poster generation but not its canonical filename.
+     */
+    protected function getThumbnailFilenameExcludeParams(): array
+    {
+        return array_values(array_unique(array_merge(self::EXCLUDE_PARAMS, [
+            'posterFormat',
+            'preventBlackBars',
+        ])));
     }
 
     /**

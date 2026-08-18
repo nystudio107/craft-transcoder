@@ -669,18 +669,31 @@ namespace {
             'assetId' => $asset->id,
         ]);
         $posterJob->execute($queue);
+        $settings->preventVideoPosterBlackBars = true;
+        $configuredPosterUrl = $service->getVideoPosterUrl($asset, 'upload', false);
         $posterPath = $service->getVideoThumbnailUrl(
             $asset,
             [
                 'width' => 64,
                 'height' => 64,
                 'timeInSecs' => 0,
-                'posterFormat' => 'upload',
             ],
             false,
             true
         );
         assertTrue(is_string($posterPath) && is_file($posterPath), 'The standalone poster job did not create its output.');
+        assertSameValue(
+            'asset-89b333afee70d7c0f2d21c1230b33777_0s_64w_64h_letterbox_.jpg',
+            basename($posterPath),
+            'Queued poster metadata changed the filename used by direct Twig thumbnail requests.'
+        );
+        assertTrue(
+            str_starts_with(
+                $configuredPosterUrl,
+                'https://example.test/encoded/thumbnail/197915/' . basename($posterPath) . '?v='
+            ),
+            'The configured poster lookup did not reuse the equivalent Twig thumbnail after enabling black-bar prevention.'
+        );
         assertTrue(
             str_contains($posterPath, DIRECTORY_SEPARATOR . 'thumbnail' . DIRECTORY_SEPARATOR . '197915' . DIRECTORY_SEPARATOR),
             'The standalone poster job ignored the Asset subfolder.'
@@ -691,6 +704,7 @@ namespace {
         );
 
         $settings->enableVideoPosters = false;
+        $settings->preventVideoPosterBlackBars = false;
         assertSameValue(
             false,
             $service->shouldQueueStandaloneVideoPostersOnUpload(),
