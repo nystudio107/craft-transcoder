@@ -208,7 +208,7 @@ class Transcode extends Component
                 $url = $settings['transcoderUrls']['video'] ?? $settings['transcoderUrls']['default'];
                 $url .= $subfolder;
                 $result = Craft::parseEnv($url) . $destVideoFile;
-                // skip encoding
+            // skip encoding
             } elseif (!$generate) {
                 $result = "";
             } else {
