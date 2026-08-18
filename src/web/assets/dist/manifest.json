@@ -1,15 +1,15 @@
 {
   "src/js/app.ts": {
-    "file": "assets/app--MQxI0fB.js",
+    "file": "assets/app-F9JWtNGu.js",
     "name": "app",
     "src": "src/js/app.ts",
     "isEntry": true,
     "css": [
-      "assets/app-BgTVgbp1.css"
+      "assets/app-Dqneo7ZX.css"
     ]
   },
   "src/js/welcome.ts": {
-    "file": "assets/welcome-CZx5RddQ.js",
+    "file": "assets/welcome-CRczF75Y.js",
     "name": "welcome",
     "src": "src/js/welcome.ts",
     "isEntry": true
