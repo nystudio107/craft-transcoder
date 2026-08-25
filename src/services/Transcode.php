@@ -214,7 +214,10 @@ class Transcode extends Component
             }
 
             // If the video file already exists and hasn't been modified, return it.  Otherwise, start it transcoding
-            if (file_exists($destVideoPath) && (@filemtime($destVideoPath) >= @filemtime($filePath))) {
+            if (file_exists($destVideoPath)
+                && filesize($destVideoPath) > 0
+                && (@filemtime($destVideoPath) >= @filemtime($filePath))
+            ) {
                 $result = $this->getVersionedMediaUrl(
                     $outputInfo['url'],
                     $destVideoPath
@@ -226,16 +229,18 @@ class Transcode extends Component
                 // Kick off the transcoding
                 if ($synchronous) {
                     file_put_contents($lockFile, (string)getmypid());
-                    $output = $this->executeShellCommand($ffmpegCmd);
+                    $execution = $this->executeShellCommandWithStatus($ffmpegCmd);
+                    $output = $execution['output'];
                     @unlink($lockFile);
                     @unlink($progressFile);
 
-                    if (file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
+                    if ($execution['success'] && file_exists($destVideoPath) && filesize($destVideoPath) > 0) {
                         $result = $this->getVersionedMediaUrl(
                             $outputInfo['url'],
                             $destVideoPath
                         );
                     } else {
+                        @unlink($destVideoPath);
                         Craft::error("Video encoding failed: $output", __METHOD__);
                     }
 

@@ -75,6 +75,12 @@ return [
     // Seconds to wait before an uploaded video starts encoding
     'videoQueueDelaySeconds' => 0,
 
+    // Retry a failed queued video encode this many times; 0 disables retries
+    'videoEncodeMaxRetries' => 2,
+
+    // Seconds to wait before retrying a failed queued video encode
+    'videoEncodeRetryDelaySeconds' => 120,
+
     // Options passed to the queued video encode
     'queuedVideoOptions' => [],
 

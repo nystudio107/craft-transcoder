@@ -20,6 +20,7 @@
 * Generate configured video poster formats after queued encodes.
 * Add blurred-background poster fitting to prevent black bars.
 * Add `refreshVideoAsset()` for integrations that intentionally replace a video asset’s source file.
+* Retry failed queued video encodes with configurable attempt and delay settings.
 
 ### Fixed
 

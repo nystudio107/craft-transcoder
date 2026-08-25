@@ -113,6 +113,12 @@ class Settings extends Model
     /** @var int|string Seconds to wait before an uploaded video starts encoding. */
     public int|string $videoQueueDelaySeconds = 0;
 
+    /** @var int|string Number of retries after a queued video encode fails. */
+    public int|string $videoEncodeMaxRetries = 2;
+
+    /** @var int|string Seconds to wait before retrying a failed video encode. */
+    public int|string $videoEncodeRetryDelaySeconds = 120;
+
     /** @var array Options passed to queued video encodes. */
     public array $queuedVideoOptions = [];
 
@@ -347,6 +353,8 @@ class Settings extends Model
             ['clearCaches', 'boolean'],
             ['queueVideosOnAssetUpload', 'boolean'],
             ['videoQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoEncodeMaxRetries', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoEncodeRetryDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
             ['queuedVideoOptions', ArrayValidator::class],
             ['queueGifsOnAssetUpload', 'boolean'],
             ['gifQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],

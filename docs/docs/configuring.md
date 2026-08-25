@@ -27,6 +27,8 @@ Video uploads can be encoded by Craft’s queue instead of starting ffmpeg durin
 return [
     'queueVideosOnAssetUpload' => true,
     'videoQueueDelaySeconds' => 5,
+    'videoEncodeMaxRetries' => 2,
+    'videoEncodeRetryDelaySeconds' => 120,
     'queuedVideoOptions' => [
         'videoBitRate' => '1200k',
         'videoFrameRate' => 30,
@@ -36,7 +38,7 @@ return [
 ];
 ```
 
-A working Craft queue runner is required. The queue job waits for ffmpeg to finish, so Craft can report failures and retry the job through the configured queue driver.
+A working Craft queue runner is required. The queue job waits for ffmpeg to finish. When an attempt fails, Transcoder queues another attempt after `videoEncodeRetryDelaySeconds`, up to `videoEncodeMaxRetries` retries. Set the retry count to `0` to disable automatic retries; after the final attempt, the Craft queue job fails normally and remains available for manual retry.
 
 ## GIF queue
 

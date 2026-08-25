@@ -381,6 +381,27 @@ namespace {
         }
     }
 
+    final class FailingVideoTranscode extends BaseTranscode
+    {
+        public int $encodeAttempts = 0;
+
+        public function runVideoAssetWork(Asset $asset, callable $callback): bool
+        {
+            $callback();
+            return true;
+        }
+
+        public function getVideoUrl(
+            string|Asset $filePath,
+            array $videoOptions,
+            bool $generate = true,
+            bool $synchronous = false
+        ): string {
+            $this->encodeAttempts++;
+            return '';
+        }
+    }
+
     final class HarnessVariableTranscode extends BaseTranscode
     {
         public ?bool $thumbnailGenerate = null;
@@ -830,6 +851,14 @@ namespace {
         assertSameValue($expectedFilename, $outputInfo['filename'], 'The production empty-option filename shape changed.');
         assertSameValue($expectedPath, $outputInfo['path'], 'Encode output path does not match the production subfolder shape.');
         assertSameValue($outputInfo['path'], $targets['output'][0], 'Refresh and EncodeVideo must use a byte-identical output path.');
+        file_put_contents($expectedPath, '');
+        touch($expectedPath, time() + 5);
+        assertSameValue(
+            '',
+            $service->getVideoUrl($asset, $settings->queuedVideoOptions, false, true),
+            'A zero-byte failed encode was treated as a reusable video output.'
+        );
+        file_put_contents($expectedPath, 'old-encoded-bytes');
 
         $settings->videoFilenameStrategy = 'source';
         $sourceStrategy = $service->outputInfo($asset, []);
@@ -943,6 +972,75 @@ namespace {
             'The refresh log does not make removedFiles=0 obvious.'
         );
 
+        putenv('TRANSCODER_VIDEO_RETRIES=2');
+        putenv('TRANSCODER_VIDEO_RETRY_DELAY=17');
+        $settings->videoEncodeMaxRetries = '$TRANSCODER_VIDEO_RETRIES';
+        $settings->videoEncodeRetryDelaySeconds = '$TRANSCODER_VIDEO_RETRY_DELAY';
+        $settings->enableVideoPosters = false;
+        $queue->jobs = [];
+        $queue->delaySeconds = 0;
+        $retryService = new FailingVideoTranscode();
+        $plugin->transcode = $retryService;
+
+        $firstAttempt = new EncodeVideo([
+            'assetId' => $asset->id,
+            'videoOptions' => ['width' => 1280],
+        ]);
+        $firstAttempt->execute($queue);
+        assertSameValue(1, $retryService->encodeAttempts, 'The initial queued video encode did not run once.');
+        assertSameValue(1, count($queue->jobs), 'A failed video encode did not queue exactly one retry.');
+        assertTrue($queue->jobs[0] instanceof EncodeVideo, 'The queued video retry is not an EncodeVideo job.');
+        assertSameValue(2, $queue->jobs[0]->attempt, 'The queued video retry has the wrong attempt number.');
+        assertSameValue(2, $queue->jobs[0]->maxRetries, 'The queued video retry lost the configured retry count.');
+        assertSameValue(17, $queue->jobs[0]->retryDelaySeconds, 'The queued video retry lost its configured delay.');
+        assertSameValue(['width' => 1280], $queue->jobs[0]->videoOptions, 'The queued video retry lost its encoding options.');
+        assertSameValue(17, $queue->delaySeconds, 'The configured video retry delay was not applied.');
+        $retryLog = 'Retrying video encode attempt 2 of 3 in 17s; asset #197915; retry job ID: job-1;'
+            . ' previous error: Video encoding failed for asset #197915.';
+        assertTrue(
+            in_array(
+                $retryLog,
+                Craft::$logs,
+                true
+            ),
+            'The queued video retry was not logged with its attempt, delay, and job ID.'
+        );
+
+        $queue->jobs = [];
+        $finalAttempt = new EncodeVideo([
+            'assetId' => $asset->id,
+            'attempt' => 3,
+            'maxRetries' => 2,
+            'retryDelaySeconds' => 17,
+        ]);
+        try {
+            $finalAttempt->execute($queue);
+            throw new RuntimeException('The final video attempt must remain a failed Craft queue job.');
+        } catch (RuntimeException $e) {
+            assertTrue(
+                str_contains($e->getMessage(), 'Video encoding failed'),
+                'The final video attempt did not expose the original encoding failure.'
+            );
+        }
+        assertSameValue([], $queue->jobs, 'The final video attempt exceeded the configured retry count.');
+
+        $queue->failPush = true;
+        try {
+            (new EncodeVideo(['assetId' => $asset->id]))->execute($queue);
+            throw new RuntimeException('A failed video retry push must leave the current Craft job failed.');
+        } catch (RuntimeException $e) {
+            assertTrue(
+                str_contains($e->getMessage(), 'Video encoding failed'),
+                'A failed video retry push hid the original encoding failure.'
+            );
+        }
+        assertTrue(
+            in_array('Unable to queue video encoding retry for asset #197915.', Craft::$logs, true),
+            'A failed video retry push was not logged.'
+        );
+        $queue->failPush = false;
+        $plugin->transcode = $service;
+
         echo "refresh-video-asset harness: OK\n";
     } finally {
         putenv('TRANSCODER_QUEUE_DELAY');
@@ -950,6 +1048,8 @@ namespace {
         putenv('TRANSCODER_WATERMARK_WIDTH');
         putenv('TRANSCODER_WATERMARK_PADDING');
         putenv('TRANSCODER_WATERMARK_OPACITY');
+        putenv('TRANSCODER_VIDEO_RETRIES');
+        putenv('TRANSCODER_VIDEO_RETRY_DELAY');
 
         if (is_dir($root)) {
             $iterator = new RecursiveIteratorIterator(

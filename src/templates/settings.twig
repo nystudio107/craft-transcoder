@@ -20,6 +20,28 @@
         size: 5,
     }) }}
 
+    {{ forms.autosuggestField({
+        label: 'Video encode retries'|t('transcoder'),
+        instructions: 'Number of retries after a queued video encode fails. Set to 0 to disable automatic retries.'|t('transcoder'),
+        id: 'videoEncodeMaxRetries',
+        name: 'videoEncodeMaxRetries',
+        value: settings.videoEncodeMaxRetries,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Video encode retry delay'|t('transcoder'),
+        instructions: 'Seconds to wait before retrying a failed queued video encode.'|t('transcoder'),
+        id: 'videoEncodeRetryDelaySeconds',
+        name: 'videoEncodeRetryDelaySeconds',
+        value: settings.videoEncodeRetryDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+    }) }}
+
     {{ forms.selectField({
         label: 'Video filename strategy'|t('transcoder'),
         instructions: 'Use the original option-based filename, or keep one stable filename per source asset.'|t('transcoder'),
