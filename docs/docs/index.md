@@ -32,7 +32,7 @@ To install Transcoder, follow these steps:
 
 You can also install Transcoder via the **Plugin Store** in the Craft Control Panel.
 
-Transcoder works on Craft 3.x.
+Transcoder works on Craft 5.x.
 
 You will also need [ffmpeg](https://ffmpeg.org/) installed for Transcoder to work. On Ubuntu 16.04, you can do just:
 
