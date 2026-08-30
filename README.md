@@ -4,6 +4,25 @@
 
 Transcode video & audio files to various formats, and provide video thumbnails
 
+## Media workflow features
+
+- Queue newly uploaded video assets through Craft’s queue.
+- Queue newly uploaded GIF assets through Craft’s queue.
+- Queue newly uploaded audio Assets through Craft’s queue.
+- Delay queued encodes when other asset-save handlers need time to finish.
+- Retry failed queued video encodes after a configurable delay.
+- Keep the original option-based filenames, including bitrate, or opt into stable source-asset filenames.
+- Overlay a configurable watermark on encoded videos.
+- Generate named poster formats after queued encodes.
+- Queue configured video posters on upload without requiring full video encoding.
+- Replace poster letterboxing with a blurred cover background.
+- Refresh managed video derivatives after a third-party plugin replaces a source asset.
+- Keep Asset and string-URL video calls in the same configured output subfolder.
+
+Upload queueing and the other opt-in media features are disabled by default, while queued video jobs retry twice by default and the original `options` filename strategy remains unchanged. Configuration is available from the plugin settings screen, organized into media queue, poster, and watermark tabs, or `config/transcoder.php`. Text and numeric fields in these tabs support Craft environment-variable autosuggestions; the watermark path also supports aliases.
+
+Third-party plugins that intentionally replace a video asset can call `Transcoder::$plugin->getTranscode()->refreshVideoAsset($asset)`. Cleanup and re-encoding run asynchronously through Craft’s queue; see the usage documentation for the integration contract.
+
 ![Screenshot](./docs/docs/resources/img/plugin-banner.jpg)
 
 **Note**: _The license fee for this plugin is $59.00 via the Craft Plugin Store._

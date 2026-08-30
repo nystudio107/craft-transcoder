@@ -16,9 +16,12 @@ use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Asset;
 use craft\events\DefineAssetThumbUrlEvent;
+use craft\events\ModelEvent;
 use craft\events\PluginEvent;
 use craft\events\RegisterCacheOptionsEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\events\TemplateEvent;
+use craft\helpers\App;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\UrlHelper;
@@ -27,6 +30,11 @@ use craft\services\Plugins;
 use craft\utilities\ClearCaches;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
+use craft\web\View;
+use nystudio107\transcoder\jobs\EncodeAudio;
+use nystudio107\transcoder\jobs\EncodeGif;
+use nystudio107\transcoder\jobs\EncodeVideo;
+use nystudio107\transcoder\jobs\GenerateVideoPosters;
 use nystudio107\transcoder\models\Settings;
 use nystudio107\transcoder\services\ServicesTrait;
 use nystudio107\transcoder\variables\TranscoderVariable;
@@ -72,7 +80,7 @@ class Transcoder extends Plugin
     /**
      * @var bool
      */
-    public bool $hasCpSettings = false;
+    public bool $hasCpSettings = true;
 
     /**
      * @var string
@@ -99,6 +107,8 @@ class Transcoder extends Plugin
         $this->addComponents();
         // Install our global event handlers
         $this->installEventHandlers();
+        // Register settings page tabs
+        $this->registerSettingsTabs();
         // We've loaded!
         Craft::info(
             Craft::t(
@@ -145,6 +155,56 @@ class Transcoder extends Plugin
     protected function createSettingsModel(): ?Model
     {
         return new Settings();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->getView()->renderTemplate('transcoder/settings', [
+            'settings' => $this->getSettings(),
+        ]);
+    }
+
+    /**
+     * Register Craft CP tabs for the plugin settings page.
+     */
+    protected function registerSettingsTabs(): void
+    {
+        Event::on(
+            View::class,
+            View::EVENT_BEFORE_RENDER_TEMPLATE,
+            function(TemplateEvent $event) {
+                if (
+                    $event->template === 'settings/plugins/_settings.twig'
+                    && ($event->variables['plugin']->handle ?? null) === $this->handle
+                ) {
+                    $event->variables['tabs'] = [
+                        [
+                            'label' => Craft::t('transcoder', 'Video queue'),
+                            'url' => '#settings-tab-video-queue',
+                        ],
+                        [
+                            'label' => Craft::t('transcoder', 'GIF queue'),
+                            'url' => '#settings-tab-gif-queue',
+                        ],
+                        [
+                            'label' => Craft::t('transcoder', 'Audio queue'),
+                            'url' => '#settings-tab-audio-queue',
+                        ],
+                        [
+                            'label' => Craft::t('transcoder', 'Video posters'),
+                            'url' => '#settings-tab-video-posters',
+                        ],
+                        [
+                            'label' => Craft::t('transcoder', 'Video watermark'),
+                            'url' => '#settings-tab-video-watermark',
+                        ],
+                    ];
+                }
+            }
+        );
     }
 
     /**
@@ -205,6 +265,76 @@ class Transcoder extends Plugin
                 }
             );
         }
+        if ($settings->queueVideosOnAssetUpload
+            || $settings->queueVideoPostersOnAssetUpload
+            || $settings->queueGifsOnAssetUpload
+            || $settings->queueAudioOnAssetUpload
+        ) {
+            Event::on(
+                Asset::class,
+                Asset::EVENT_AFTER_SAVE,
+                function(ModelEvent $event) use ($settings) {
+                    $asset = $event->sender;
+                    if (!$event->isNew || !$asset instanceof Asset) {
+                        return;
+                    }
+
+                    $isGif = strtolower(pathinfo($asset->filename, PATHINFO_EXTENSION)) === 'gif';
+                    $kind = AssetsHelper::getFileKindByExtension($asset->filename);
+                    if ($isGif && $settings->queueGifsOnAssetUpload) {
+                        $this->queueUploadedMedia(
+                            new EncodeGif([
+                                'assetId' => $asset->id,
+                                'gifOptions' => $settings->queuedGifOptions,
+                            ]),
+                            $settings->gifQueueDelaySeconds,
+                            'GIF',
+                            (int)$asset->id
+                        );
+                        return;
+                    }
+
+                    if ($kind === Asset::KIND_AUDIO && $settings->queueAudioOnAssetUpload) {
+                        $this->queueUploadedMedia(
+                            new EncodeAudio([
+                                'assetId' => $asset->id,
+                                'audioOptions' => $settings->queuedAudioOptions,
+                            ]),
+                            $settings->audioQueueDelaySeconds,
+                            'audio',
+                            (int)$asset->id
+                        );
+                        return;
+                    }
+
+                    if ($kind === Asset::KIND_VIDEO) {
+                        if ($settings->queueVideosOnAssetUpload) {
+                            $this->queueUploadedMedia(
+                                new EncodeVideo([
+                                    'assetId' => $asset->id,
+                                    'videoOptions' => $settings->queuedVideoOptions,
+                                ]),
+                                $settings->videoQueueDelaySeconds,
+                                'video',
+                                (int)$asset->id
+                            );
+                            return;
+                        }
+
+                        if ($this->transcode->shouldQueueStandaloneVideoPostersOnUpload()) {
+                            $this->queueUploadedMedia(
+                                new GenerateVideoPosters([
+                                    'assetId' => $asset->id,
+                                ]),
+                                $settings->videoQueueDelaySeconds,
+                                'video poster',
+                                (int)$asset->id
+                            );
+                        }
+                    }
+                }
+            );
+        }
         // Handler: Plugins::EVENT_AFTER_INSTALL_PLUGIN
         Event::on(
             Plugins::class,
@@ -246,6 +376,26 @@ class Transcoder extends Plugin
                 );
             }
         );
+    }
+
+    /**
+     * Push an uploaded media job with its configured delay.
+     */
+    protected function queueUploadedMedia(object $job, int|string $delaySeconds, string $mediaType, int $assetId): void
+    {
+        $queue = Craft::$app->getQueue();
+        $queueDelay = max(0, (int)App::parseEnv((string)$delaySeconds));
+        if ($queueDelay > 0) {
+            $queue = $queue->delay($queueDelay);
+        }
+
+        $jobId = $queue->push($job);
+        if ($jobId === null) {
+            Craft::error("Unable to queue $mediaType asset #$assetId for encoding.", __METHOD__);
+            return;
+        }
+
+        Craft::info("Queued $mediaType asset #$assetId for encoding; job ID: $jobId", __METHOD__);
     }
 
     /**

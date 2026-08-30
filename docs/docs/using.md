@@ -28,6 +28,8 @@ You can also pass in an URL:
 }) %}
 ```
 
+When passing a URL or string path, Transcoder cannot read Craft’s `folderPath` directly. Configure `subfolderUrlSegment` if the encoded output should retain a folder segment from that URL. Passing the actual `Asset` remains preferred because its subfolder is available without parsing the URL.
+
 You can also pass in an `Asset`:
 
 ```twig
@@ -89,7 +91,39 @@ The file format setting `videoEncoder` is preset to what you’ll need to genera
 
 ![Screenshot](./resources/screenshots/admin-cp-video-thumbnails.png)
 
-Transcoder will also automatically add video thumbnails in the Control Panel Asset index.
+Transcoder will also automatically add video thumbnails in the Control Panel Asset index. During an upload, thumbnail generation waits until Craft has moved the Asset into its final folder so `createSubfolders` remains consistent.
+
+## Reading Generated Video Posters
+
+Queued poster generation does not need to be started from a template. Enable `queueVideoPostersOnAssetUpload` to generate configured formats when full video upload encoding is disabled, then read a poster by its format handle:
+
+```twig
+{% set video = entry.video.one() %}
+{% set posterUrl = craft.transcoder.getVideoPosterUrl(video, '16_9') %}
+{% set posterUrls = craft.transcoder.getVideoPosterUrls(video) %}
+```
+
+`getVideoPosterUrl()` returns an empty string until the poster exists. Passing `true` as its third argument keeps the original on-demand behavior and starts poster generation when needed.
+
+## Refreshing Replaced Video Assets
+
+Plugins that intentionally replace the source file of an existing video asset can ask Transcoder to invalidate its managed derivatives and encode the replacement again:
+
+```php
+use nystudio107\transcoder\Transcoder;
+
+$result = Transcoder::$plugin
+    ->getTranscode()
+    ->refreshVideoAsset($asset);
+```
+
+The result contains `queued` and `jobId`. Cleanup and encoding are asynchronous, so a working Craft queue runner is required. The refresh is explicit and works independently of `queueVideosOnAssetUpload`; Transcoder does not listen globally for every asset replacement.
+
+Only the encoded variant produced with `queuedVideoOptions`, its lock/progress files, and currently configured poster formats are managed. Arbitrary variants generated from Twig are not removed. Missing derivatives are a successful no-op. Transcoder waits when the asset is already being processed and never signals or terminates FFmpeg. No database state or migration is required.
+
+The refresh and encoding jobs use the same output-path calculation, including subfolders, aliases, hashed names, filename strategy, encoding options, and watermark fingerprint. If cleanup or the follow-up queue push fails, Craft records a failed queue job rather than a completed refresh. Successful refreshes log the asset ID, removed-file count, and follow-up job ID without exposing filesystem paths.
+
+Generated video and poster URLs include a `v` query parameter based on the output file’s actual modification time. This prevents a stable output URL from continuing to serve cached bytes after successful regeneration.
 
 ## Generating a Transcoded Audio File
 
@@ -155,6 +189,14 @@ The above example would cause it to not change the audio of the source audio fil
 
 The file format setting `audioEncoder` is preset to what you’ll need to generate `mp3` audio files, but it can also generate `aac`, `ogg`, or any other format that `ffmpeg` supports. See the `config.php` file for details
 
+## Queued Audio Encoding
+
+When `queueAudioOnAssetUpload` is enabled, newly uploaded audio Assets are converted using Craft’s queue and `queuedAudioOptions`. The queue job executes ffmpeg synchronously so failures remain visible in Craft. Existing `craft.transcoder.getAudioUrl()` calls retain their original string response and on-demand behavior.
+
+## Queued GIF Encoding
+
+When `queueGifsOnAssetUpload` is enabled, newly uploaded GIF Assets are converted using Craft’s queue and `queuedGifOptions`. This does not change the existing `craft.transcoder.getGifUrl()` response or its on-demand behavior. Queue failures are reported as failed Craft jobs.
+
 ## Getting Transcoding Progress
 
 Transcoding of video/audio files can take quite a bit of time, so Transcoder provides you with a way to get the status of any currently running transcoding operation via `craft.transcoder.getVideoProgressUrl()` or `craft.transcoder.getAudioProgressUrl()`. For example:
@@ -205,7 +247,7 @@ To generate a thumbnail from a video, do the following:
 You can also pass in a URL:
 
 ```twig
-{% set transVideoUrl = craft.transcoder.getVideoUrl('http://vjs.zencdn.net/v/oceans.mp4', {
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl('http://vjs.zencdn.net/v/oceans.mp4', {
     "width": 300,
     "height": 200,
     "timeInSecs": 20,
@@ -216,14 +258,22 @@ You can also pass in an `Asset`:
 
 ```twig
 {% set myAsset = entry.someAsset.one() %}
-{% set transVideoUrl = craft.transcoder.getVideoUrl(myAsset, {
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl(myAsset, {
     "width": 300,
     "height": 200,
     "timeInSecs": 20,
 }) %}
 ```
 
-It will return to you a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video.  It creates this thumbnail immediately if it doesn’t already exist.
+It will return a URL to the thumbnail of the video, in the size you specify, from the timecode `timeInSecs` in the video. It creates this thumbnail immediately if it doesn’t already exist. Pass `false` as the third argument to perform a read-only lookup without starting FFmpeg:
+
+```twig
+{% set transVideoThumbUrl = craft.transcoder.getVideoThumbnailUrl(myAsset, {
+    "width": 300,
+    "height": 200,
+    "timeInSecs": 20,
+}, false) %}
+```
 
 In the array you pass in, the default values are used if the key-value pair does not exist:
 

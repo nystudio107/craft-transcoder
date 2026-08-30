@@ -3,6 +3,32 @@
 ## 4.0.3 - UNRELEASED
 ### Changed
 * Remove the `bufsize` parameter entirely from the FFMPEG default command, which was preventing `WebM` files from being generated properly ([#72](https://github.com/nystudio107/craft-transcoder/issues/72))
+* Organize video settings into separate queue, posters, and watermark tabs in the Craft control panel.
+* Use Craft autosuggest fields for queue, subfolder, and watermark values, including environment-variable support.
+
+### Added
+
+* Queue video encoding when new video assets are uploaded, with a configurable delay.
+* Queue GIF encoding when new GIF assets are uploaded, with a configurable delay.
+* Queue audio encoding when new audio assets are uploaded, with a configurable delay.
+* Queue configured video poster formats on asset upload without requiring full video encoding.
+* Add source-asset and encoding-options video filename strategies while preserving bitrate-based filenames by default.
+* Add configurable video watermark overlays.
+* Generate configured video poster formats after queued encodes.
+* Add blurred-background poster fitting to prevent black bars.
+* Add `refreshVideoAsset()` for integrations that intentionally replace a video asset’s source file.
+* Retry failed queued video encodes with configurable attempt and delay settings.
+
+### Fixed
+
+* Use one byte-identical output-path calculation for replacement cleanup and queued encoding.
+* Fail refresh jobs when Craft cannot queue replacement encoding instead of reporting completion.
+* Add modification-time cache versions to generated video and poster URLs after regeneration.
+* Preserve configured video output subfolders when `getVideoUrl()` receives a string URL or path.
+* Keep automatic Control Panel video thumbnails out of temporary upload storage and in the Asset's final subfolder.
+* Forward the optional `generate` argument from Twig's `getVideoThumbnailUrl()` helper.
+* Keep poster format handles and black-bar generation flags out of thumbnail filenames so queued posters and equivalent Twig requests reuse the same file.
+* Correct legacy `transcoderUrl` migration and remove validation for the obsolete singular `transcoderPath` property.
 
 ## 4.0.2 - 2024.09.30
 ## Added
