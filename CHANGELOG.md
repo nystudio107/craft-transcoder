@@ -3,9 +3,6 @@
 ## 4.0.3 - UNRELEASED
 ### Changed
 * Remove the `bufsize` parameter entirely from the FFMPEG default command, which was preventing `WebM` files from being generated properly ([#72](https://github.com/nystudio107/craft-transcoder/issues/72))
-
-### Changed
-
 * Organize video settings into separate queue, posters, and watermark tabs in the Craft control panel.
 * Use Craft autosuggest fields for queue, subfolder, and watermark values, including environment-variable support.
 
@@ -31,6 +28,7 @@
 * Keep automatic Control Panel video thumbnails out of temporary upload storage and in the Asset's final subfolder.
 * Forward the optional `generate` argument from Twig's `getVideoThumbnailUrl()` helper.
 * Keep poster format handles and black-bar generation flags out of thumbnail filenames so queued posters and equivalent Twig requests reuse the same file.
+* Correct legacy `transcoderUrl` migration and remove validation for the obsolete singular `transcoderPath` property.
 
 ## 4.0.2 - 2024.09.30
 ## Added

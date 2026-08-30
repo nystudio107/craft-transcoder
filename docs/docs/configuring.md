@@ -82,7 +82,7 @@ Audio queueing is disabled by default. The job overrides the internal `synchrono
 
 ### Output subfolders
 
-Passing the actual Craft `Asset` to video and thumbnail helpers is preferred. With `createSubfolders` enabled, Transcoder uses Craft's Asset folder for both the generated filesystem path and public URL. Automatic Control Panel thumbnails wait until an uploaded Asset has reached its final folder.
+Passing the actual Craft `Asset` to video and thumbnail helpers is preferred. With `createSubfolders` enabled, Transcoder uses Craft’s Asset folder for both the generated filesystem path and public URL. Automatic Control Panel thumbnails wait until an uploaded Asset has reached its final folder.
 
 When an integration can only pass a string URL or path, configure `subfolderUrlSegment` with the one-based path segment that contains the desired output folder. For example, segment `3` extracts `197915` from `/content/videos/197915/video.mp4`:
 
@@ -138,7 +138,7 @@ return [
 ];
 ```
 
-`queueVideoPostersOnAssetUpload` is disabled by default. When full video upload encoding is enabled, its existing `EncodeVideo` job remains responsible for poster generation and no duplicate poster job is queued. When full video upload encoding is disabled, this setting queues only the configured poster formats. The job reloads the Asset by ID and fails visibly instead of writing into Craft's temporary upload folder.
+`queueVideoPostersOnAssetUpload` is disabled by default. When full video upload encoding is enabled, its existing `EncodeVideo` job remains responsible for poster generation and no duplicate poster job is queued. When full video upload encoding is disabled, this setting queues only the configured poster formats. The job reloads the Asset by ID and fails visibly instead of writing into Craft’s temporary upload folder.
 
 When `preventVideoPosterBlackBars` is enabled, the video frame is fitted over a blurred cover version of the same frame. Poster timestamps are clamped to the source duration for short videos.
 

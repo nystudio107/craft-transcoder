@@ -106,9 +106,8 @@ class Transcode extends Component
         string|Asset $filePath,
         array $videoOptions,
         bool $generate = true,
-        bool $synchronous = false
-    ): string
-    {
+        bool $synchronous = false,
+    ): string {
         $result = '';
         $settings = Transcoder::$plugin->getSettings();
         $outputInfo = $this->getVideoOutputInfo($filePath, $videoOptions);
@@ -276,9 +275,8 @@ class Transcode extends Component
         array $thumbnailOptions,
         bool $generate = true,
         bool $asPath = false,
-        bool $synchronous = false
-    ): string|false|null
-    {
+        bool $synchronous = false,
+    ): string|false|null {
         $result = null;
         $settings = Transcoder::$plugin->getSettings();
         $outputInfo = $this->getThumbnailOutputInfo($filePath);
@@ -360,7 +358,7 @@ class Transcode extends Component
                         Craft::error("Video poster generation failed: $shellOutput", __METHOD__);
                     }
 
-                // if ffmpeg fails which we can't check because the process is ran in the background
+                    // if ffmpeg fails which we can't check because the process is ran in the background
                     // don't return the future path of the image or else we can't check this in the front end
                 } else {
                     Craft::info('Thumbnail does not exist, but not asked to generate it: ' . $filePath, __METHOD__);
@@ -390,7 +388,7 @@ class Transcode extends Component
         Asset|string $filePath,
         string $formatHandle,
         bool $generate = false,
-        bool $synchronous = false
+        bool $synchronous = false,
     ): string {
         $options = $this->getVideoPosterOptions($filePath, $formatHandle);
         if ($options === null) {
