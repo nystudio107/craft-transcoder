@@ -129,7 +129,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -vcodec ' . $thisEncoder['videoCodec']
                 . ' ' . $thisEncoder['videoCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -threads ' . $thisEncoder['threads'];
 
             // Set the framerate if desired
@@ -362,7 +361,6 @@ class Transcode extends Component
                 . ' -i ' . escapeshellarg($filePath)
                 . ' -acodec ' . $thisEncoder['audioCodec']
                 . ' ' . $thisEncoder['audioCodecOptions']
-                . ' -bufsize 1000k'
                 . ' -vn'
                 . ' -threads ' . $thisEncoder['threads'];
 
@@ -798,6 +796,11 @@ class Transcode extends Component
                 // If it's local, get a path to the file
                 $fs = $assetVolume->getFs();
                 if ($fs instanceof Local) {
+                    $subPath = $assetVolume->getSubPath();
+                    if (!empty($subPath)) {
+                        $subPath = rtrim($subPath, DIRECTORY_SEPARATOR);
+                        $subPath .= '' === $subPath ? '' : DIRECTORY_SEPARATOR;
+                    }
                     $sourcePath = rtrim($fs->path, DIRECTORY_SEPARATOR);
                     $sourcePath .= '' === $sourcePath ? '' : DIRECTORY_SEPARATOR;
                     $folderPath = '';
@@ -808,7 +811,7 @@ class Transcode extends Component
                     }
                     $folderPath .= '' === $folderPath ? '' : DIRECTORY_SEPARATOR;
 
-                    $filePath = $sourcePath . $folderPath . $asset->filename;
+                    $filePath = $sourcePath . $subPath . $folderPath . $asset->filename;
                 } else {
                     // Otherwise, get a URL
                     $filePath = $asset->getUrl() ?? '';

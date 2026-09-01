@@ -8,12 +8,7 @@ interface ConfettiInterface {
   stop(): void,
 }
 
-export enum ParticlesType {
-  circle = "circle",
-  rect = "rect",
-  heart = "heart",
-  image = "image",
-}
+type ParticlesType = "circle" | "rect" | "heart" | "image";
 
 interface ParticlesConfig {
   type: ParticlesType,

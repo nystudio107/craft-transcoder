@@ -14,15 +14,10 @@
  */
 
 /**
- * We don't want these in the Control Panel
- * @import "tailwindcss/preflight";
+ * This injects Tailwind's base styles, which is a combination of
+ * Normalize.css and some additional base styles.
  */
-
-/**
- * This injects any component classes registered by plugins.
- *
- */
-@import "tailwindcss/components";
+@import "./tailwind-config.css";
 
 /**
  * Here we add custom component classes; stuff we want loaded
