@@ -1,0 +1,249 @@
+{% import '_includes/forms' as forms %}
+{% set selectedTab = selectedTab ?? 'settings-tab-video-queue' %}
+
+<div id="tab-video-queue"{% if selectedTab != 'settings-tab-video-queue' %} class="hidden"{% endif %}>
+    {{ forms.lightswitchField({
+        label: 'Queue videos on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded video assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueVideosOnAssetUpload',
+        name: 'queueVideosOnAssetUpload',
+        on: settings.queueVideosOnAssetUpload,
+        errors: settings.getErrors('queueVideosOnAssetUpload'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Video queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before an uploaded video starts encoding.'|t('transcoder'),
+        id: 'videoQueueDelaySeconds',
+        name: 'videoQueueDelaySeconds',
+        value: settings.videoQueueDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('videoQueueDelaySeconds'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Video encode retries'|t('transcoder'),
+        instructions: 'Number of retries after a queued video encode fails. Set to 0 to disable automatic retries.'|t('transcoder'),
+        id: 'videoEncodeMaxRetries',
+        name: 'videoEncodeMaxRetries',
+        value: settings.videoEncodeMaxRetries,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('videoEncodeMaxRetries'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Video encode retry delay'|t('transcoder'),
+        instructions: 'Seconds to wait before retrying a failed queued video encode.'|t('transcoder'),
+        id: 'videoEncodeRetryDelaySeconds',
+        name: 'videoEncodeRetryDelaySeconds',
+        value: settings.videoEncodeRetryDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('videoEncodeRetryDelaySeconds'),
+    }) }}
+
+    {{ forms.selectField({
+        label: 'Video filename strategy'|t('transcoder'),
+        instructions: 'Use the original option-based filename, or keep one stable filename per source asset.'|t('transcoder'),
+        id: 'videoFilenameStrategy',
+        name: 'videoFilenameStrategy',
+        value: settings.videoFilenameStrategy,
+        options: [
+            { label: 'Encoding options'|t('transcoder'), value: 'options' },
+            { label: 'Source asset'|t('transcoder'), value: 'source' },
+        ],
+        errors: settings.getErrors('videoFilenameStrategy'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'URL subfolder segment'|t('transcoder'),
+        instructions: 'For string URL/path inputs, use this one-based path segment as the output subfolder. Leave empty to disable it.'|t('transcoder'),
+        id: 'subfolderUrlSegment',
+        name: 'subfolderUrlSegment',
+        value: settings.subfolderUrlSegment ?: '',
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('subfolderUrlSegment'),
+    }) }}
+    <hr>
+    <h2>{{ 'GIF queue'|t('transcoder') }}</h2>
+
+    {{ forms.lightswitchField({
+        label: 'Queue GIFs on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded GIF assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueGifsOnAssetUpload',
+        name: 'queueGifsOnAssetUpload',
+        on: settings.queueGifsOnAssetUpload,
+        errors: settings.getErrors('queueGifsOnAssetUpload'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'GIF queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before an uploaded GIF starts encoding.'|t('transcoder'),
+        id: 'gifQueueDelaySeconds',
+        name: 'gifQueueDelaySeconds',
+        value: settings.gifQueueDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('gifQueueDelaySeconds'),
+    }) }}
+    <hr>
+    <h2>{{ 'Audio queue'|t('transcoder') }}</h2>
+
+    {{ forms.lightswitchField({
+        label: 'Queue audio on asset upload'|t('transcoder'),
+        instructions: 'Add newly uploaded audio Assets to Craft’s queue for background encoding.'|t('transcoder'),
+        id: 'queueAudioOnAssetUpload',
+        name: 'queueAudioOnAssetUpload',
+        on: settings.queueAudioOnAssetUpload,
+        errors: settings.getErrors('queueAudioOnAssetUpload'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Audio queue delay'|t('transcoder'),
+        instructions: 'Seconds to wait before uploaded audio starts encoding.'|t('transcoder'),
+        id: 'audioQueueDelaySeconds',
+        name: 'audioQueueDelaySeconds',
+        value: settings.audioQueueDelaySeconds,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 5,
+        errors: settings.getErrors('audioQueueDelaySeconds'),
+    }) }}
+</div>
+
+<div id="tab-video-posters"{% if selectedTab != 'settings-tab-video-posters' %} class="hidden"{% endif %}>
+    {{ forms.lightswitchField({
+        label: 'Generate video posters'|t('transcoder'),
+        instructions: 'Enable configured poster formats for automated video workflows.'|t('transcoder'),
+        id: 'enableVideoPosters',
+        name: 'enableVideoPosters',
+        on: settings.enableVideoPosters,
+        errors: settings.getErrors('enableVideoPosters'),
+    }) }}
+
+    {{ forms.lightswitchField({
+        label: 'Queue video posters on asset upload'|t('transcoder'),
+        instructions: 'Generate configured posters through Craft’s queue when full video encoding is not queued.'|t('transcoder'),
+        id: 'queueVideoPostersOnAssetUpload',
+        name: 'queueVideoPostersOnAssetUpload',
+        on: settings.queueVideoPostersOnAssetUpload,
+        errors: settings.getErrors('queueVideoPostersOnAssetUpload'),
+    }) }}
+
+    {{ forms.lightswitchField({
+        label: 'Prevent poster black bars'|t('transcoder'),
+        instructions: 'Fill unused poster space with a blurred cover image behind the fitted video frame.'|t('transcoder'),
+        id: 'preventVideoPosterBlackBars',
+        name: 'preventVideoPosterBlackBars',
+        on: settings.preventVideoPosterBlackBars,
+        errors: settings.getErrors('preventVideoPosterBlackBars'),
+    }) }}
+
+    {{ forms.editableTableField({
+        label: 'Video poster formats'|t('transcoder'),
+        id: 'videoPosterFormats',
+        name: 'videoPosterFormats',
+        cols: {
+            handle: {
+                type: 'singleline',
+                heading: 'Handle'|t('transcoder'),
+            },
+            width: {
+                type: 'number',
+                heading: 'Width'|t('transcoder'),
+            },
+            height: {
+                type: 'number',
+                heading: 'Height'|t('transcoder'),
+            },
+            timeInSecs: {
+                type: 'number',
+                heading: 'Time in seconds'|t('transcoder'),
+            },
+        },
+        rows: settings.getVideoPosterFormatRows(),
+        allowAdd: true,
+        allowReorder: true,
+        allowDelete: true,
+        errors: settings.getErrors('videoPosterFormats'),
+    }) }}
+</div>
+
+<div id="tab-video-watermark"{% if selectedTab != 'settings-tab-video-watermark' %} class="hidden"{% endif %}>
+    {{ forms.lightswitchField({
+        label: 'Enable video watermark'|t('transcoder'),
+        instructions: 'Overlay the configured image on newly encoded videos.'|t('transcoder'),
+        id: 'enableVideoWatermark',
+        name: 'enableVideoWatermark',
+        on: settings.enableVideoWatermark,
+        errors: settings.getErrors('enableVideoWatermark'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Watermark path or URL'|t('transcoder'),
+        instructions: 'Use a local path, Yii alias, environment value, or public image URL.'|t('transcoder'),
+        id: 'videoWatermarkPath',
+        name: 'videoWatermarkPath',
+        value: settings.videoWatermarkPath,
+        suggestEnvVars: true,
+        suggestAliases: true,
+        errors: settings.getErrors('videoWatermarkPath'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Watermark width'|t('transcoder'),
+        instructions: 'Optional width in pixels. Leave empty to keep the original size.'|t('transcoder'),
+        id: 'videoWatermarkWidth',
+        name: 'videoWatermarkWidth',
+        value: settings.videoWatermarkWidth,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 6,
+        errors: settings.getErrors('videoWatermarkWidth'),
+    }) }}
+
+    {{ forms.selectField({
+        label: 'Watermark position'|t('transcoder'),
+        id: 'videoWatermarkPosition',
+        name: 'videoWatermarkPosition',
+        value: settings.videoWatermarkPosition,
+        options: [
+            { label: 'Top left'|t('transcoder'), value: 'top-left' },
+            { label: 'Top right'|t('transcoder'), value: 'top-right' },
+            { label: 'Bottom left'|t('transcoder'), value: 'bottom-left' },
+            { label: 'Bottom right'|t('transcoder'), value: 'bottom-right' },
+        ],
+        errors: settings.getErrors('videoWatermarkPosition'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Watermark padding'|t('transcoder'),
+        id: 'videoWatermarkPadding',
+        name: 'videoWatermarkPadding',
+        value: settings.videoWatermarkPadding,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 6,
+        errors: settings.getErrors('videoWatermarkPadding'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Watermark opacity'|t('transcoder'),
+        instructions: 'Percentage from 0 to 100.'|t('transcoder'),
+        id: 'videoWatermarkOpacity',
+        name: 'videoWatermarkOpacity',
+        value: settings.videoWatermarkOpacity,
+        suggestEnvVars: true,
+        inputAttributes: { inputmode: 'numeric' },
+        size: 6,
+        errors: settings.getErrors('videoWatermarkOpacity'),
+    }) }}
+</div>

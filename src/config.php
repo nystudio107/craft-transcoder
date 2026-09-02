@@ -63,8 +63,83 @@ return [
     // if a upload location has a subfolder defined, add this to the transcoder paths too
     'createSubfolders' => true,
 
+    // One-based URL/path segment to use as the output subfolder for string inputs; false disables it
+    'subfolderUrlSegment' => false,
+
     // Add the Clear Caches utility to the CP?
     'clearCaches' => false,
+
+    // Queue video encoding when a new video asset is uploaded
+    'queueVideosOnAssetUpload' => false,
+
+    // Seconds to wait before an uploaded video starts encoding
+    'videoQueueDelaySeconds' => 0,
+
+    // Retry a failed queued video encode this many times; 0 disables retries
+    'videoEncodeMaxRetries' => 2,
+
+    // Seconds to wait before retrying a failed queued video encode
+    'videoEncodeRetryDelaySeconds' => 120,
+
+    // Options passed to the queued video encode
+    'queuedVideoOptions' => [],
+
+    // Queue GIF encoding when a new GIF asset is uploaded
+    'queueGifsOnAssetUpload' => false,
+
+    // Seconds to wait before an uploaded GIF starts encoding
+    'gifQueueDelaySeconds' => 0,
+
+    // Options passed to the queued GIF encode
+    'queuedGifOptions' => [],
+
+    // Queue audio encoding when a new audio Asset is uploaded
+    'queueAudioOnAssetUpload' => false,
+
+    // Seconds to wait before uploaded audio starts encoding
+    'audioQueueDelaySeconds' => 0,
+
+    // Options passed to the queued audio encode
+    'queuedAudioOptions' => [],
+
+    // How encoded video filenames are generated: options or source
+    'videoFilenameStrategy' => 'options',
+
+    // Overlay a watermark on encoded videos
+    'enableVideoWatermark' => false,
+
+    // Local path, Yii alias, environment value, or URL for the watermark image
+    'videoWatermarkPath' => '',
+
+    // Optional watermark width in pixels; leave empty to keep its original size
+    'videoWatermarkWidth' => '',
+
+    // Watermark position: top-left, top-right, bottom-left, or bottom-right
+    'videoWatermarkPosition' => 'bottom-right',
+
+    // Watermark distance from the selected edges in pixels
+    'videoWatermarkPadding' => 24,
+
+    // Watermark opacity percentage
+    'videoWatermarkOpacity' => 100,
+
+    // Generate configured poster images after queued video encoding
+    'enableVideoPosters' => false,
+
+    // Queue configured poster generation for uploaded videos, even when video encoding is not queued
+    'queueVideoPostersOnAssetUpload' => false,
+
+    // Fill unused poster space with a blurred cover image instead of black bars
+    'preventVideoPosterBlackBars' => false,
+
+    // Poster images generated for each queued video
+    'videoPosterFormats' => [
+        '16_9' => [
+            'width' => 800,
+            'height' => 450,
+            'timeInSecs' => 3,
+        ],
+    ],
 
     // Preset video encoders
     'videoEncoders' => [

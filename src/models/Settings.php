@@ -11,7 +11,9 @@
 namespace nystudio107\transcoder\models;
 
 use craft\base\Model;
+use craft\helpers\App;
 use craft\validators\ArrayValidator;
+use yii\validators\NumberValidator;
 
 /**
  * Transcoder Settings model
@@ -95,12 +97,87 @@ class Settings extends Model
      */
     public bool $createSubfolders = true;
 
+    /** @var bool|int|string One-based URL/path segment used as the output subfolder for string inputs. */
+    public bool|int|string $subfolderUrlSegment = false;
+
     /**
      * clear caches when somebody clears all caches from the CP?
      *
      * @var bool
      */
     public bool $clearCaches = false;
+
+    /** @var bool Queue video encoding when a new video asset is uploaded. */
+    public bool $queueVideosOnAssetUpload = false;
+
+    /** @var int|string Seconds to wait before an uploaded video starts encoding. */
+    public int|string $videoQueueDelaySeconds = 0;
+
+    /** @var int|string Number of retries after a queued video encode fails. */
+    public int|string $videoEncodeMaxRetries = 2;
+
+    /** @var int|string Seconds to wait before retrying a failed video encode. */
+    public int|string $videoEncodeRetryDelaySeconds = 120;
+
+    /** @var array Options passed to queued video encodes. */
+    public array $queuedVideoOptions = [];
+
+    /** @var bool Queue GIF encoding when a new GIF asset is uploaded. */
+    public bool $queueGifsOnAssetUpload = false;
+
+    /** @var int|string Seconds to wait before an uploaded GIF starts encoding. */
+    public int|string $gifQueueDelaySeconds = 0;
+
+    /** @var array Options passed to queued GIF encodes. */
+    public array $queuedGifOptions = [];
+
+    /** @var bool Queue audio encoding when a new audio Asset is uploaded. */
+    public bool $queueAudioOnAssetUpload = false;
+
+    /** @var int|string Seconds to wait before uploaded audio starts encoding. */
+    public int|string $audioQueueDelaySeconds = 0;
+
+    /** @var array Options passed to queued audio encodes. */
+    public array $queuedAudioOptions = [];
+
+    /** @var string How encoded video filenames are generated: options or source. */
+    public string $videoFilenameStrategy = 'options';
+
+    /** @var bool Overlay a watermark on encoded videos. */
+    public bool $enableVideoWatermark = false;
+
+    /** @var string Local path, alias, environment value, or URL for the watermark image. */
+    public string $videoWatermarkPath = '';
+
+    /** @var int|string Optional watermark width in pixels. */
+    public int|string $videoWatermarkWidth = '';
+
+    /** @var string Watermark position. */
+    public string $videoWatermarkPosition = 'bottom-right';
+
+    /** @var int|string Watermark distance from the selected edges in pixels. */
+    public int|string $videoWatermarkPadding = 24;
+
+    /** @var int|string Watermark opacity percentage. */
+    public int|string $videoWatermarkOpacity = 100;
+
+    /** @var bool Generate configured poster images after queued video encoding. */
+    public bool $enableVideoPosters = false;
+
+    /** @var bool Queue configured poster generation when a new video Asset is uploaded. */
+    public bool $queueVideoPostersOnAssetUpload = false;
+
+    /** @var bool Fill unused poster space with a blurred cover image. */
+    public bool $preventVideoPosterBlackBars = false;
+
+    /** @var array Poster images generated for each queued video. */
+    public array $videoPosterFormats = [
+        '16_9' => [
+            'width' => 800,
+            'height' => 450,
+            'timeInSecs' => 3,
+        ],
+    ];
 
     /**
      * Preset video encoders
@@ -244,7 +321,7 @@ class Settings extends Model
                 unset($config['transcoderPath']);
             }
             if (isset($config['transcoderUrl'])) {
-                $config['$transcoderUrls']['default'] = $config['transcoderUrl'];
+                $config['transcoderUrls']['default'] = $config['transcoderUrl'];
                 unset($config['transcoderUrl']);
             }
         }
@@ -266,20 +343,85 @@ class Settings extends Model
             ['ffprobePath', 'required'],
             ['ffprobeOptions', 'string'],
             ['ffprobeOptions', 'safe'],
-            ['transcoderPath', 'string'],
-            ['transcoderPath', 'required'],
             ['transcoderPaths', ArrayValidator::class],
             ['transcoderPaths', 'required'],
             ['transcoderUrls', ArrayValidator::class],
             ['enableDownloadFileEndpoint', 'boolean'],
             ['useHashedNames', 'boolean'],
             ['createSubfolders', 'boolean'],
+            ['subfolderUrlSegment', 'validateIntegerSetting', 'params' => ['min' => 1], 'skipOnEmpty' => true],
             ['clearCaches', 'boolean'],
+            ['queueVideosOnAssetUpload', 'boolean'],
+            ['videoQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoEncodeMaxRetries', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoEncodeRetryDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['queuedVideoOptions', ArrayValidator::class],
+            ['queueGifsOnAssetUpload', 'boolean'],
+            ['gifQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['queuedGifOptions', ArrayValidator::class],
+            ['queueAudioOnAssetUpload', 'boolean'],
+            ['audioQueueDelaySeconds', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['queuedAudioOptions', ArrayValidator::class],
+            ['videoFilenameStrategy', 'in', 'range' => ['options', 'source']],
+            ['enableVideoWatermark', 'boolean'],
+            ['videoWatermarkPath', 'string'],
+            ['videoWatermarkWidth', 'validateIntegerSetting', 'params' => ['min' => 1], 'skipOnEmpty' => true],
+            ['videoWatermarkPosition', 'in', 'range' => ['top-left', 'top-right', 'bottom-left', 'bottom-right']],
+            ['videoWatermarkPadding', 'validateIntegerSetting', 'params' => ['min' => 0]],
+            ['videoWatermarkOpacity', 'validateIntegerSetting', 'params' => ['min' => 0, 'max' => 100]],
+            ['enableVideoPosters', 'boolean'],
+            ['queueVideoPostersOnAssetUpload', 'boolean'],
+            ['preventVideoPosterBlackBars', 'boolean'],
+            ['videoPosterFormats', ArrayValidator::class],
             ['videoEncoders', 'required'],
             ['audioEncoders', 'required'],
             ['defaultVideoOptions', 'required'],
             ['defaultThumbnailOptions', 'required'],
             ['defaultAudioOptions', 'required'],
         ];
+    }
+
+    /**
+     * Validate a numeric setting after resolving its environment variable.
+     */
+    public function validateIntegerSetting(string $attribute, array $params): void
+    {
+        if ($this->$attribute === false) {
+            return;
+        }
+
+        $validator = new NumberValidator([
+            'integerOnly' => true,
+            'min' => $params['min'] ?? null,
+            'max' => $params['max'] ?? null,
+        ]);
+        $error = null;
+        $value = App::parseEnv((string)$this->$attribute);
+
+        if (!$validator->validate($value, $error)) {
+            $this->addError($attribute, $error);
+        }
+    }
+
+    /**
+     * Return poster formats as editable-table rows.
+     */
+    public function getVideoPosterFormatRows(): array
+    {
+        $rows = [];
+        foreach ($this->videoPosterFormats as $handle => $format) {
+            if (!is_array($format)) {
+                continue;
+            }
+
+            $rows[] = [
+                'handle' => is_string($handle) ? $handle : ($format['handle'] ?? ''),
+                'width' => $format['width'] ?? '',
+                'height' => $format['height'] ?? '',
+                'timeInSecs' => $format['timeInSecs'] ?? '',
+            ];
+        }
+
+        return $rows;
     }
 }
